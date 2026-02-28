@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Spa-Pregio Original Colors - Softened */
+    --spa-purple: #9B7CB6;
+    --spa-pink: #D09AC6;
+    --spa-lavender: #F8F6FA;
+    --spa-cream: #FDFCFA;
+    --spa-blush: #F5E8F0;
+    --spa-charcoal: #3D3D3D;
+    --spa-gray: #6B6B6B;
+    --spa-light: #F0EDF3;
+    
+    --background: 270 20% 98%;
+    --foreground: 0 0% 24%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 24%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 24%;
+    --primary: 280 25% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 310 30% 70%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 270 15% 96%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 310 30% 70%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 270 15% 92%;
+    --input: 270 15% 92%;
+    --ring: 280 25% 60%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-[var(--spa-cream)] text-[var(--spa-charcoal)] font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-semibold tracking-tight;
+  }
+  
+  button, a {
+    @apply touch-manipulation;
+  }
+}
+
+@layer components {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8 xl:px-12;
+  }
+  
+  /* Primary button - Spa Purple */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-[var(--spa-purple)] text-white font-medium rounded-full transition-all duration-200;
+  }
+  
+  .btn-primary:hover {
+    background-color: #8B6CA6;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(155, 124, 182, 0.35);
+  }
+  
+  /* Secondary button - Spa Pink */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-[var(--spa-pink)] text-white font-medium rounded-full transition-all duration-200;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #C08AB6;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(208, 154, 198, 0.35);
+  }
+  
+  /* Outline button */
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-[var(--spa-purple)] text-[var(--spa-purple)] font-medium rounded-full transition-all duration-200;
+  }
+  
+  .btn-outline:hover {
+    background-color: var(--spa-purple);
+    color: white;
+  }
+  
+  /* Card shadow - softer */
+  .card-shadow {
+    box-shadow: 0 4px 20px rgba(155, 124, 182, 0.08);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  
+  .card-shadow:hover {
+    box-shadow: 0 8px 28px rgba(155, 124, 182, 0.12);
+    transform: translateY(-4px);
+  }
+  
+  /* Elegant card */
+  .elegant-card {
+    @apply bg-white rounded-2xl overflow-hidden;
+    box-shadow: 0 4px 20px rgba(155, 124, 182, 0.08);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  
+  .elegant-card:hover {
+    box-shadow: 0 8px 28px rgba(155, 124, 182, 0.12);
+    transform: translateY(-4px);
+  }
+  
+  /* Section title */
+  .section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.875rem, 4vw, 3rem);
+    font-weight: 600;
+    color: var(--spa-charcoal);
+    line-height: 1.15;
+  }
+  
+  /* Shadow elegant */
+  .shadow-elegant {
+    box-shadow: 0 4px 20px rgba(155, 124, 182, 0.08);
+  }
+  
+  /* Text colors */
+  .text-purple {
+    color: var(--spa-purple);
+  }
+  
+  .text-pink {
+    color: var(--spa-pink);
+  }
+}
+
+@layer utilities {
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+  
+  .bg-blush {
+    background-color: var(--spa-blush);
+  }
+  
+  .bg-lavender {
+    background-color: var(--spa-lavender);
+  }
+  
+  .bg-cream {
+    background-color: var(--spa-cream);
+  }
+}
