@@ -97,28 +97,43 @@ export default function About() {
 
       {/* Grandma Section */}
       <section className="w-full py-16 lg:py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
-          <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">From a Grandmother's Heart</span>
-          <h2 className="section-title mt-4">
-            The world has stopped <span className="text-spa-purple">celebrating mamas.</span>
-          </h2>
-          <div className="mt-8 space-y-5 text-spa-gray leading-relaxed text-lg max-w-2xl mx-auto">
-            <p>
-              As a grandmother — I call my grandchildren my "nuggets" — I watch closely. And what I see is a quiet decline in how we honor the women who are literally growing the next generation.
-            </p>
-            <p>
-              Pregnancy is hard. The world is hard. And yet, right in the middle of all of it, a woman is doing the most extraordinary thing a human being can do — she is creating life.
-            </p>
-            <p>
-              She deserves a shrimp ring at 11pm. She deserves a spa day. She deserves a community of women who get it, who show up, who celebrate her — whether it's her first pregnancy or her fifth.
-            </p>
-            <p className="font-serif text-xl text-spa-charcoal italic">
-              Spa-Pregio® is my love letter to every mama bringing something beautiful into this hard world.
-            </p>
-          </div>
-          <div className="mt-8">
-            <p className="text-spa-purple font-medium">— Angie, Founder of Spa-Pregio®</p>
-            <p className="text-spa-gray text-sm mt-1">Beauty industry veteran. Grandmother. Advocate for maternal celebration.</p>
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            {/* Photo */}
+            <div className="relative">
+              <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-elegant">
+                <img src="/images/angie_founder.jpeg" alt="Angie, Founder of Spa-Pregio®" className="w-full h-full object-cover object-top" />
+              </div>
+              <div className="absolute -bottom-4 -right-4 bg-white border border-spa-light rounded-2xl shadow-elegant px-6 py-4 max-w-[220px]">
+                <p className="font-serif text-sm text-spa-charcoal italic">"Every gift deserves to be wrapped with love."</p>
+                <p className="text-xs text-spa-purple mt-2 font-medium">— Angie, Founder</p>
+              </div>
+            </div>
+            {/* Text */}
+            <div>
+              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">From a Grandmother's Heart</span>
+              <h2 className="section-title mt-4">
+                The world has stopped <span className="text-spa-purple">celebrating mamas.</span>
+              </h2>
+              <div className="mt-6 space-y-5 text-spa-gray leading-relaxed">
+                <p>
+                  As a grandmother — I call my grandchildren my "nuggets" — I watch closely. And what I see is a quiet decline in how we honor the women who are literally growing the next generation.
+                </p>
+                <p>
+                  Pregnancy is hard. The world is hard. And yet, right in the middle of all of it, a woman is doing the most extraordinary thing a human being can do — she is creating life.
+                </p>
+                <p>
+                  She deserves a shrimp ring at 11pm. She deserves a spa day. She deserves a community of women who get it, who show up, who celebrate her — whether it's her first pregnancy or her fifth.
+                </p>
+                <p className="font-serif text-xl text-spa-charcoal italic">
+                  Spa-Pregio® is my love letter to every mama bringing something beautiful into this hard world.
+                </p>
+              </div>
+              <div className="mt-8">
+                <p className="text-spa-purple font-medium">— Angie, Founder of Spa-Pregio®</p>
+                <p className="text-spa-gray text-sm mt-1">Beauty industry veteran. Grandmother. Advocate for maternal celebration.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
