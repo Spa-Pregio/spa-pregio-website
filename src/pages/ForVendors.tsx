@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { 
   ArrowRight, Check, Star, Users, MapPin, Store,
   Image, Type, Palette, Eye, Download, Upload, Search
 } from 'lucide-react';
 import VendorDirectory from '../sections/VendorDirectory';
-import LocalVendorSearch from '../sections/LocalVendorSearch';
+import LocalVendorSearch, { VendorSearchHandle } from '../sections/LocalVendorSearch';
 
 const vendorCategories = [
   { 
@@ -235,6 +235,7 @@ export default function ForVendors() {
             {vendorCategories.map((category, index) => (
               <div 
                 key={index} 
+                onClick={() => vendorSearchRef.current?.searchCategory(category.name)}
                 className="bg-white rounded-2xl p-6 shadow-elegant hover:shadow-elegant-hover transition-all cursor-pointer group"
               >
                 <div className="w-12 h-12 rounded-full bg-spa-purple/10 flex items-center justify-center mb-4 group-hover:bg-spa-purple group-hover:text-white transition-colors">
@@ -715,7 +716,7 @@ export default function ForVendors() {
       )}
 
       {/* Vendor Directory */}
-      <LocalVendorSearch />
+      <LocalVendorSearch ref={vendorSearchRef} />
       <div className="mt-16">
         <div className="text-center mb-8">
           <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">All Listings</span>
