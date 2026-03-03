@@ -37,7 +37,7 @@ export default function LocalVendorSearch() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState('');
-  const [apiKey] = useState(import.meta.env.VITE_GOOGLE_PLACES_API_KEY || '');
+  const apiKey = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY || '';
 
   const searchVendors = async () => {
     if (!city || !state) {
