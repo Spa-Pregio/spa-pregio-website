@@ -4,6 +4,7 @@ import {
   Image, Type, Palette, Eye, Download, Upload, Search
 } from 'lucide-react';
 import VendorDirectory from '../sections/VendorDirectory';
+import LocalVendorSearch from '../sections/LocalVendorSearch';
 
 const vendorCategories = [
   { 
@@ -714,7 +715,14 @@ export default function ForVendors() {
       )}
 
       {/* Vendor Directory */}
-      <VendorDirectory />
+      <LocalVendorSearch />
+      <div className="mt-16">
+        <div className="text-center mb-8">
+          <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">All Listings</span>
+          <h2 className="section-title mt-2">Browse the <span className="text-spa-purple">directory.</span></h2>
+        </div>
+        <VendorDirectory />
+      </div>
     </div>
   );
 }
