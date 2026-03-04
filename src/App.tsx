@@ -12,6 +12,7 @@ import Events from './pages/Events';
 import ForVendors from './pages/ForVendors';
 import Membership from './pages/Membership';
 import About from './pages/About';
+import FindVendors from './pages/FindVendors';
 import Ambassadors from './pages/Ambassadors';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
             <Route path="/suites" element={<CelebrationSuites />} />
             <Route path="/events" element={<Events />} />
             <Route path="/vendors" element={<ForVendors />} />
+            <Route path="/find-vendors" element={<FindVendors />} />
             <Route path="/join" element={<Membership />} />
             <Route path="/about" element={<About />} />
             <Route path="/ambassadors" element={<Ambassadors />} />
