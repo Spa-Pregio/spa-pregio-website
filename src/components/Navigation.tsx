@@ -23,7 +23,6 @@ export default function Navigation() {
     { name: 'Celebration Suites', href: '/suites' },
     { name: 'Find Vendors', href: '/find-vendors' },
     { name: 'Events', href: '/events' },
-    
     { name: 'Suite Sisters™', href: '/ambassadors' },
     { name: 'About', href: '/about' },
   ];
@@ -39,9 +38,28 @@ export default function Navigation() {
       >
         <div className="w-full px-4 sm:px-6 lg:px-12">
           <div className="flex items-center justify-between h-16 lg:h-20">
+
             {/* Logo */}
             <Link to="/" className="flex flex-col items-start">
-              <img src="/images/spa-pregio-logo.png" alt="Spa-Pregio" className="h-10 lg:h-12 w-auto" />
+              <svg width="180" height="30" viewBox="0 0 180 30" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#7B6FD0" />
+                    <stop offset="100%" stopColor="#C84B9E" />
+                  </linearGradient>
+                </defs>
+                <text
+                  x="0"
+                  y="24"
+                  fontFamily="Georgia, serif"
+                  fontSize="24"
+                  fontWeight="600"
+                  letterSpacing="2"
+                  fill="url(#logoGrad)"
+                >
+                  SPA-PREGIO
+                </text>
+              </svg>
               <span className="text-[10px] lg:text-xs text-spa-purple/70 uppercase tracking-[0.15em] mt-0.5">
                 The Celebration Suite Movement
               </span>
