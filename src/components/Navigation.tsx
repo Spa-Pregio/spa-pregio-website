@@ -40,13 +40,9 @@ export default function Navigation() {
         <div className="w-full px-4 sm:px-6 lg:px-12">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
-            <Link to="/" className="flex flex-col">
-              <span className="font-serif text-xl lg:text-2xl font-semibold tracking-tight">
-                <span className="text-spa-purple">SPA</span>
-                <span className="text-spa-gray">-</span>
-                <span className="text-spa-pink">PREGIO</span>
-              </span>
-              <span className="text-[10px] lg:text-xs text-spa-purple/70 uppercase tracking-[0.15em]">
+            <Link to="/" className="flex flex-col items-start">
+              <img src="/images/spa-pregio-logo.png" alt="Spa-Pregio" className="h-10 lg:h-12 w-auto" />
+              <span className="text-[10px] lg:text-xs text-spa-purple/70 uppercase tracking-[0.15em] mt-0.5">
                 The Celebration Suite Movement
               </span>
             </Link>
