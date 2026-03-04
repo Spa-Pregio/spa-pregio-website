@@ -41,7 +41,7 @@ export default function Navigation() {
 
             {/* Logo */}
             <Link to="/" className="flex flex-col items-start">
-              <span className="text-lg lg:text-xl font-semibold tracking-widest text-spa-purple">
+              <span className="font-serif text-lg lg:text-xl font-semibold tracking-widest text-spa-purple">
                 SPA-PREGIO
               </span>
               <span className="text-[10px] lg:text-xs text-spa-purple/70 uppercase tracking-[0.15em] mt-0.5">
