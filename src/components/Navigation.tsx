@@ -21,8 +21,9 @@ export default function Navigation() {
 
   const navLinks = [
     { name: 'Celebration Suites', href: '/suites' },
+    { name: 'Find Vendors', href: '/find-vendors' },
     { name: 'Events', href: '/events' },
-    { name: 'For Vendors', href: '/vendors' },
+    
     { name: 'Suite Sisters™', href: '/ambassadors' },
     { name: 'About', href: '/about' },
   ];
