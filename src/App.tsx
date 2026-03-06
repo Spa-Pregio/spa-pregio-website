@@ -1,10 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import './App.css';
-
 // Layout
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
-
 // Pages
 import Home from './pages/Home';
 import CelebrationSuites from './pages/CelebrationSuites';
@@ -15,9 +14,18 @@ import About from './pages/About';
 import FindVendors from './pages/FindVendors';
 import Ambassadors from './pages/Ambassadors';
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pathname]);
+  return null;
+}
+
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="relative min-h-screen bg-spa-cream">
         <Navigation />
         <main className="relative">
