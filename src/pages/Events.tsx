@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import EventDirectory from '../sections/EventDirectory';
-import { 
-  MapPin, Calendar, Users, Plus, Search, Filter, 
-  ChevronDown, Star, ArrowRight, Store 
+import { supabase } from '../lib/supabaseClient';
+import {
+  MapPin, Calendar, Users, Plus, Search, Filter,
+  ChevronDown, Star, ArrowRight, Store
 } from 'lucide-react';
 
-const events = [
+const staticEvents = [
   {
     id: 1,
     title: 'Baby Bloom Market',
@@ -101,14 +101,98 @@ const customizableOptions = [
   { title: 'Customize Details', desc: 'Theme, catering, decor, and more', icon: Star },
 ];
 
+const emptyForm = {
+  title: '',
+  date: '',
+  time: '',
+  location: '',
+  type: 'Vendor Market',
+  description: '',
+  max_attendees: '',
+  vendor_tables: '',
+  special_offer: '',
+};
+
 export default function Events() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createType, setCreateType] = useState<'member' | 'vendor' | null>(null);
+  const [formData, setFormData] = useState(emptyForm);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [userEvents, setUserEvents] = useState<any[]>([]);
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  const loadEvents = async () => {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setUserEvents(data);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitStatus('loading');
+
+    const { error } = await supabase.from('events').insert([
+      {
+        title: formData.title,
+        date: formData.date,
+        time: formData.time,
+        location: formData.location,
+        type: formData.type,
+        description: formData.description,
+        max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
+        vendor_tables: formData.vendor_tables ? parseInt(formData.vendor_tables) : null,
+        special_offer: formData.special_offer,
+        event_kind: createType,
+      },
+    ]);
+
+    if (error) {
+      console.error(error);
+      setSubmitStatus('error');
+    } else {
+      setSubmitStatus('success');
+      setFormData(emptyForm);
+      loadEvents();
+      setTimeout(() => {
+        setShowCreateModal(false);
+        setSubmitStatus('idle');
+      }, 2000);
+    }
+  };
+
+  const allEvents = [
+    ...staticEvents,
+    ...userEvents.map((e, i) => ({
+      id: 1000 + i,
+      title: e.title,
+      date: e.date,
+      time: e.time,
+      location: e.location,
+      attendees: 0,
+      maxAttendees: e.max_attendees || 50,
+      type: e.type,
+      host: 'Community Member',
+      image: '/images/gathering_large.jpg',
+      vendors: e.vendor_tables || 0,
+    })),
+  ];
 
   const filteredEvents = activeFilter === 'All'
-    ? events
-    : events.filter(e => e.type === activeFilter);
+    ? allEvents
+    : allEvents.filter(e => e.type === activeFilter);
 
   return (
     <div className="w-full pt-20">
@@ -124,7 +208,7 @@ export default function Events() {
               Discover vendor markets, brunches, workshops, and more. Or create your own customizable gathering.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-              <button 
+              <button
                 onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
                 className="btn-primary"
               >
@@ -151,7 +235,6 @@ export default function Events() {
               <p className="mt-4 text-spa-gray leading-relaxed">
                 From intimate brunches to full vendor showcases, customize every detail. Choose your venue, invite vendors, and create an experience that's uniquely yours.
               </p>
-              
               <div className="mt-8 grid sm:grid-cols-2 gap-4">
                 {customizableOptions.map((option, index) => (
                   <div key={index} className="flex items-start gap-3">
@@ -165,8 +248,7 @@ export default function Events() {
                   </div>
                 ))}
               </div>
-              
-              <button 
+              <button
                 onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
                 className="btn-primary mt-8"
               >
@@ -176,24 +258,16 @@ export default function Events() {
             </div>
             <div className="relative">
               <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-elegant">
-                <img
-                  src="/images/gathering_large.jpg"
-                  alt="Customizable gathering"
-                  className="w-full h-full object-cover"
-                />
+                <img src="/images/gathering_large.jpg" alt="Customizable gathering" className="w-full h-full object-cover" />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* State & City Event Directory */}
-      <EventDirectory />
-
       {/* Events Discovery */}
       <section className="w-full py-16 lg:py-20 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          {/* Search & Filter */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-10">
             <div className="relative flex-1 max-w-md">
               <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-spa-gray" />
@@ -221,7 +295,6 @@ export default function Events() {
             </div>
           </div>
 
-          {/* Events Grid */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredEvents.map((event) => (
               <div key={event.id} className="elegant-card group cursor-pointer">
@@ -235,7 +308,7 @@ export default function Events() {
                     <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-spa-charcoal">
                       {event.type}
                     </span>
-                    {event.partner && (
+                    {(event as any).partner && (
                       <span className="px-3 py-1 bg-spa-purple rounded-full text-xs font-medium text-white flex items-center gap-1">
                         <Star size={12} className="fill-white" />
                         Partner
@@ -268,9 +341,7 @@ export default function Events() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-spa-charcoal/5">
-                    <span className="text-sm text-spa-gray">
-                      Hosted by {event.host}
-                    </span>
+                    <span className="text-sm text-spa-gray">Hosted by {event.host}</span>
                     <button className="text-spa-purple font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all">
                       Join
                       <ArrowRight size={16} />
@@ -281,7 +352,6 @@ export default function Events() {
             ))}
           </div>
 
-          {/* Load More */}
           <div className="text-center mt-12">
             <button className="btn-outline">
               Load More Events
@@ -304,14 +374,14 @@ export default function Events() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button 
+              <button
                 onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
                 className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors flex items-center justify-center gap-2"
               >
                 <Users size={18} />
                 Create Member Event
               </button>
-              <button 
+              <button
                 onClick={() => { setCreateType('vendor'); setShowCreateModal(true); }}
                 className="px-6 py-3 border-2 border-white/30 text-white rounded-full font-medium hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
               >
@@ -332,112 +402,163 @@ export default function Events() {
                 <h3 className="font-serif text-2xl text-spa-charcoal">
                   Create {createType === 'vendor' ? 'Vendor' : 'Member'} Event
                 </h3>
-                <button 
-                  onClick={() => setShowCreateModal(false)}
+                <button
+                  onClick={() => { setShowCreateModal(false); setSubmitStatus('idle'); }}
                   className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors"
                 >
                   ×
                 </button>
               </div>
 
-              <form className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Name</label>
-                  <input
-                    type="text"
-                    placeholder="e.g., Sunset Park Meetup"
-                    className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
-                  />
+              {submitStatus === 'success' ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4">
+                    <Star size={28} className="text-spa-purple" />
+                  </div>
+                  <h4 className="font-serif text-xl text-spa-charcoal mb-2">Event Created! 🎉</h4>
+                  <p className="text-spa-gray">Your event is now live on the events page.</p>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Date</label>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Name</label>
                     <input
-                      type="date"
-                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                      type="text"
+                      name="title"
+                      required
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="e.g., Sunset Park Meetup"
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Time</label>
-                    <input
-                      type="time"
-                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
-                    />
-                  </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-spa-charcoal mb-1">Location</label>
-                  <input
-                    type="text"
-                    placeholder="e.g., Brooklyn, NY"
-                    className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Type</label>
-                  <select className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30">
-                    <option>Vendor Market</option>
-                    <option>Brunch</option>
-                    <option>Virtual</option>
-                    <option>Workshop</option>
-                    <option>Tea</option>
-                    <option>Wellness</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-spa-charcoal mb-1">Description</label>
-                  <textarea
-                    rows={3}
-                    placeholder="Tell us about your event..."
-                    className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-spa-charcoal mb-1">Max Attendees</label>
-                  <input
-                    type="number"
-                    placeholder="20"
-                    className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
-                  />
-                </div>
-
-                {createType === 'vendor' && (
-                  <>
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-spa-charcoal mb-1">Number of Vendor Tables</label>
+                      <label className="block text-sm font-medium text-spa-charcoal mb-1">Date</label>
                       <input
-                        type="number"
-                        placeholder="5"
+                        type="date"
+                        name="date"
+                        required
+                        value={formData.date}
+                        onChange={handleChange}
                         className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-spa-charcoal mb-1">Special Offer for Attendees</label>
+                      <label className="block text-sm font-medium text-spa-charcoal mb-1">Time</label>
                       <input
-                        type="text"
-                        placeholder="e.g., 15% off all products"
-                        className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                        type="time"
+                        name="time"
+                        required
+                        value={formData.time}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                       />
                     </div>
-                  </>
-                )}
+                  </div>
 
-                <button type="submit" className="btn-primary w-full justify-center mt-6">
-                  <Plus size={18} />
-                  Create Event
-                </button>
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Location</label>
+                    <input
+                      type="text"
+                      name="location"
+                      required
+                      value={formData.location}
+                      onChange={handleChange}
+                      placeholder="e.g., Brooklyn, NY"
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    />
+                  </div>
 
-                <p className="text-xs text-spa-gray text-center">
-                  {createType === 'vendor' 
-                    ? 'Vendor events require partner status. Contact us to learn more.'
-                    : 'Member events are free to create and subject to community guidelines.'}
-                </p>
-              </form>
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Type</label>
+                    <select
+                      name="type"
+                      value={formData.type}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    >
+                      <option>Vendor Market</option>
+                      <option>Brunch</option>
+                      <option>Virtual</option>
+                      <option>Workshop</option>
+                      <option>Tea</option>
+                      <option>Wellness</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Description</label>
+                    <textarea
+                      rows={3}
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      placeholder="Tell us about your event..."
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Max Attendees</label>
+                    <input
+                      type="number"
+                      name="max_attendees"
+                      value={formData.max_attendees}
+                      onChange={handleChange}
+                      placeholder="20"
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    />
+                  </div>
+
+                  {createType === 'vendor' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-spa-charcoal mb-1">Number of Vendor Tables</label>
+                        <input
+                          type="number"
+                          name="vendor_tables"
+                          value={formData.vendor_tables}
+                          onChange={handleChange}
+                          placeholder="5"
+                          className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-spa-charcoal mb-1">Special Offer for Attendees</label>
+                        <input
+                          type="text"
+                          name="special_offer"
+                          value={formData.special_offer}
+                          onChange={handleChange}
+                          placeholder="e.g., 15% off all products"
+                          className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {submitStatus === 'error' && (
+                    <p className="text-red-500 text-sm">Something went wrong. Please try again.</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={submitStatus === 'loading'}
+                    className="btn-primary w-full justify-center mt-6 disabled:opacity-50"
+                  >
+                    <Plus size={18} />
+                    {submitStatus === 'loading' ? 'Creating...' : 'Create Event'}
+                  </button>
+
+                  <p className="text-xs text-spa-gray text-center">
+                    {createType === 'vendor'
+                      ? 'Vendor events require partner status. Contact us to learn more.'
+                      : 'Member events are free to create and subject to community guidelines.'}
+                  </p>
+                </form>
+              )}
             </div>
           </div>
         </div>
