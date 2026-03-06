@@ -28,12 +28,13 @@ export default function About() {
 
   const handleSubmit = async () => {
     if (!formData.firstName || !formData.email || !formData.message) {
-      alert('Please fill in all required fields.');
+      alert('Please fill in your name, email, and message.');
       return;
     }
     setStatus('sending');
 
     try {
+      window.emailjs.init(PUBLIC_KEY);
       await window.emailjs.send(
         SERVICE_ID,
         TEMPLATE_ID,
@@ -42,8 +43,7 @@ export default function About() {
           from_email: formData.email,
           message: formData.message,
           email: formData.email,
-        },
-        PUBLIC_KEY
+        }
       );
       setStatus('success');
       setFormData({ firstName: '', lastName: '', email: '', message: '' });
