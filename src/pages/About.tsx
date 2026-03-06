@@ -2,16 +2,6 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Heart, Users, Sparkles, Mail, MapPin } from 'lucide-react';
 
-const SERVICE_ID = 'service_lmaajah';
-const TEMPLATE_ID = 'template_ifdr09o';
-const PUBLIC_KEY = 'WSKOBiLAfd1hQ6jLg';
-
-declare global {
-  interface Window {
-    emailjs: any;
-  }
-}
-
 const values = [
   { icon: Heart, title: 'Celebration is Sacred', desc: 'Every pregnancy — first or fifth — deserves to be honored. We believe the world needs more joy, more gathering, and more intentional celebration of the women bringing life into it.' },
   { icon: Sparkles, title: 'Elevated & Intimate', desc: 'After 25 years in the beauty industry, we know what it feels like to be truly pampered. Spa-Pregio brings that elevated, personal touch to every mama\'s journey.' },
@@ -19,36 +9,29 @@ const values = [
 ];
 
 export default function About() {
-  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.firstName || !formData.email || !formData.message) {
-      alert('Please fill in your name, email, and message.');
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setStatus('sending');
 
+    const form = e.currentTarget;
+    const data = new FormData(form);
+
     try {
-      window.emailjs.init(PUBLIC_KEY);
-      await window.emailjs.send(
-        SERVICE_ID,
-        TEMPLATE_ID,
-        {
-          from_name: `${formData.firstName} ${formData.lastName}`,
-          from_email: formData.email,
-          message: formData.message,
-          email: formData.email,
-        }
-      );
-      setStatus('success');
-      setFormData({ firstName: '', lastName: '', email: '', message: '' });
-    } catch (error) {
-      console.error('EmailJS error:', error);
+      const response = await fetch('https://formspree.io/f/xaqpwggd', {
+        method: 'POST',
+        body: data,
+        headers: { Accept: 'application/json' },
+      });
+
+      if (response.ok) {
+        setStatus('success');
+        form.reset();
+      } else {
+        setStatus('error');
+      }
+    } catch {
       setStatus('error');
     }
   };
@@ -228,15 +211,14 @@ export default function About() {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-spa-charcoal mb-1">First Name</label>
                   <input
                     type="text"
                     name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                   />
                 </div>
@@ -245,8 +227,6 @@ export default function About() {
                   <input
                     type="text"
                     name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
                     className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                   />
                 </div>
@@ -256,8 +236,7 @@ export default function About() {
                 <input
                   type="email"
                   name="email"
-                  value={formData.email}
-                  onChange={handleChange}
+                  required
                   className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                 />
               </div>
@@ -266,8 +245,7 @@ export default function About() {
                 <textarea
                   rows={4}
                   name="message"
-                  value={formData.message}
-                  onChange={handleChange}
+                  required
                   className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none"
                 />
               </div>
@@ -280,14 +258,14 @@ export default function About() {
               )}
 
               <button
-                onClick={handleSubmit}
+                type="submit"
                 disabled={status === 'sending'}
                 className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {status === 'sending' ? 'Sending...' : 'Send Message'}
                 {status !== 'sending' && <ArrowRight size={18} />}
               </button>
-            </div>
+            </form>
           </div>
         </div>
       </section>
