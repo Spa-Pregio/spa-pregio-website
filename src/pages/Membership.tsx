@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { 
-  Check, Users, Calendar, Gift, Sparkles, MapPin, 
-  ArrowRight, Lock, Mail, User, Baby, Heart 
+import {
+  Check, Users, Calendar, Gift, Sparkles, MapPin,
+  ArrowRight, Lock, Mail, User, Baby, Heart
 } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 const benefits = [
   { icon: Users, title: 'Connect Locally', desc: 'Find and meet expectant mothers in your area' },
@@ -21,6 +22,8 @@ const testimonials = [
 
 export default function Membership() {
   const [isLogin, setIsLogin] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -30,10 +33,79 @@ export default function Membership() {
     location: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Welcome to Spa-Pregio! Your account has been created.');
+    setStatus('loading');
+    setErrorMsg('');
+
+    const { error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        data: {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          due_date: formData.dueDate,
+          location: formData.location,
+        },
+      },
+    });
+
+    if (error) {
+      setErrorMsg(error.message);
+      setStatus('error');
+    } else {
+      setStatus('success');
+    }
   };
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('loading');
+    setErrorMsg('');
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: formData.email,
+      password: formData.password,
+    });
+
+    if (error) {
+      setErrorMsg(error.message);
+      setStatus('error');
+    } else {
+      setStatus('success');
+    }
+  };
+
+  if (status === 'success' && !isLogin) {
+    return (
+      <div className="w-full pt-20 min-h-screen bg-spa-cream flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-20 h-20 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-6">
+            <Check size={36} className="text-spa-purple" />
+          </div>
+          <h2 className="font-serif text-3xl text-spa-charcoal mb-4">Welcome to Spa-Pregio! 🎉</h2>
+          <p className="text-spa-gray leading-relaxed">
+            Your account has been created! Please check your email to confirm your address, then you'll be all set.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'success' && isLogin) {
+    return (
+      <div className="w-full pt-20 min-h-screen bg-spa-cream flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-20 h-20 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-6">
+            <Check size={36} className="text-spa-purple" />
+          </div>
+          <h2 className="font-serif text-3xl text-spa-charcoal mb-4">Welcome back! 💜</h2>
+          <p className="text-spa-gray leading-relaxed">You're signed in successfully.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full pt-20">
@@ -61,7 +133,6 @@ export default function Membership() {
               Everything you need to <span className="text-spa-purple">celebrate.</span>
             </h2>
           </div>
-
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (
               <div key={index} className="flex items-start gap-4">
@@ -86,7 +157,7 @@ export default function Membership() {
             <div className="bg-white rounded-2xl p-8 lg:p-10 shadow-elegant">
               <div className="flex gap-4 mb-8">
                 <button
-                  onClick={() => setIsLogin(false)}
+                  onClick={() => { setIsLogin(false); setStatus('idle'); setErrorMsg(''); }}
                   className={`flex-1 py-3 rounded-full font-medium transition-colors ${
                     !isLogin ? 'bg-spa-purple text-white' : 'bg-spa-lavender text-spa-charcoal'
                   }`}
@@ -94,7 +165,7 @@ export default function Membership() {
                   Create Account
                 </button>
                 <button
-                  onClick={() => setIsLogin(true)}
+                  onClick={() => { setIsLogin(true); setStatus('idle'); setErrorMsg(''); }}
                   className={`flex-1 py-3 rounded-full font-medium transition-colors ${
                     isLogin ? 'bg-spa-purple text-white' : 'bg-spa-lavender text-spa-charcoal'
                   }`}
@@ -104,7 +175,7 @@ export default function Membership() {
               </div>
 
               {isLogin ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSignIn} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Email</label>
                     <div className="relative">
@@ -112,11 +183,12 @@ export default function Membership() {
                       <input
                         type="email"
                         placeholder="you@email.com"
+                        required
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="w-full pl-11 pr-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                       />
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Password</label>
                     <div className="relative">
@@ -124,26 +196,26 @@ export default function Membership() {
                       <input
                         type="password"
                         placeholder="••••••••"
+                        required
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         className="w-full pl-11 pr-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" className="rounded border-spa-charcoal/20" />
-                      <span className="text-sm text-spa-gray">Remember me</span>
-                    </label>
-                    <a href="#" className="text-sm text-spa-purple hover:underline">Forgot password?</a>
-                  </div>
+                  {errorMsg && <p className="text-red-500 text-sm">{errorMsg}</p>}
 
-                  <button type="submit" className="btn-primary w-full justify-center mt-6">
-                    Sign In
-                    <ArrowRight size={18} />
+                  <button
+                    type="submit"
+                    disabled={status === 'loading'}
+                    className="btn-primary w-full justify-center mt-6 disabled:opacity-50"
+                  >
+                    {status === 'loading' ? 'Signing in...' : 'Sign In'}
+                    {status !== 'loading' && <ArrowRight size={18} />}
                   </button>
                 </form>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-spa-charcoal mb-1">First Name</label>
@@ -152,8 +224,9 @@ export default function Membership() {
                         <input
                           type="text"
                           placeholder="Jane"
+                          required
                           value={formData.firstName}
-                          onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                           className="w-full pl-11 pr-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                         />
                       </div>
@@ -164,7 +237,7 @@ export default function Membership() {
                         type="text"
                         placeholder="Doe"
                         value={formData.lastName}
-                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                         className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                       />
                     </div>
@@ -177,8 +250,9 @@ export default function Membership() {
                       <input
                         type="email"
                         placeholder="you@email.com"
+                        required
                         value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="w-full pl-11 pr-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                       />
                     </div>
@@ -191,8 +265,9 @@ export default function Membership() {
                       <input
                         type="password"
                         placeholder="••••••••"
+                        required
                         value={formData.password}
-                        onChange={(e) => setFormData({...formData, password: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         className="w-full pl-11 pr-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                       />
                     </div>
@@ -207,7 +282,7 @@ export default function Membership() {
                       <input
                         type="date"
                         value={formData.dueDate}
-                        onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
                         className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                       />
                     </div>
@@ -220,22 +295,28 @@ export default function Membership() {
                         type="text"
                         placeholder="City, State"
                         value={formData.location}
-                        onChange={(e) => setFormData({...formData, location: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                         className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                       />
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2">
-                    <input type="checkbox" className="mt-1 rounded border-spa-charcoal/20" required />
+                    <input type="checkbox" required className="mt-1 rounded border-spa-charcoal/20" />
                     <span className="text-sm text-spa-gray">
                       I agree to the <a href="#" className="text-spa-purple hover:underline">Terms of Service</a> and <a href="#" className="text-spa-purple hover:underline">Privacy Policy</a>
                     </span>
                   </div>
 
-                  <button type="submit" className="btn-primary w-full justify-center mt-6">
-                    Create Free Account
-                    <ArrowRight size={18} />
+                  {errorMsg && <p className="text-red-500 text-sm">{errorMsg}</p>}
+
+                  <button
+                    type="submit"
+                    disabled={status === 'loading'}
+                    className="btn-primary w-full justify-center mt-6 disabled:opacity-50"
+                  >
+                    {status === 'loading' ? 'Creating account...' : 'Create Free Account'}
+                    {status !== 'loading' && <ArrowRight size={18} />}
                   </button>
 
                   <p className="text-xs text-spa-gray text-center">
@@ -245,12 +326,11 @@ export default function Membership() {
               )}
             </div>
 
-            {/* Info */}
+            {/* Testimonials */}
             <div>
               <h2 className="font-serif text-3xl lg:text-4xl text-spa-charcoal mb-6">
                 Why mothers love <span className="text-spa-purple">Spa-Pregio.</span>
               </h2>
-              
               <div className="space-y-6">
                 {testimonials.map((testimonial, index) => (
                   <div key={index} className="flex gap-4">
@@ -259,14 +339,11 @@ export default function Membership() {
                     </div>
                     <div>
                       <p className="text-spa-charcoal leading-relaxed">"{testimonial.quote}"</p>
-                      <p className="text-sm text-spa-gray mt-2">
-                        — {testimonial.author}, {testimonial.location}
-                      </p>
+                      <p className="text-sm text-spa-gray mt-2">— {testimonial.author}, {testimonial.location}</p>
                     </div>
                   </div>
                 ))}
               </div>
-
               <div className="mt-10 pt-10 border-t border-spa-purple/10">
                 <div className="flex flex-wrap gap-4">
                   <div className="flex items-center gap-2">
@@ -297,8 +374,8 @@ export default function Membership() {
           <p className="mt-4 text-white/70 leading-relaxed">
             Welcome back! Sign in to discover events, connect with other mothers, and plan your Celebration Suite.
           </p>
-          <button 
-            onClick={() => setIsLogin(true)}
+          <button
+            onClick={() => { setIsLogin(true); setStatus('idle'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center gap-2 mt-8"
           >
             Sign In to Your Account
