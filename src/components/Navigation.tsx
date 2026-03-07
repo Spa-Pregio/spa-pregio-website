@@ -3,17 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, LayoutDashboard } from 'lucide-react';
 
 export default function Navigation() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -29,24 +20,17 @@ export default function Navigation() {
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? 'bg-white/95 backdrop-blur-lg shadow-sm'
-            : 'bg-transparent'
-        }`}
-      >
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
         <div className="w-full px-4 sm:px-6 lg:px-12">
           <div className="flex items-center justify-between h-16 lg:h-20">
 
             {/* Logo */}
-            <Link to="/" className="flex flex-col items-start">
-              <span className="font-serif text-lg lg:text-xl font-semibold tracking-widest text-spa-purple">
-                SPA-PREGIO
-              </span>
-              <span className="text-[10px] lg:text-xs text-spa-purple/70 uppercase tracking-[0.15em] mt-0.5">
-                The Celebration Suite Movement
-              </span>
+            <Link to="/" className="flex items-center">
+              <img
+                src="/images/SPA-PREGIO__LOGO.png"
+                alt="Spa-Pregio"
+                className="h-10 lg:h-12 w-auto object-contain"
+              />
             </Link>
 
             {/* Desktop Navigation */}
@@ -68,7 +52,6 @@ export default function Navigation() {
 
             {/* CTAs */}
             <div className="hidden lg:flex items-center gap-4">
-              {/* Vendor Dashboard icon link */}
               <Link
                 to="/vendor-dashboard"
                 title="Vendor Dashboard"
@@ -81,17 +64,13 @@ export default function Navigation() {
                 <LayoutDashboard size={16} />
                 <span>Vendor</span>
               </Link>
-
               <Link
                 to="/vendors"
                 className="text-sm font-medium text-spa-charcoal/70 hover:text-spa-purple transition-colors"
               >
                 List Your Business
               </Link>
-              <Link
-                to="/join"
-                className="btn-primary text-sm"
-              >
+              <Link to="/join" className="btn-primary text-sm">
                 Become a Member
               </Link>
             </div>
@@ -118,6 +97,12 @@ export default function Navigation() {
         }`}
       >
         <div className="flex flex-col items-center justify-center h-full gap-6 pt-20">
+          {/* Logo in mobile menu */}
+          <img
+            src="/images/SPA-PREGIO__LOGO.png"
+            alt="Spa-Pregio"
+            className="h-10 w-auto object-contain mb-2"
+          />
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -131,8 +116,6 @@ export default function Navigation() {
               {link.name}
             </Link>
           ))}
-
-          {/* Vendor Dashboard in mobile menu */}
           <Link
             to="/vendor-dashboard"
             className={`font-serif text-2xl transition-colors duration-200 flex items-center gap-2 ${
@@ -143,7 +126,6 @@ export default function Navigation() {
           >
             <LayoutDashboard size={22} /> Vendor Dashboard
           </Link>
-
           <div className="flex flex-col gap-4 mt-6">
             <Link
               to="/vendors"
