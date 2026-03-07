@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, LayoutDashboard } from 'lucide-react';
+import { Menu, X, LayoutDashboard, User } from 'lucide-react';
 
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -54,6 +54,18 @@ export default function Navigation() {
 
             {/* CTAs */}
             <div className="hidden lg:flex items-center gap-4">
+              <Link
+                to="/my-account"
+                title="My Account"
+                className={`flex items-center gap-1.5 text-sm font-medium transition-colors duration-200 ${
+                  location.pathname === '/my-account'
+                    ? 'text-spa-purple'
+                    : 'text-spa-charcoal/70 hover:text-spa-purple'
+                }`}
+              >
+                <User size={16} />
+                <span>My Account</span>
+              </Link>
               <Link
                 to="/vendor-dashboard"
                 title="Vendor Dashboard"
@@ -117,6 +129,16 @@ export default function Navigation() {
               {link.name}
             </Link>
           ))}
+          <Link
+            to="/my-account"
+            className={`font-serif text-2xl transition-colors duration-200 flex items-center gap-2 ${
+              location.pathname === '/my-account'
+                ? 'text-spa-purple'
+                : 'text-spa-charcoal hover:text-spa-purple'
+            }`}
+          >
+            <User size={22} /> My Account
+          </Link>
           <Link
             to="/vendor-dashboard"
             className={`font-serif text-2xl transition-colors duration-200 flex items-center gap-2 ${
