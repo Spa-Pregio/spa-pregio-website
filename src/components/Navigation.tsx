@@ -28,7 +28,7 @@ export default function Navigation() {
             <Link to="/" className="flex flex-col items-start">
               <div className="flex items-baseline gap-0">
                 <span className="font-serif text-xl lg:text-2xl font-bold tracking-widest text-spa-charcoal">SPA-</span>
-                <span className="font-serif text-xl lg:text-2xl font-bold tracking-widest text-spa-purple">PREGIO®</span>
+                <span className="font-serif text-xl lg:text-2xl font-bold tracking-widest text-spa-purple">PREGIO™</span>
               </div>
               <span className="text-[10px] lg:text-xs text-spa-purple/70 uppercase tracking-[0.15em] mt-0.5">
                 The Celebration Suite Movement
@@ -102,7 +102,7 @@ export default function Navigation() {
           {/* Logo in mobile menu */}
           <div className="flex items-baseline gap-0 mb-2">
             <span className="font-serif text-2xl font-bold tracking-widest text-spa-charcoal">SPA-</span>
-            <span className="font-serif text-2xl font-bold tracking-widest text-spa-purple">PREGIO®</span>
+            <span className="font-serif text-2xl font-bold tracking-widest text-spa-purple">PREGIO™</span>
           </div>
           {navLinks.map((link) => (
             <Link
