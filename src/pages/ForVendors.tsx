@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { 
   ArrowRight, Check, Star, Users, MapPin, Store,
-  Image, Type, Palette, Eye, Download, Search
+  Image, Type, Palette, Eye, Download, Search, X
 } from 'lucide-react';
 import LocalVendorSearch, { VendorSearchHandle } from '../sections/LocalVendorSearch';
 
@@ -18,22 +18,63 @@ const vendorCategories = [
 
 const pricingTiers = [
   {
-    name: 'Starter', price: 49, period: 'month',
+    name: 'Starter',
+    price: 29,
+    period: 'month',
     description: 'Perfect for individual vendors just starting out',
-    features: ['Business profile page', 'Photo gallery (up to 15 images)', 'Contact information', 'Website & social links', 'Appear in local search results', 'Basic analytics'],
-    cta: 'Get Started', popular: false,
+    features: [
+      'Business profile page',
+      'Photo gallery (up to 15 images)',
+      'Contact information',
+      'Website & social links',
+      'Appear in local search results',
+      'Basic analytics',
+    ],
+    cta: 'Get Started',
+    popular: false,
+    badge: 'Founding Member Rate',
+    stripeLink: 'https://buy.stripe.com/test_8x23cwgC8d987N79Fx2go00',
+    eventAccess: 'Up to 2 events/month',
   },
   {
-    name: 'Professional', price: 149, period: 'month',
+    name: 'Professional',
+    price: 79,
+    period: 'month',
     description: 'Enhanced visibility with event participation',
-    features: ['Everything in Starter', 'Featured placement in category', '"Verified" badge on profile', 'Priority in search results', 'Event vendor opportunities', 'Customer reviews & ratings', 'Advanced analytics dashboard'],
-    cta: 'Become a Partner', popular: true,
+    features: [
+      'Everything in Starter',
+      'Featured placement in category',
+      '"Verified" badge on profile',
+      'Priority in search results',
+      'Event vendor opportunities',
+      'Customer reviews & ratings',
+      'Advanced analytics dashboard',
+    ],
+    cta: 'Become a Partner',
+    popular: true,
+    badge: 'Most Popular',
+    stripeLink: 'https://buy.stripe.com/test_9B6cN6adKfhg5EZ7xp2go01',
+    eventAccess: 'Up to 5 events/month',
   },
   {
-    name: 'Enterprise', price: 299, period: 'month',
+    name: 'Enterprise',
+    price: 149,
+    period: 'month',
     description: 'Maximum exposure for established businesses',
-    features: ['Everything in Professional', 'Homepage featured placement', 'Dedicated email to local members', 'Custom advertisement design', 'Multiple location listings', 'Exclusive event sponsorships', 'Dedicated account manager'],
-    cta: 'Contact Sales', popular: false,
+    features: [
+      'Everything in Professional',
+      'Homepage featured placement',
+      'Dedicated email to local members',
+      'Custom advertisement design',
+      'Multiple location listings',
+      'Exclusive event sponsorships',
+      'Dedicated account manager',
+    ],
+    cta: 'Contact Sales',
+    popular: false,
+    badge: 'Unlimited Events',
+    stripeLink: 'https://buy.stripe.com/test_8x24gA71y0mm6J304X2go02',
+    eventAccess: 'Unlimited events',
   },
 ];
 
@@ -48,9 +89,21 @@ export default function ForVendors() {
   const [showAdDesigner, setShowAdDesigner] = useState(false);
   const [selectedSize, setSelectedSize] = useState(adSizes[0]);
   const [adText, setAdText] = useState({ headline: '', description: '', cta: 'Learn More' });
-  const [showSignupForm, setShowSignupForm] = useState(false);
-  const [selectedTier, setSelectedTier] = useState<string | null>(null);
+  const [selectedTier, setSelectedTier] = useState<typeof pricingTiers[0] | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const vendorSearchRef = useRef<VendorSearchHandle>(null);
+
+  const handleSelectTier = (tier: typeof pricingTiers[0]) => {
+    setSelectedTier(tier);
+    setShowConfirmModal(true);
+  };
+
+  const handleProceedToCheckout = () => {
+    if (selectedTier) {
+      window.open(selectedTier.stripeLink, '_blank');
+      setShowConfirmModal(false);
+    }
+  };
 
   return (
     <div className="w-full pt-20">
@@ -67,9 +120,9 @@ export default function ForVendors() {
               Join Spa-Pregio's directory and get discovered by local mamas actively shopping for maternity products and services.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-              <button onClick={() => setShowSignupForm(true)} className="btn-primary">
+              <a href="#pricing" className="btn-primary">
                 List Your Business <ArrowRight size={18} />
-              </button>
+              </a>
               <button onClick={() => setShowAdDesigner(true)} className="btn-outline">
                 <Eye size={18} /> Try Ad Designer
               </button>
@@ -122,24 +175,41 @@ export default function ForVendors() {
       </section>
 
       {/* Pricing */}
-      <section className="w-full py-16 lg:py-20 bg-spa-cream">
+      <section id="pricing" className="w-full py-16 lg:py-20 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="text-center mb-16">
+          <div className="text-center mb-6">
             <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Pricing</span>
             <h2 className="section-title mt-4">Choose your <span className="text-spa-purple">plan.</span></h2>
+            <p className="mt-4 text-spa-gray max-w-xl mx-auto">
+              These are our founding member rates — locked in for early vendors. Prices increase as the platform grows.
+            </p>
           </div>
+
+          {/* Event access callout */}
+          <div className="bg-spa-purple/10 border border-spa-purple/20 rounded-2xl p-4 max-w-2xl mx-auto mb-12 text-center">
+            <p className="text-spa-purple text-sm font-medium">
+              🎉 All plans include event access — Enterprise members get <strong>unlimited</strong> events to showcase their products!
+            </p>
+          </div>
+
           <div className="grid lg:grid-cols-3 gap-8">
             {pricingTiers.map((tier, index) => (
               <div key={index} className={`relative rounded-2xl p-8 ${tier.popular ? 'bg-spa-purple text-white' : 'bg-white'}`}>
-                {tier.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-spa-pink text-white text-xs font-medium uppercase tracking-wider rounded-full">Most Popular</span>
-                )}
-                <h3 className={`font-serif text-2xl ${tier.popular ? 'text-white' : 'text-spa-charcoal'}`}>{tier.name}</h3>
+                <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 text-white text-xs font-medium uppercase tracking-wider rounded-full ${tier.popular ? 'bg-spa-pink' : 'bg-spa-charcoal/60'}`}>
+                  {tier.badge}
+                </span>
+                <h3 className={`font-serif text-2xl mt-2 ${tier.popular ? 'text-white' : 'text-spa-charcoal'}`}>{tier.name}</h3>
                 <p className={`mt-2 text-sm ${tier.popular ? 'text-white/70' : 'text-spa-gray'}`}>{tier.description}</p>
                 <div className="mt-6">
                   <span className={`font-serif text-4xl ${tier.popular ? 'text-white' : 'text-spa-charcoal'}`}>${tier.price}</span>
                   <span className={`text-sm ${tier.popular ? 'text-white/70' : 'text-spa-gray'}`}>/{tier.period}</span>
                 </div>
+
+                {/* Event access badge */}
+                <div className={`mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${tier.popular ? 'bg-white/20 text-white' : 'bg-spa-purple/10 text-spa-purple'}`}>
+                  <Store size={12} /> {tier.eventAccess}
+                </div>
+
                 <ul className="mt-6 space-y-3">
                   {tier.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-3">
@@ -149,7 +219,7 @@ export default function ForVendors() {
                   ))}
                 </ul>
                 <button
-                  onClick={() => { setSelectedTier(tier.name); setShowSignupForm(true); }}
+                  onClick={() => handleSelectTier(tier)}
                   className={`w-full mt-8 py-3 rounded-full font-medium transition-colors ${tier.popular ? 'bg-white text-spa-purple hover:bg-spa-cream' : 'bg-spa-purple text-white hover:bg-spa-purple/90'}`}
                 >
                   {tier.cta}
@@ -160,7 +230,7 @@ export default function ForVendors() {
         </div>
       </section>
 
-      {/* Be First CTA — replaces fake testimonials */}
+      {/* Be First CTA */}
       <section className="w-full py-16 lg:py-20 bg-spa-blush">
         <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
           <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Early Opportunity</span>
@@ -181,9 +251,9 @@ export default function ForVendors() {
               </div>
             ))}
           </div>
-          <button onClick={() => setShowSignupForm(true)} className="btn-primary mt-10 mx-auto">
-            Claim Your Spot — List Free <ArrowRight size={18} />
-          </button>
+          <a href="#pricing" className="btn-primary mt-10 mx-auto inline-flex">
+            Claim Your Spot <ArrowRight size={18} />
+          </a>
         </div>
       </section>
 
@@ -232,11 +302,49 @@ export default function ForVendors() {
         <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
           <h2 className="font-serif text-3xl lg:text-4xl text-white">Ready to grow your <span className="text-spa-pink">business?</span></h2>
           <p className="mt-4 text-white/70 leading-relaxed">Get in front of local mamas who are ready to buy. List your business today.</p>
-          <button onClick={() => setShowSignupForm(true)} className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center gap-2 mt-8">
+          <a href="#pricing" className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center gap-2 mt-8">
             List Your Business <ArrowRight size={18} />
-          </button>
+          </a>
         </div>
       </section>
+
+      {/* Plan Confirmation Modal */}
+      {showConfirmModal && selectedTier && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-md w-full p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-serif text-2xl text-spa-charcoal">Confirm Your Plan</h3>
+              <button onClick={() => setShowConfirmModal(false)} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="bg-spa-lavender rounded-2xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-serif text-xl text-spa-charcoal">{selectedTier.name}</h4>
+                <span className="text-spa-purple font-medium">${selectedTier.price}/mo</span>
+              </div>
+              <p className="text-sm text-spa-gray mb-4">{selectedTier.description}</p>
+              <div className="flex items-center gap-2 text-sm text-spa-purple font-medium">
+                <Store size={14} /> {selectedTier.eventAccess}
+              </div>
+            </div>
+
+            <p className="text-sm text-spa-gray mb-6 text-center">
+              You'll be taken to Stripe's secure checkout to complete your subscription. Cancel anytime.
+            </p>
+
+            <div className="flex gap-3">
+              <button onClick={() => setShowConfirmModal(false)} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">
+                Go Back
+              </button>
+              <button onClick={handleProceedToCheckout} className="flex-1 btn-primary justify-center">
+                Proceed to Checkout <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Ad Designer Modal */}
       {showAdDesigner && (
@@ -245,7 +353,9 @@ export default function ForVendors() {
             <div className="p-6 lg:p-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-serif text-2xl text-spa-charcoal">Ad Designer</h3>
-                <button onClick={() => setShowAdDesigner(false)} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors">×</button>
+                <button onClick={() => setShowAdDesigner(false)} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors">
+                  <X size={18} />
+                </button>
               </div>
               <div className="grid lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
@@ -295,57 +405,6 @@ export default function ForVendors() {
                 <button className="flex-1 btn-primary justify-center"><Download size={18} /> Save Design</button>
                 <button onClick={() => setShowAdDesigner(false)} className="px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors">Close</button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Signup Modal */}
-      {showSignupForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 lg:p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-serif text-2xl text-spa-charcoal">{selectedTier ? `Sign Up: ${selectedTier}` : 'List Your Business'}</h3>
-                <button onClick={() => setShowSignupForm(false)} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors">×</button>
-              </div>
-              <form className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-spa-charcoal mb-1">Business Name</label>
-                  <input type="text" placeholder="e.g., Bloom Maternity Boutique" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-spa-charcoal mb-1">Category</label>
-                  <select className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30">
-                    <option>Select a category...</option>
-                    {vendorCategories.map((cat) => <option key={cat.name}>{cat.name}</option>)}
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">First Name</label>
-                    <input type="text" placeholder="First Name" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Last Name</label>
-                    <input type="text" placeholder="Last Name" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-spa-charcoal mb-1">Email</label>
-                  <input type="email" placeholder="you@business.com" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-spa-charcoal mb-1">Phone</label>
-                  <input type="tel" placeholder="(555) 123-4567" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-spa-charcoal mb-1">City, State</label>
-                  <input type="text" placeholder="e.g., High Point, NC" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                </div>
-                <button type="submit" className="btn-primary w-full justify-center mt-6">Submit Application</button>
-                <p className="text-xs text-spa-gray text-center">Our team will review your application within 24-48 hours.</p>
-              </form>
             </div>
           </div>
         </div>
