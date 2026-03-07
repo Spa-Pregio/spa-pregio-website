@@ -22,14 +22,14 @@ export default function Navigation() {
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
         <div className="w-full px-4 sm:px-6 lg:px-12">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+          <div className="flex items-center justify-between h-20 lg:h-24">
 
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <img
                 src="/images/SPA-PREGIO__LOGO.png"
                 alt="Spa-Pregio"
-                className="h-10 lg:h-12 w-auto object-contain"
+                className="h-16 lg:h-20 w-auto object-contain"
               />
             </Link>
 
