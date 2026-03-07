@@ -22,15 +22,17 @@ export default function Navigation() {
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
         <div className="w-full px-4 sm:px-6 lg:px-12">
-          <div className="flex items-center justify-between h-20 lg:h-24">
+          <div className="flex items-center justify-between h-16 lg:h-20">
 
-            {/* Logo */}
-            <Link to="/" className="flex items-center">
-              <img
-                src="/images/SPA-PREGIO__LOGO.png"
-                alt="Spa-Pregio"
-                className="h-16 lg:h-20 w-auto object-contain"
-              />
+            {/* Logo — matches footer style */}
+            <Link to="/" className="flex flex-col items-start">
+              <div className="flex items-baseline gap-0">
+                <span className="font-serif text-xl lg:text-2xl font-bold tracking-widest text-spa-charcoal">SPA-</span>
+                <span className="font-serif text-xl lg:text-2xl font-bold tracking-widest text-spa-purple">PREGIO®</span>
+              </div>
+              <span className="text-[10px] lg:text-xs text-spa-purple/70 uppercase tracking-[0.15em] mt-0.5">
+                The Celebration Suite Movement
+              </span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -98,11 +100,10 @@ export default function Navigation() {
       >
         <div className="flex flex-col items-center justify-center h-full gap-6 pt-20">
           {/* Logo in mobile menu */}
-          <img
-            src="/images/SPA-PREGIO__LOGO.png"
-            alt="Spa-Pregio"
-            className="h-10 w-auto object-contain mb-2"
-          />
+          <div className="flex items-baseline gap-0 mb-2">
+            <span className="font-serif text-2xl font-bold tracking-widest text-spa-charcoal">SPA-</span>
+            <span className="font-serif text-2xl font-bold tracking-widest text-spa-purple">PREGIO®</span>
+          </div>
           {navLinks.map((link) => (
             <Link
               key={link.name}
