@@ -13,6 +13,7 @@ import Membership from './pages/Membership';
 import About from './pages/About';
 import FindVendors from './pages/FindVendors';
 import Ambassadors from './pages/Ambassadors';
+import VendorDashboard from './pages/VendorDashboard';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -38,6 +39,7 @@ function App() {
             <Route path="/join" element={<Membership />} />
             <Route path="/about" element={<About />} />
             <Route path="/ambassadors" element={<Ambassadors />} />
+            <Route path="/vendor-dashboard" element={<VendorDashboard />} />
           </Routes>
         </main>
         <Footer />
