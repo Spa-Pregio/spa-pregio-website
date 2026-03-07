@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LayoutDashboard } from 'lucide-react';
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -68,6 +68,20 @@ export default function Navigation() {
 
             {/* CTAs */}
             <div className="hidden lg:flex items-center gap-4">
+              {/* Vendor Dashboard icon link */}
+              <Link
+                to="/vendor-dashboard"
+                title="Vendor Dashboard"
+                className={`flex items-center gap-1.5 text-sm font-medium transition-colors duration-200 ${
+                  location.pathname === '/vendor-dashboard'
+                    ? 'text-spa-purple'
+                    : 'text-spa-charcoal/70 hover:text-spa-purple'
+                }`}
+              >
+                <LayoutDashboard size={16} />
+                <span>Vendor</span>
+              </Link>
+
               <Link
                 to="/vendors"
                 className="text-sm font-medium text-spa-charcoal/70 hover:text-spa-purple transition-colors"
@@ -117,10 +131,23 @@ export default function Navigation() {
               {link.name}
             </Link>
           ))}
+
+          {/* Vendor Dashboard in mobile menu */}
+          <Link
+            to="/vendor-dashboard"
+            className={`font-serif text-2xl transition-colors duration-200 flex items-center gap-2 ${
+              location.pathname === '/vendor-dashboard'
+                ? 'text-spa-purple'
+                : 'text-spa-charcoal hover:text-spa-purple'
+            }`}
+          >
+            <LayoutDashboard size={22} /> Vendor Dashboard
+          </Link>
+
           <div className="flex flex-col gap-4 mt-6">
             <Link
               to="/vendors"
-              className="text-spa-charcoal/70 hover:text-spa-purple transition-colors"
+              className="text-spa-charcoal/70 hover:text-spa-purple transition-colors text-center"
             >
               List Your Business
             </Link>
