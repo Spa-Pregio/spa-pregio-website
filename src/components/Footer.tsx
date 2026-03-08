@@ -46,21 +46,25 @@ export default function Footer() {
             {/* Social Links */}
             <div className="flex gap-3">
               <a
-                href="#"
+                href="https://www.instagram.com/spapregio"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-spa-lavender flex items-center justify-center text-spa-charcoal hover:bg-spa-purple hover:text-white transition-all duration-200"
                 aria-label="Instagram"
               >
                 <Instagram size={18} />
               </a>
               <a
-                href="#"
+                href="https://www.pinterest.com/spapregio/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-spa-lavender flex items-center justify-center text-spa-charcoal hover:bg-spa-purple hover:text-white transition-all duration-200"
                 aria-label="Pinterest"
               >
                 <Pin size={18} />
               </a>
               <a
-                href="#"
+                href="mailto:support@spa-pregio.com"
                 className="w-10 h-10 rounded-full bg-spa-lavender flex items-center justify-center text-spa-charcoal hover:bg-spa-purple hover:text-white transition-all duration-200"
                 aria-label="Email"
               >
@@ -122,7 +126,7 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="mt-16 pt-8 border-t border-spa-purple/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-spa-gray">
-            © 2026 Spa-Pregio. All rights reserved.
+            © 2026 Spa-Pregio®. All rights reserved.
           </p>
           <p className="text-sm text-spa-gray flex items-center gap-1">
             Made with <Heart size={14} className="text-spa-pink fill-spa-pink" /> for expectant mothers everywhere
