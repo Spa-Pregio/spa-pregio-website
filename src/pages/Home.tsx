@@ -28,47 +28,13 @@ const vendorTypes = [
   { name: 'Event Venues', icon: MapPin },
 ];
 
-const featuredCities = [
-  { name: 'New York, NY', venues: 45, events: 12 },
-  { name: 'Los Angeles, CA', venues: 38, events: 8 },
-  { name: 'Chicago, IL', venues: 32, events: 6 },
-  { name: 'Austin, TX', venues: 28, events: 10 },
-  { name: 'Miami, FL', venues: 24, events: 5 },
-  { name: 'Seattle, WA', venues: 22, events: 7 },
-];
-
-const testimonials = [
-  { quote: 'I found my closest mom friends through Spa-Pregio. Our monthly gatherings with local vendors are the highlight of my month!', author: 'Alexandra M.', location: 'Chicago, IL' },
-  { quote: 'As a maternity boutique owner, Spa-Pregio has connected me with hundreds of expectant mothers in my area.', author: 'Sarah K.', location: 'Boston, MA' },
-  { quote: 'The vendor marketplace made planning my shower so easy. I found everything I needed locally.', author: 'Maya T.', location: 'Austin, TX' },
-];
-
 export default function Home() {
   return (
     <div className="w-full">
       {/* Hero Section - Video Ready */}
       <section className="relative w-full min-h-screen flex items-center pt-20 bg-spa-cream overflow-hidden">
-        {/* Video Background (replace with your video) */}
         <div className="absolute inset-0 z-0">
-          {/* 
-            TO ADD YOUR VIDEO:
-            1. Upload your video file to your server or video hosting platform
-            2. Replace the div below with:
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover"
-            >
-              <source src="/your-video.mp4" type="video/mp4" />
-            </video>
-            3. Add a poster image for loading:
-            poster="/images/hero-poster.jpg"
-          */}
           <div className="absolute inset-0 bg-gradient-to-br from-spa-cream via-spa-lavender to-spa-blush" />
-          
-          {/* Fallback image until video is added */}
           <img
             src="/images/gathering_large.jpg"
             alt="Spa-Pregio community gathering"
@@ -82,17 +48,17 @@ export default function Home() {
             <span className="inline-block px-4 py-1 bg-spa-purple/10 text-spa-purple text-sm font-medium rounded-full mb-6">
               The Celebration Suite Movement
             </span>
-            
+
             <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-spa-charcoal leading-[1.1]">
               Where motherhood becomes a{' '}
               <span className="text-spa-purple">celebration.</span>
             </h1>
-            
+
             <p className="mt-6 lg:mt-8 text-lg text-spa-gray leading-relaxed">
               Join thousands of expectant mothers and local vendors. Connect, shop, and celebrate together in your community.
             </p>
-            
-            {/* Search Bar */}
+
+            {/* Search Bar — redirects to Find Vendors page */}
             <div className="mt-8 relative max-w-md">
               <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-spa-gray" />
               <input
@@ -100,11 +66,14 @@ export default function Home() {
                 placeholder="Search by city or state..."
                 className="w-full pl-12 pr-4 py-4 bg-white rounded-full text-spa-charcoal placeholder:text-spa-gray shadow-elegant focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
               />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 btn-primary py-2 px-4 text-sm">
+              <Link
+                to="/vendors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 btn-primary py-2 px-4 text-sm"
+              >
                 Search
-              </button>
+              </Link>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <Link to="/join" className="btn-primary">
                 Become a Member — Free
@@ -114,7 +83,7 @@ export default function Home() {
                 List Your Business
               </Link>
             </div>
-            
+
             {/* Trust Badges */}
             <div className="flex flex-wrap items-center gap-6 mt-10">
               <div className="flex items-center gap-2">
@@ -143,7 +112,7 @@ export default function Home() {
               Find everything you need <span className="text-spa-purple">locally.</span>
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {vendorTypes.map((type, index) => (
               <Link
@@ -168,7 +137,7 @@ export default function Home() {
               Your journey, <span className="text-spa-purple">elevated.</span>
             </h2>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             {experienceCards.map((card, index) => (
               <div key={index} className="elegant-card group">
@@ -193,47 +162,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* City Directory Section */}
-      <section className="w-full py-20 lg:py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-12">
-            <div>
-              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">City Directory</span>
-              <h2 className="section-title mt-4">
-                Find your <span className="text-spa-purple">city.</span>
-              </h2>
-              <p className="mt-4 text-spa-gray max-w-lg">
-                Browse vendors, venues, and events by location. From coast to coast, we're building communities everywhere.
-              </p>
-            </div>
-            <Link to="/vendors" className="text-spa-purple font-medium flex items-center gap-2 mt-4 lg:mt-0 hover:gap-3 transition-all">
-              View All Cities
-              <ArrowRight size={18} />
-            </Link>
-          </div>
-          
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredCities.map((city, index) => (
-              <Link
-                key={index}
-                to={`/events?city=${city.name}`}
-                className="flex items-center justify-between p-6 bg-spa-lavender rounded-2xl hover:bg-spa-purple/10 transition-colors group"
-              >
-                <div>
-                  <h3 className="font-serif text-lg text-spa-charcoal group-hover:text-spa-purple transition-colors">
-                    {city.name}
-                  </h3>
-                  <p className="text-sm text-spa-gray mt-1">
-                    {city.venues} vendors · {city.events} upcoming events
-                  </p>
-                </div>
-                <ArrowRight size={20} className="text-spa-purple opacity-0 group-hover:opacity-100 transition-opacity" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Customizable Gatherings Section */}
       <section className="w-full py-20 lg:py-28 bg-spa-blush">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -246,7 +174,7 @@ export default function Home() {
               <p className="mt-4 text-spa-gray leading-relaxed">
                 From intimate brunches to full vendor showcases, customize every detail of your gathering. Choose your venue, invite vendors, and create an experience that's uniquely yours.
               </p>
-              
+
               <div className="mt-8 space-y-4">
                 {[
                   'Choose from verified venues in your area',
@@ -260,7 +188,7 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              
+
               <Link to="/events" className="btn-primary mt-8 inline-flex">
                 Plan Your Event
                 <ArrowRight size={18} />
@@ -279,33 +207,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Testimonials — Coming Soon */}
       <section className="w-full py-20 lg:py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="text-center mb-16">
-            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Testimonials</span>
-            <h2 className="section-title mt-4">
-              What our community <span className="text-spa-purple">says.</span>
-            </h2>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-spa-lavender rounded-2xl p-8">
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={16} className="fill-spa-purple text-spa-purple" />
-                  ))}
-                </div>
-                <p className="text-spa-charcoal leading-relaxed mb-6">
-                  "{testimonial.quote}"
-                </p>
-                <div>
-                  <p className="font-medium text-spa-charcoal">{testimonial.author}</p>
-                  <p className="text-sm text-spa-gray">{testimonial.location}</p>
-                </div>
-              </div>
-            ))}
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center">
+          <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Testimonials</span>
+          <h2 className="section-title mt-4">
+            What our community <span className="text-spa-purple">says.</span>
+          </h2>
+          <div className="mt-12 inline-flex flex-col items-center gap-4 px-10 py-10 bg-spa-lavender rounded-2xl">
+            <Star size={32} className="text-spa-purple opacity-40" />
+            <p className="font-serif text-xl text-spa-charcoal">Community stories coming soon.</p>
+            <p className="text-spa-gray text-sm max-w-sm">
+              We're just getting started. Be among the first to share your Spa-Pregio experience.
+            </p>
           </div>
         </div>
       </section>
@@ -328,8 +242,7 @@ export default function Home() {
               List Your Business
             </Link>
           </div>
-          
-          {/* Benefits List */}
+
           <div className="flex flex-wrap justify-center gap-6 mt-12">
             {['Free Membership', 'Local Vendors', 'Custom Events', 'Community Support'].map((benefit, index) => (
               <div key={index} className="flex items-center gap-2 text-white/70">
