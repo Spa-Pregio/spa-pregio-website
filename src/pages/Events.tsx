@@ -3,68 +3,58 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import {
   MapPin, Calendar, Users, Plus, Search, Filter,
-  ChevronDown, Star, ArrowRight, Store, X, Check,
-  Ticket, Utensils, DollarSign, AlertCircle
+  ChevronDown, ArrowRight, Store, X, Check,
+  Ticket, Utensils, DollarSign, AlertCircle, Sparkles
 } from 'lucide-react';
 
 const SUPABASE_FUNCTIONS_URL = 'https://reompjeeiurwnbpbfhyj.supabase.co/functions/v1';
 
-const staticEvents = [
+// 5 Celebration Suite showcase cards — placeholder images to swap later
+const suiteShowcases = [
   {
-    id: 's1', title: 'Baby Bloom Market', date: 'Aug 12, 2026', time: '10:00 AM - 4:00 PM',
-    location: 'Brooklyn, NY', attendees: 45, maxAttendees: 100, type: 'Vendor Market',
-    host: 'Spa-Pregio', image: '/images/gathering_large.jpg', vendors: 12, featured: true,
-    description: 'A beautiful outdoor market celebrating expectant mothers and local vendors.',
-    is_free: true, tickets: [],
+    id: 'suite-baby-shower',
+    title: 'Baby Shower Suite',
+    emoji: '🍼',
+    description: 'Celebrate the mama-to-be with a curated baby shower experience. Local vendors, beautiful décor, and community all in one place.',
+    image: '/images/suite_baby_shower.jpg',
+    color: 'bg-pink-50',
+    badge: 'Baby Shower',
   },
   {
-    id: 's2', title: 'Mama Brunch & Shop', date: 'Aug 14, 2026', time: '11:00 AM - 2:00 PM',
-    location: 'Austin, TX', attendees: 28, maxAttendees: 40, type: 'Brunch',
-    host: 'The Garden Room', partner: true, image: '/images/venue_restaurant.jpg', vendors: 5,
-    description: 'Enjoy a relaxing brunch surrounded by local vendors and fellow mamas.',
-    is_free: false, tickets: [
-      { type: 'General Admission', price: 45, description: 'Entry + brunch buffet' },
-      { type: 'VIP Table', price: 85, description: 'Priority seating + champagne' },
-    ],
+    id: 'suite-gender-reveal',
+    title: 'Gender Reveal Suite',
+    emoji: '🎉',
+    description: 'Make the big reveal unforgettable. Create a customized gender reveal event with vendors, activities, and the perfect setting.',
+    image: '/images/suite_gender_reveal.jpg',
+    color: 'bg-purple-50',
+    badge: 'Gender Reveal',
   },
   {
-    id: 's3', title: 'Virtual Spa Night', date: 'Aug 18, 2026', time: '7:00 PM - 8:30 PM',
-    location: 'Virtual', attendees: 56, maxAttendees: 100, type: 'Virtual',
-    host: 'Spa-Pregio', image: '/images/spa_bright.jpg', vendors: 3,
-    description: 'A relaxing virtual evening of self-care, community, and celebration.',
-    is_free: true, tickets: [],
+    id: 'suite-sip-and-see',
+    title: 'Sip & See Suite',
+    emoji: '☕',
+    description: 'Introduce your new arrival in style. A relaxed, elegant gathering for friends and family to meet the newest addition.',
+    image: '/images/suite_sip_and_see.jpg',
+    color: 'bg-amber-50',
+    badge: 'Sip & See',
   },
   {
-    id: 's4', title: 'Celebration Suite Workshop', date: 'Aug 20, 2026', time: '2:00 PM - 5:00 PM',
-    location: 'Seattle, WA', attendees: 15, maxAttendees: 20, type: 'Workshop',
-    host: 'Paper & Petal Design', partner: true, image: '/images/plan_bright.jpg', vendors: 2,
-    description: 'Learn how to plan the perfect celebration suite for your pregnancy milestones.',
-    is_free: false, tickets: [
-      { type: 'General Admission', price: 35, description: 'Workshop entry + materials' },
-      { type: 'Buffet Add-on', price: 20, description: 'Light buffet included' },
-    ],
+    id: 'suite-push-present',
+    title: 'Push Present & Pampering Suite',
+    emoji: '💆‍♀️',
+    description: 'Honor the mama who just did the hard work. A luxurious pampering experience she truly deserves.',
+    image: '/images/suite_push_present.jpg',
+    color: 'bg-rose-50',
+    badge: 'Push Present',
   },
   {
-    id: 's5', title: 'Expectant Mothers Tea', date: 'Aug 22, 2026', time: '2:00 PM - 4:00 PM',
-    location: 'Chicago, IL', attendees: 22, maxAttendees: 30, type: 'Tea',
-    host: 'The Grand Ballroom', partner: true, image: '/images/venue_countryclub.jpg', vendors: 4,
-    description: 'An elegant afternoon tea celebrating the journey of motherhood.',
-    is_free: false, tickets: [
-      { type: 'General Admission', price: 55, description: 'Afternoon tea service' },
-      { type: 'VIP Table', price: 95, description: 'Private table + premium selections' },
-      { type: 'Plated Dinner Add-on', price: 40, description: 'Full plated dinner service' },
-    ],
-  },
-  {
-    id: 's6', title: 'Prenatal Yoga & Wellness Fair', date: 'Aug 25, 2026', time: '10:00 AM - 2:00 PM',
-    location: 'Los Angeles, CA', attendees: 35, maxAttendees: 50, type: 'Wellness',
-    host: 'Serenity Spa', partner: true, image: '/images/venue_spa_lounge.jpg', vendors: 8,
-    description: 'A full day of prenatal wellness, yoga, and curated vendor experiences.',
-    is_free: false, tickets: [
-      { type: 'General Admission', price: 30, description: 'Fair entry + yoga session' },
-      { type: 'Vendor Table', price: 75, description: 'Set up your vendor table' },
-      { type: 'Buffet Add-on', price: 25, description: 'Healthy buffet lunch' },
-    ],
+    id: 'suite-announcement',
+    title: 'Pregnancy Announcement Suite',
+    emoji: '✨',
+    description: 'Share your exciting news with the world in a meaningful, memorable way. Start the journey with a celebration.',
+    image: '/images/suite_announcement.jpg',
+    color: 'bg-lavender-50',
+    badge: 'Announcement',
   },
 ];
 
@@ -97,7 +87,10 @@ export default function Events() {
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setCurrentUser(user);
-    if (user) { setRsvpEmail(user.email || ''); setRsvpName(user.user_metadata?.first_name || ''); }
+    if (user) {
+      setRsvpEmail(user.email || '');
+      setRsvpName(user.user_metadata?.first_name || '');
+    }
   };
 
   const loadEvents = async () => {
@@ -135,7 +128,9 @@ export default function Events() {
     }]);
     if (error) setSubmitStatus('error');
     else {
-      setSubmitStatus('success'); setFormData(emptyForm); loadEvents();
+      setSubmitStatus('success');
+      setFormData(emptyForm);
+      loadEvents();
       setTimeout(() => { setShowCreateModal(false); setSubmitStatus('idle'); }, 2000);
     }
   };
@@ -188,35 +183,28 @@ export default function Events() {
     }
   };
 
-  const allEvents = [
-    ...staticEvents,
-    ...userEvents.map((e) => ({
-      id: e.id, title: e.title, date: e.date, time: e.time, location: e.location,
-      attendees: 0, maxAttendees: e.max_attendees || 50, type: e.type,
-      host: 'Community Member', image: '/images/gathering_large.jpg',
-      vendors: e.vendor_tables || 0, description: e.description || '',
-      is_free: e.is_free ?? true, tickets: e.tickets || [],
-      connected_account_id: e.connected_account_id,
-    })),
-  ];
-
-  const filteredEvents = activeFilter === 'All' ? allEvents : allEvents.filter(e => e.type === activeFilter);
+  const filteredEvents = activeFilter === 'All'
+    ? userEvents
+    : userEvents.filter(e => e.type === activeFilter);
 
   return (
     <div className="w-full pt-20">
 
       {/* Hero */}
       <section className="w-full py-16 lg:py-24 bg-spa-cream">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto px-6 lg:px-12 text-center">
           <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Events</span>
           <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-spa-charcoal leading-tight mt-4">
             Local <span className="text-spa-purple">celebrations.</span>
           </h1>
           <p className="mt-6 text-lg text-spa-gray leading-relaxed">
-            Discover vendor markets, brunches, workshops, and more. Free and ticketed events for every mama.
+            Choose a Celebration Suite™ below and create your own event — or browse community events already happening near you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <button onClick={() => { setCreateType('member'); setShowCreateModal(true); }} className="btn-primary">
+            <button
+              onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
+              className="btn-primary"
+            >
               <Plus size={18} /> Create an Event
             </button>
             <Link to="/join" className="btn-outline">Become a Member</Link>
@@ -224,83 +212,201 @@ export default function Events() {
         </div>
       </section>
 
-      {/* Events Grid */}
+      {/* Suite Showcase Cards */}
+      <section className="w-full py-16 lg:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="text-center mb-12">
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Celebration Suites™</span>
+            <h2 className="section-title mt-4">
+              Choose your <span className="text-spa-purple">suite.</span>
+            </h2>
+            <p className="mt-4 text-spa-gray max-w-xl mx-auto">
+              Each suite is designed for a specific milestone in your pregnancy journey. Pick one and create your event — you can add your own photo or use our default.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {suiteShowcases.map((suite) => (
+              <div key={suite.id} className="elegant-card group">
+                {/* Placeholder image area */}
+                <div className="relative aspect-[4/3] overflow-hidden bg-spa-lavender flex items-center justify-center">
+                  <img
+                    src={suite.image}
+                    alt={suite.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      // Fallback if image not found yet
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                  {/* Fallback overlay shown until real image is added */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-spa-lavender">
+                    <span className="text-5xl mb-3">{suite.emoji}</span>
+                    <span className="text-sm text-spa-purple font-medium uppercase tracking-widest">Photo Coming Soon</span>
+                  </div>
+                  <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-spa-charcoal">
+                      {suite.badge}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-6 lg:p-8">
+                  <h3 className="font-serif text-xl lg:text-2xl text-spa-charcoal mb-2">
+                    {suite.title}
+                  </h3>
+                  <p className="text-spa-gray text-sm leading-relaxed mb-6">
+                    {suite.description}
+                  </p>
+                  <button
+                    onClick={() => {
+                      setFormData({ ...emptyForm, title: suite.title });
+                      setCreateType('member');
+                      setShowCreateModal(true);
+                    }}
+                    className="btn-primary w-full justify-center"
+                  >
+                    <Sparkles size={16} /> Create This Event
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Community Events Grid */}
       <section className="w-full py-16 lg:py-20 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="text-center mb-12">
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Community Events</span>
+            <h2 className="section-title mt-4">
+              Events near <span className="text-spa-purple">you.</span>
+            </h2>
+          </div>
+
+          {/* Filters */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-10">
             <div className="relative flex-1 max-w-md">
               <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-spa-gray" />
-              <input type="text" placeholder="Search events by location..." className="w-full pl-11 pr-4 py-3 bg-white rounded-full text-spa-charcoal placeholder:text-spa-gray shadow-elegant focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
+              <input
+                type="text"
+                placeholder="Search events by location..."
+                className="w-full pl-11 pr-4 py-3 bg-white rounded-full text-spa-charcoal placeholder:text-spa-gray shadow-elegant focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+              />
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
               <Filter size={18} className="text-spa-gray flex-shrink-0" />
               {eventTypes.map((type) => (
-                <button key={type} onClick={() => setActiveFilter(type)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeFilter === type ? 'bg-spa-purple text-white' : 'bg-white text-spa-charcoal hover:bg-spa-purple/10'}`}>
+                <button
+                  key={type}
+                  onClick={() => setActiveFilter(type)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                    activeFilter === type ? 'bg-spa-purple text-white' : 'bg-white text-spa-charcoal hover:bg-spa-purple/10'
+                  }`}
+                >
                   {type}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredEvents.map((event) => {
-              const rsvpCount = attendeeCounts[String(event.id)] || 0;
-              const totalAttendees = (event.attendees || 0) + rsvpCount;
-              const minPrice = event.tickets?.length > 0 ? Math.min(...event.tickets.map((t: any) => Number(t.price))) : 0;
-              return (
-                <div key={event.id} className="elegant-card group cursor-pointer" onClick={() => { setSelectedEvent(event); setRsvpStatus('idle'); setPaymentStatus('idle'); setSelectedTickets({}); }}>
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img src={event.image} alt={event.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <div className="absolute top-4 left-4 flex gap-2">
-                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-spa-charcoal">{event.type}</span>
-                      {(event as any).partner && (
-                        <span className="px-3 py-1 bg-spa-purple rounded-full text-xs font-medium text-white flex items-center gap-1">
-                          <Star size={12} className="fill-white" /> Partner
-                        </span>
-                      )}
+          {/* Events or Empty State */}
+          {filteredEvents.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-2xl">
+              <span className="text-5xl mb-4 block">🎉</span>
+              <h3 className="font-serif text-2xl text-spa-charcoal mb-2">No events yet — be the first!</h3>
+              <p className="text-spa-gray mb-6 max-w-sm mx-auto">
+                Choose a Celebration Suite™ above and create the first event in your area.
+              </p>
+              <button
+                onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
+                className="btn-primary"
+              >
+                <Plus size={18} /> Create an Event
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredEvents.map((event) => {
+                  const rsvpCount = attendeeCounts[String(event.id)] || 0;
+                  const totalAttendees = rsvpCount;
+                  const tickets = event.tickets || [];
+                  const minPrice = tickets.length > 0 ? Math.min(...tickets.map((t: any) => Number(t.price))) : 0;
+                  return (
+                    <div
+                      key={event.id}
+                      className="elegant-card group cursor-pointer"
+                      onClick={() => {
+                        setSelectedEvent(event);
+                        setRsvpStatus('idle');
+                        setPaymentStatus('idle');
+                        setSelectedTickets({});
+                      }}
+                    >
+                      <div className="relative aspect-[4/3] overflow-hidden bg-spa-lavender">
+                        <img
+                          src={event.image || '/images/gathering_large.jpg'}
+                          alt={event.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute top-4 left-4">
+                          <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-spa-charcoal">{event.type}</span>
+                        </div>
+                        <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold ${event.is_free ? 'bg-green-500 text-white' : 'bg-spa-pink text-white'}`}>
+                          {event.is_free ? 'Free' : `From $${minPrice}`}
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <h3 className="font-serif text-xl text-spa-charcoal group-hover:text-spa-purple transition-colors">{event.title}</h3>
+                        <div className="mt-3 space-y-2">
+                          <div className="flex items-center gap-2 text-sm text-spa-gray"><Calendar size={16} className="text-spa-purple" /> {event.date} · {event.time}</div>
+                          <div className="flex items-center gap-2 text-sm text-spa-gray"><MapPin size={16} className="text-spa-purple" /> {event.location}</div>
+                          <div className="flex items-center gap-2 text-sm text-spa-gray"><Users size={16} className="text-spa-purple" /> {totalAttendees} / {event.max_attendees || 50} attending</div>
+                        </div>
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-spa-charcoal/5">
+                          <span className="text-sm text-spa-gray">Community Event</span>
+                          <button className="text-spa-purple font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all">
+                            {event.is_free ? 'Join Free' : 'Get Tickets'} <ArrowRight size={16} />
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold ${event.is_free ? 'bg-green-500 text-white' : 'bg-spa-pink text-white'}`}>
-                      {event.is_free ? 'Free' : `From $${minPrice}`}
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="font-serif text-xl text-spa-charcoal group-hover:text-spa-purple transition-colors">{event.title}</h3>
-                    <div className="mt-3 space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-spa-gray"><Calendar size={16} className="text-spa-purple" /> {event.date} · {event.time}</div>
-                      <div className="flex items-center gap-2 text-sm text-spa-gray"><MapPin size={16} className="text-spa-purple" /> {event.location}</div>
-                      <div className="flex items-center gap-2 text-sm text-spa-gray"><Users size={16} className="text-spa-purple" /> {totalAttendees} / {event.maxAttendees} attending</div>
-                    </div>
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-spa-charcoal/5">
-                      <span className="text-sm text-spa-gray">Hosted by {event.host}</span>
-                      <button className="text-spa-purple font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all">
-                        {event.is_free ? 'Join Free' : 'Get Tickets'} <ArrowRight size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="text-center mt-12">
-            <button className="btn-outline">Load More Events <ChevronDown size={18} /></button>
-          </div>
+                  );
+                })}
+              </div>
+              <div className="text-center mt-12">
+                <button className="btn-outline">Load More Events <ChevronDown size={18} /></button>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
-      {/* Create Event CTA */}
+      {/* Create Event CTA Banner */}
       <section className="w-full py-16 lg:py-20 bg-spa-purple">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="font-serif text-3xl lg:text-4xl text-white">Host your own <span className="text-spa-pink">celebration.</span></h2>
-              <p className="mt-4 text-white/70 leading-relaxed">Free or ticketed — create your event and we'll handle the payments.</p>
+              <h2 className="font-serif text-3xl lg:text-4xl text-white">
+                Host your own <span className="text-spa-pink">celebration.</span>
+              </h2>
+              <p className="mt-4 text-white/70 leading-relaxed">
+                Free or ticketed — create your event and we'll handle the rest.
+              </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button onClick={() => { setCreateType('member'); setShowCreateModal(true); }} className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors flex items-center justify-center gap-2">
+              <button
+                onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
+                className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors flex items-center justify-center gap-2"
+              >
                 <Users size={18} /> Create Member Event
               </button>
-              <button onClick={() => { setCreateType('vendor'); setShowCreateModal(true); }} className="px-6 py-3 border-2 border-white/30 text-white rounded-full font-medium hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
+              <button
+                onClick={() => { setCreateType('vendor'); setShowCreateModal(true); }}
+                className="px-6 py-3 border-2 border-white/30 text-white rounded-full font-medium hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
+              >
                 <Store size={18} /> Create Vendor Event
               </button>
             </div>
@@ -313,8 +419,15 @@ export default function Events() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="relative">
-              <img src={selectedEvent.image} alt={selectedEvent.title} className="w-full aspect-[16/7] object-cover rounded-t-2xl" />
-              <button onClick={() => setSelectedEvent(null)} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-md">
+              <img
+                src={selectedEvent.image || '/images/gathering_large.jpg'}
+                alt={selectedEvent.title}
+                className="w-full aspect-[16/7] object-cover rounded-t-2xl"
+              />
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-md"
+              >
                 <X size={18} className="text-spa-charcoal" />
               </button>
               <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold ${selectedEvent.is_free ? 'bg-green-500 text-white' : 'bg-spa-pink text-white'}`}>
@@ -327,15 +440,19 @@ export default function Events() {
               <div className="mt-4 space-y-2">
                 <div className="flex items-center gap-2 text-sm text-spa-gray"><Calendar size={16} className="text-spa-purple" /> {selectedEvent.date} · {selectedEvent.time}</div>
                 <div className="flex items-center gap-2 text-sm text-spa-gray"><MapPin size={16} className="text-spa-purple" /> {selectedEvent.location}</div>
-                <div className="flex items-center gap-2 text-sm text-spa-gray"><Users size={16} className="text-spa-purple" /> {(selectedEvent.attendees || 0) + (attendeeCounts[String(selectedEvent.id)] || 0)} / {selectedEvent.maxAttendees} attending</div>
+                <div className="flex items-center gap-2 text-sm text-spa-gray"><Users size={16} className="text-spa-purple" /> {attendeeCounts[String(selectedEvent.id)] || 0} / {selectedEvent.max_attendees || 50} attending</div>
               </div>
-              {selectedEvent.description && <p className="mt-4 text-spa-gray leading-relaxed">{selectedEvent.description}</p>}
+              {selectedEvent.description && (
+                <p className="mt-4 text-spa-gray leading-relaxed">{selectedEvent.description}</p>
+              )}
 
               <div className="mt-6 pt-6 border-t border-spa-charcoal/5">
                 {!currentUser ? (
                   <div className="text-center">
                     <p className="text-spa-gray mb-4">You need a free account to RSVP or purchase tickets.</p>
-                    <Link to="/join" onClick={() => setSelectedEvent(null)} className="btn-primary justify-center w-full">Create Free Account <ArrowRight size={18} /></Link>
+                    <Link to="/join" onClick={() => setSelectedEvent(null)} className="btn-primary justify-center w-full">
+                      Create Free Account <ArrowRight size={18} />
+                    </Link>
                   </div>
                 ) : rsvpStatus === 'success' || paymentStatus === 'success' ? (
                   <div className="text-center py-4">
@@ -347,7 +464,9 @@ export default function Events() {
                   </div>
                 ) : selectedEvent.is_free ? (
                   <form onSubmit={handleFreeRsvp} className="space-y-4">
-                    <h4 className="font-serif text-lg text-spa-charcoal flex items-center gap-2"><Ticket size={18} className="text-spa-purple" /> RSVP — Free Event</h4>
+                    <h4 className="font-serif text-lg text-spa-charcoal flex items-center gap-2">
+                      <Ticket size={18} className="text-spa-purple" /> RSVP — Free Event
+                    </h4>
                     <div>
                       <label className="block text-sm font-medium text-spa-charcoal mb-1">Your Name</label>
                       <input type="text" required value={rsvpName} onChange={e => setRsvpName(e.target.value)} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
@@ -363,7 +482,9 @@ export default function Events() {
                   </form>
                 ) : (
                   <div className="space-y-4">
-                    <h4 className="font-serif text-lg text-spa-charcoal flex items-center gap-2"><Ticket size={18} className="text-spa-purple" /> Select Tickets</h4>
+                    <h4 className="font-serif text-lg text-spa-charcoal flex items-center gap-2">
+                      <Ticket size={18} className="text-spa-purple" /> Select Tickets
+                    </h4>
                     {selectedEvent.tickets.map((ticket: any, index: number) => (
                       <div key={index} className="flex items-center justify-between p-4 bg-spa-lavender rounded-xl">
                         <div>
@@ -389,7 +510,7 @@ export default function Events() {
                           <span className="font-medium text-spa-charcoal">Total</span>
                           <span className="font-serif text-xl text-spa-purple">${getTotalPrice()}</span>
                         </div>
-                        <p className="text-xs text-spa-gray mt-1">Includes 10% Spa-Pregio® platform fee</p>
+                        <p className="text-xs text-spa-gray mt-1">Includes 10% Spa-Pregio™ platform fee</p>
                       </div>
                     )}
                     <div>
@@ -423,12 +544,22 @@ export default function Events() {
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 lg:p-8">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-serif text-2xl text-spa-charcoal">Create {createType === 'vendor' ? 'Vendor' : 'Member'} Event</h3>
-                <button onClick={() => { setShowCreateModal(false); setSubmitStatus('idle'); }} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors"><X size={18} /></button>
+                <h3 className="font-serif text-2xl text-spa-charcoal">
+                  Create {createType === 'vendor' ? 'Vendor' : 'Member'} Event
+                </h3>
+                <button
+                  onClick={() => { setShowCreateModal(false); setSubmitStatus('idle'); }}
+                  className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors"
+                >
+                  <X size={18} />
+                </button>
               </div>
+
               {submitStatus === 'success' ? (
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4"><Check size={28} className="text-spa-purple" /></div>
+                  <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4">
+                    <Check size={28} className="text-spa-purple" />
+                  </div>
                   <h4 className="font-serif text-xl text-spa-charcoal mb-2">Event Created! 🎉</h4>
                   <p className="text-spa-gray">Your event is now live on the events page.</p>
                 </div>
@@ -436,8 +567,15 @@ export default function Events() {
                 <form onSubmit={handleCreateSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Name</label>
-                    <input type="text" name="title" required value={formData.title} onChange={handleChange} placeholder="e.g., Sunset Park Meetup" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
+                    <input type="text" name="title" required value={formData.title} onChange={handleChange} placeholder="e.g., Baby Shower Suite" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                   </div>
+
+                  {/* Photo upload hint */}
+                  <div className="p-4 bg-spa-lavender rounded-xl">
+                    <p className="text-sm font-medium text-spa-charcoal mb-1">📸 Event Photo</p>
+                    <p className="text-xs text-spa-gray">A default suite photo will be used automatically. Custom photo upload coming soon!</p>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-spa-charcoal mb-1">Date</label>
@@ -448,20 +586,29 @@ export default function Events() {
                       <input type="time" name="time" required value={formData.time} onChange={handleChange} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                     </div>
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Location</label>
                     <input type="text" name="location" required value={formData.location} onChange={handleChange} placeholder="e.g., High Point, NC or Virtual" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Type</label>
                     <select name="type" value={formData.type} onChange={handleChange} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30">
-                      <option>Vendor Market</option><option>Brunch</option><option>Virtual</option><option>Workshop</option><option>Tea</option><option>Wellness</option>
+                      <option>Vendor Market</option>
+                      <option>Brunch</option>
+                      <option>Virtual</option>
+                      <option>Workshop</option>
+                      <option>Tea</option>
+                      <option>Wellness</option>
                     </select>
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Description</label>
                     <textarea rows={3} name="description" value={formData.description} onChange={handleChange} placeholder="Tell us about your event..." className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none" />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Max Attendees</label>
                     <input type="number" name="max_attendees" value={formData.max_attendees} onChange={handleChange} placeholder="50" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
@@ -473,8 +620,11 @@ export default function Events() {
                       <p className="font-medium text-spa-charcoal">Free Event</p>
                       <p className="text-xs text-spa-gray">Toggle off to add ticket pricing</p>
                     </div>
-                    <button type="button" onClick={() => setFormData({ ...formData, is_free: !formData.is_free })}
-                      className={`relative w-12 h-6 rounded-full transition-colors ${formData.is_free ? 'bg-spa-purple' : 'bg-spa-charcoal/20'}`}>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, is_free: !formData.is_free })}
+                      className={`relative w-12 h-6 rounded-full transition-colors ${formData.is_free ? 'bg-spa-purple' : 'bg-spa-charcoal/20'}`}
+                    >
                       <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${formData.is_free ? 'translate-x-7' : 'translate-x-1'}`} />
                     </button>
                   </div>
@@ -484,10 +634,14 @@ export default function Events() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <label className="text-sm font-medium text-spa-charcoal">Ticket Types</label>
-                        <button type="button" onClick={addTicket} className="text-xs text-spa-purple font-medium flex items-center gap-1"><Plus size={14} /> Add ticket type</button>
+                        <button type="button" onClick={addTicket} className="text-xs text-spa-purple font-medium flex items-center gap-1">
+                          <Plus size={14} /> Add ticket type
+                        </button>
                       </div>
                       {formData.tickets.length === 0 && (
-                        <p className="text-sm text-spa-gray text-center py-4 bg-spa-lavender rounded-xl">No ticket types yet — click "Add ticket type" above</p>
+                        <p className="text-sm text-spa-gray text-center py-4 bg-spa-lavender rounded-xl">
+                          No ticket types yet — click "Add ticket type" above
+                        </p>
                       )}
                       {formData.tickets.map((ticket, index) => (
                         <div key={index} className="bg-spa-lavender rounded-xl p-4 space-y-3">
@@ -519,11 +673,16 @@ export default function Events() {
                     </div>
                   )}
 
-                  {submitStatus === 'error' && <p className="text-red-500 text-sm">Something went wrong. Please try again.</p>}
+                  {submitStatus === 'error' && (
+                    <p className="text-red-500 text-sm">Something went wrong. Please try again.</p>
+                  )}
+
                   <button type="submit" disabled={submitStatus === 'loading'} className="btn-primary w-full justify-center mt-6 disabled:opacity-50">
                     <Plus size={18} /> {submitStatus === 'loading' ? 'Creating...' : 'Create Event'}
                   </button>
-                  <p className="text-xs text-spa-gray text-center">Spa-Pregio® takes a 10% platform fee on all paid ticket sales.</p>
+                  <p className="text-xs text-spa-gray text-center">
+                    Spa-Pregio™ takes a 10% platform fee on all paid ticket sales.
+                  </p>
                 </form>
               )}
             </div>
