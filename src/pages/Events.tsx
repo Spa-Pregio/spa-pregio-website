@@ -9,15 +9,13 @@ import {
 
 const SUPABASE_FUNCTIONS_URL = 'https://reompjeeiurwnbpbfhyj.supabase.co/functions/v1';
 
-// 5 Celebration Suite showcase cards — placeholder images to swap later
 const suiteShowcases = [
   {
     id: 'suite-baby-shower',
     title: 'Baby Shower Suite',
     emoji: '🍼',
     description: 'Celebrate the mama-to-be with a curated baby shower experience. Local vendors, beautiful décor, and community all in one place.',
-    image: '/images/suite_baby_shower.jpg',
-    color: 'bg-pink-50',
+    image: '/images/suite_baby_shower.png',
     badge: 'Baby Shower',
   },
   {
@@ -25,8 +23,7 @@ const suiteShowcases = [
     title: 'Gender Reveal Suite',
     emoji: '🎉',
     description: 'Make the big reveal unforgettable. Create a customized gender reveal event with vendors, activities, and the perfect setting.',
-    image: '/images/suite_gender_reveal.jpg',
-    color: 'bg-purple-50',
+    image: '/images/suite_gender_reveal.png',
     badge: 'Gender Reveal',
   },
   {
@@ -34,8 +31,7 @@ const suiteShowcases = [
     title: 'Sip & See Suite',
     emoji: '☕',
     description: 'Introduce your new arrival in style. A relaxed, elegant gathering for friends and family to meet the newest addition.',
-    image: '/images/suite_sip_and_see.jpg',
-    color: 'bg-amber-50',
+    image: '/images/suite_sip_and_see.png',
     badge: 'Sip & See',
   },
   {
@@ -43,8 +39,7 @@ const suiteShowcases = [
     title: 'Push Present & Pampering Suite',
     emoji: '💆‍♀️',
     description: 'Honor the mama who just did the hard work. A luxurious pampering experience she truly deserves.',
-    image: '/images/suite_push_present.jpg',
-    color: 'bg-rose-50',
+    image: '/images/suite_push_present.png',
     badge: 'Push Present',
   },
   {
@@ -52,8 +47,7 @@ const suiteShowcases = [
     title: 'Pregnancy Announcement Suite',
     emoji: '✨',
     description: 'Share your exciting news with the world in a meaningful, memorable way. Start the journey with a celebration.',
-    image: '/images/suite_announcement.jpg',
-    color: 'bg-lavender-50',
+    image: '/images/suite_announcement.png',
     badge: 'Announcement',
   },
 ];
@@ -228,29 +222,18 @@ export default function Events() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {suiteShowcases.map((suite) => (
               <div key={suite.id} className="elegant-card group">
-                {/* Placeholder image area */}
-                <div className="relative aspect-[4/3] overflow-hidden bg-spa-lavender flex items-center justify-center">
+                <div className="relative aspect-[4/3] overflow-hidden bg-spa-lavender">
                   <img
                     src={suite.image}
                     alt={suite.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    onError={(e) => {
-                      // Fallback if image not found yet
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
                   />
-                  {/* Fallback overlay shown until real image is added */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-spa-lavender">
-                    <span className="text-5xl mb-3">{suite.emoji}</span>
-                    <span className="text-sm text-spa-purple font-medium uppercase tracking-widest">Photo Coming Soon</span>
-                  </div>
                   <div className="absolute top-4 left-4">
                     <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-spa-charcoal">
                       {suite.badge}
                     </span>
                   </div>
                 </div>
-
                 <div className="p-6 lg:p-8">
                   <h3 className="font-serif text-xl lg:text-2xl text-spa-charcoal mb-2">
                     {suite.title}
@@ -285,7 +268,6 @@ export default function Events() {
             </h2>
           </div>
 
-          {/* Filters */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-10">
             <div className="relative flex-1 max-w-md">
               <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-spa-gray" />
@@ -311,7 +293,6 @@ export default function Events() {
             </div>
           </div>
 
-          {/* Events or Empty State */}
           {filteredEvents.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-2xl">
               <span className="text-5xl mb-4 block">🎉</span>
@@ -331,7 +312,6 @@ export default function Events() {
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredEvents.map((event) => {
                   const rsvpCount = attendeeCounts[String(event.id)] || 0;
-                  const totalAttendees = rsvpCount;
                   const tickets = event.tickets || [];
                   const minPrice = tickets.length > 0 ? Math.min(...tickets.map((t: any) => Number(t.price))) : 0;
                   return (
@@ -363,7 +343,7 @@ export default function Events() {
                         <div className="mt-3 space-y-2">
                           <div className="flex items-center gap-2 text-sm text-spa-gray"><Calendar size={16} className="text-spa-purple" /> {event.date} · {event.time}</div>
                           <div className="flex items-center gap-2 text-sm text-spa-gray"><MapPin size={16} className="text-spa-purple" /> {event.location}</div>
-                          <div className="flex items-center gap-2 text-sm text-spa-gray"><Users size={16} className="text-spa-purple" /> {totalAttendees} / {event.max_attendees || 50} attending</div>
+                          <div className="flex items-center gap-2 text-sm text-spa-gray"><Users size={16} className="text-spa-purple" /> {rsvpCount} / {event.max_attendees || 50} attending</div>
                         </div>
                         <div className="flex items-center justify-between mt-4 pt-4 border-t border-spa-charcoal/5">
                           <span className="text-sm text-spa-gray">Community Event</span>
@@ -445,7 +425,6 @@ export default function Events() {
               {selectedEvent.description && (
                 <p className="mt-4 text-spa-gray leading-relaxed">{selectedEvent.description}</p>
               )}
-
               <div className="mt-6 pt-6 border-t border-spa-charcoal/5">
                 {!currentUser ? (
                   <div className="text-center">
@@ -554,7 +533,6 @@ export default function Events() {
                   <X size={18} />
                 </button>
               </div>
-
               {submitStatus === 'success' ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4">
@@ -569,13 +547,10 @@ export default function Events() {
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Name</label>
                     <input type="text" name="title" required value={formData.title} onChange={handleChange} placeholder="e.g., Baby Shower Suite" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                   </div>
-
-                  {/* Photo upload hint */}
                   <div className="p-4 bg-spa-lavender rounded-xl">
                     <p className="text-sm font-medium text-spa-charcoal mb-1">📸 Event Photo</p>
                     <p className="text-xs text-spa-gray">A default suite photo will be used automatically. Custom photo upload coming soon!</p>
                   </div>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-spa-charcoal mb-1">Date</label>
@@ -586,12 +561,10 @@ export default function Events() {
                       <input type="time" name="time" required value={formData.time} onChange={handleChange} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Location</label>
                     <input type="text" name="location" required value={formData.location} onChange={handleChange} placeholder="e.g., High Point, NC or Virtual" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Type</label>
                     <select name="type" value={formData.type} onChange={handleChange} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30">
@@ -603,18 +576,14 @@ export default function Events() {
                       <option>Wellness</option>
                     </select>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Description</label>
                     <textarea rows={3} name="description" value={formData.description} onChange={handleChange} placeholder="Tell us about your event..." className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none" />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Max Attendees</label>
                     <input type="number" name="max_attendees" value={formData.max_attendees} onChange={handleChange} placeholder="50" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                   </div>
-
-                  {/* Free/Paid toggle */}
                   <div className="flex items-center justify-between p-4 bg-spa-lavender rounded-xl">
                     <div>
                       <p className="font-medium text-spa-charcoal">Free Event</p>
@@ -628,8 +597,6 @@ export default function Events() {
                       <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${formData.is_free ? 'translate-x-7' : 'translate-x-1'}`} />
                     </button>
                   </div>
-
-                  {/* Ticket builder */}
                   {!formData.is_free && (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -665,18 +632,15 @@ export default function Events() {
                       </div>
                     </div>
                   )}
-
                   {createType === 'vendor' && (
                     <div>
                       <label className="block text-sm font-medium text-spa-charcoal mb-1">Number of Vendor Tables</label>
                       <input type="number" name="vendor_tables" value={formData.vendor_tables} onChange={handleChange} placeholder="5" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                     </div>
                   )}
-
                   {submitStatus === 'error' && (
                     <p className="text-red-500 text-sm">Something went wrong. Please try again.</p>
                   )}
-
                   <button type="submit" disabled={submitStatus === 'loading'} className="btn-primary w-full justify-center mt-6 disabled:opacity-50">
                     <Plus size={18} /> {submitStatus === 'loading' ? 'Creating...' : 'Create Event'}
                   </button>
