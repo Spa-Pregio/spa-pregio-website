@@ -15,6 +15,9 @@ import FindVendors from './pages/FindVendors';
 import Ambassadors from './pages/Ambassadors';
 import VendorDashboard from './pages/VendorDashboard';
 import MommaDashboard from './pages/MommaDashboard';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Contact from './pages/Contact';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -42,6 +45,9 @@ function App() {
             <Route path="/ambassadors" element={<Ambassadors />} />
             <Route path="/vendor-dashboard" element={<VendorDashboard />} />
             <Route path="/my-account" element={<MommaDashboard />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/contact" element={<Contact />} />
           </Routes>
         </main>
         <Footer />
