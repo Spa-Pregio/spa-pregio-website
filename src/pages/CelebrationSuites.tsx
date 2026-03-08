@@ -167,19 +167,21 @@ export default function CelebrationSuites() {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* Badge side */}
-            <div className="relative flex items-center justify-center bg-spa-lavender rounded-2xl min-h-[360px]">
-              <div className="text-center p-12">
-                <div className="text-6xl mb-4">{featuredSuite.emoji}</div>
-                <div className="font-serif text-3xl text-spa-purple">{featuredSuite.name}</div>
-                <div className="text-spa-gray mt-2">{featuredSuite.subtitle}</div>
-                <div className="mt-6 w-20 h-20 rounded-full bg-spa-purple flex flex-col items-center justify-center mx-auto shadow-elegant">
-                  <span className="text-xs text-white/80">Only</span>
-                  <span className="font-bold text-2xl text-white">$27</span>
-                </div>
+            {/* Product mockup image */}
+            <div className="relative">
+              <div className="rounded-2xl overflow-hidden shadow-elegant">
+                <img
+                  src="/images/celebration_suite_mockup.png"
+                  alt="The Celebration Suite™ — Luxury Baby Shower Planning Collection"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="absolute top-4 left-4">
                 <span className="px-4 py-2 bg-spa-purple text-white rounded-full text-sm font-semibold">✨ Flagship Suite</span>
+              </div>
+              <div className="absolute -bottom-5 -right-5 w-24 h-24 rounded-full bg-white shadow-elegant flex flex-col items-center justify-center border-2 border-spa-purple/20">
+                <span className="text-xs text-spa-gray">Only</span>
+                <span className="font-bold text-2xl text-spa-purple">$27</span>
               </div>
             </div>
 
