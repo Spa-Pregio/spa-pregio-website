@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Store, MapPin, Star, Check, Search } from 'lucide-react';
+import { ArrowRight, Users, Store, MapPin, Star, Check } from 'lucide-react';
 
 const experienceCards = [
   {
@@ -58,25 +58,14 @@ export default function Home() {
               Join thousands of expectant mothers and local vendors. Connect, shop, and celebrate together in your community.
             </p>
 
-            {/* Search Bar — redirects to Find Vendors page */}
-            <div className="mt-8 relative max-w-md">
-              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-spa-gray" />
-              <input
-                type="text"
-                placeholder="Search by city or state..."
-                className="w-full pl-12 pr-4 py-4 bg-white rounded-full text-spa-charcoal placeholder:text-spa-gray shadow-elegant focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
-              />
-              <Link
-                to="/vendors"
-                className="absolute right-2 top-1/2 -translate-y-1/2 btn-primary py-2 px-4 text-sm"
-              >
-                Search
-              </Link>
-            </div>
-
+            {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <Link to="/join" className="btn-primary">
                 Become a Member — Free
+                <ArrowRight size={18} />
+              </Link>
+              <Link to="/find-vendors" className="btn-primary">
+                Find Vendors Near Me
                 <ArrowRight size={18} />
               </Link>
               <Link to="/vendors" className="btn-outline">
@@ -117,7 +106,7 @@ export default function Home() {
             {vendorTypes.map((type, index) => (
               <Link
                 key={index}
-                to="/vendors"
+                to="/find-vendors"
                 className="flex flex-col items-center p-6 bg-spa-lavender rounded-2xl hover:bg-spa-purple/10 transition-colors group"
               >
                 <type.icon size={28} className="text-spa-purple mb-3 group-hover:scale-110 transition-transform" />
