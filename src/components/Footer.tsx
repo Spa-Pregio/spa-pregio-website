@@ -29,7 +29,7 @@ export default function Footer() {
               <span className="font-serif text-2xl font-semibold tracking-tight">
                 <span className="text-spa-purple">SPA</span>
                 <span className="text-spa-gray">-</span>
-                <span className="text-spa-pink">PREGIO</span>
+                <span className="text-spa-pink">PREGIO™</span>
               </span>
               <span className="text-xs text-spa-purple/70 uppercase tracking-[0.15em]">
                 The Celebration Suite Movement
@@ -156,7 +156,7 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="mt-16 pt-8 border-t border-spa-purple/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-spa-gray">
-            © 2026 Spa-Pregio®. All rights reserved.
+            © 2026 Spa-Pregio. All rights reserved.
           </p>
           <p className="text-sm text-spa-gray flex items-center gap-1">
             Made with <Heart size={14} className="text-spa-pink fill-spa-pink" /> for expectant mothers everywhere
