@@ -1,67 +1,141 @@
-import { ArrowRight, Check, Download, Palette, FileText, Clock, Star } from 'lucide-react';
+import { ArrowRight, Check, Download, Palette, FileText, Clock, Star, Sparkles } from 'lucide-react';
 
-const activeSuite = {
-  name: 'The Celebration Suite™',
-  subtitle: 'Luxury Baby Shower Planning Collection',
-  price: 27,
-  url: 'https://payhip.com/b/4w08K',
-  image: '/images/product_blush_bloom.jpg',
-  badge: 'Available Now',
-  badgeColor: 'bg-spa-purple',
-  description: 'Elevate your celebration with a thoughtfully designed, fully editable planning system created to simplify every detail. This is not just a template — it\'s a structured experience.',
-  includes: [
-    'Minimalist Invitation Template',
-    'Lifestyle Invitation Template',
-    'RSVP Card',
-    'Baby Shower Planning Checklist',
-    'Guest Tracker',
-    'Budget Planner',
-  ],
-  for: [
-    'Expecting mothers',
-    'Hosts planning an elevated celebration',
-    'Lovers of modern, neutral aesthetics',
-    'Those who value elegance and organization',
-  ],
-};
-
-const comingSuites = [
+const suites = [
   {
-    name: 'The Milestone Suite™',
-    subtitle: 'Pregnancy Journey Keepsake Collection',
-    badge: 'Coming Soon',
-    description: 'Capture every beautiful moment from first trimester to birth — bump photos, cravings, feelings, and milestones all in one elegant keepsake.',
-    image: '/images/kit_grid_01.jpg',
+    name: 'The Celebration Suite™',
+    subtitle: 'Luxury Baby Shower Planning Collection',
+    price: 27,
+    url: 'https://payhip.com/b/4w08K',
+    badge: 'Flagship Suite',
+    badgeColor: 'bg-spa-purple',
+    featured: true,
+    description: 'The original. The one that started it all. A fully editable luxury planning system that takes the stress out of celebrating and puts the joy back in. This is not just a template — it\'s a structured experience.',
+    includes: [
+      'Minimalist Invitation Template',
+      'Lifestyle Invitation Template',
+      'RSVP Card',
+      'Baby Shower Planning Checklist',
+      'Guest Tracker',
+      'Budget Planner',
+    ],
+    emoji: '✨',
   },
   {
-    name: 'The Push Party Suite™',
-    subtitle: 'Co-Ed Celebration Planning Collection',
-    badge: 'Coming Soon',
-    description: 'The modern baby shower isn\'t just for the girls. This suite helps you plan an elevated co-ed celebration that everyone will love.',
-    image: '/images/kit_grid_02.jpg',
+    name: 'The Baby Shower Suite™',
+    subtitle: 'Complete Baby Shower Planning Collection',
+    price: 27,
+    url: 'https://payhip.com/b/lZ6WG',
+    badge: 'Available Now',
+    badgeColor: 'bg-spa-purple',
+    featured: false,
+    description: 'She deserves a shower as beautiful as the journey she\'s on. From the first invitation to the last gift unwrapped — every detail covered so the only thing left to do is celebrate.',
+    includes: [
+      'Customizable Invitation & RSVP Card',
+      'Planning Timeline',
+      'Complete Celebration Checklist',
+      'Guest Tracker & RSVP Organizer',
+      'Budget Planner',
+      'Vendor Selection Guide',
+      'Theme & Decor Inspiration',
+      'Keepsake & Memory Pages',
+    ],
+    emoji: '🛁',
   },
   {
-    name: 'The Spa Day Suite™',
-    subtitle: 'Prenatal Pampering Experience Guide',
-    badge: 'Coming Soon',
-    description: 'A complete guide to planning the ultimate prenatal spa experience — at home or with your favorite local vendors.',
-    image: '/images/spa_bright.jpg',
+    name: 'The Gender Reveal Suite™',
+    subtitle: 'Complete Gender Reveal Planning Collection',
+    price: 27,
+    url: 'https://payhip.com/b/jLSWB',
+    badge: 'Available Now',
+    badgeColor: 'bg-spa-purple',
+    featured: false,
+    description: 'Build the suspense. Capture the joy. Make it unforgettable. Your complete planning companion for the moment that changes everything.',
+    includes: [
+      'Customizable Invitation & RSVP Card',
+      'Step-by-Step Planning Timeline',
+      'Complete Reveal Checklist',
+      'Guest Tracker & RSVP Organizer',
+      'Budget Planner',
+      'Vendor Selection Guide',
+      'Theme & Decor Inspiration',
+      'Keepsake & Memory Pages',
+    ],
+    emoji: '🎀',
   },
   {
-    name: 'The Village Suite™',
-    subtitle: 'Postpartum Support Planning Collection',
-    badge: 'Coming Soon',
-    description: 'Because the celebration doesn\'t end at birth. Help your community show up for the new mama in the weeks and months that follow.',
-    image: '/images/connect_bright.jpg',
+    name: 'The Announcement Suite™',
+    subtitle: 'Pregnancy Announcement Planning Collection',
+    price: 27,
+    url: 'https://payhip.com/b/j6hfL',
+    badge: 'Available Now',
+    badgeColor: 'bg-spa-purple',
+    featured: false,
+    description: 'You have the most beautiful secret in the world — and you\'re ready to share it. Plan every detail of your reveal with intention, from telling family first to crafting the post that stops everyone\'s scroll.',
+    includes: [
+      'Welcome Guide & How to Use',
+      'Planning Timeline',
+      'Complete Announcement Checklist',
+      'Budget Tracker',
+      'Vendor Selection Guide',
+      'Theme & Photo Inspiration',
+      'Contact & Reaction Tracker',
+      'Keepsake Pages + Letter to Baby',
+    ],
+    emoji: '📣',
+  },
+  {
+    name: 'The Push Present & Pampering Suite™',
+    subtitle: 'Mama Celebration & Gifting Collection',
+    price: 27,
+    url: 'https://payhip.com/b/Ldkxz',
+    badge: 'Available Now',
+    badgeColor: 'bg-spa-purple',
+    featured: false,
+    description: 'She carried life. She showed up with everything she had. Now it\'s time to honor her. The only planning guide designed specifically for celebrating the mama.',
+    includes: [
+      'Gifting Timeline Through Postpartum',
+      'Push Present Planning Checklist',
+      'Pampering Experience Planner',
+      'Home Self-Care Setup Guide',
+      'Budget Planner',
+      'Vendor Selection Guide',
+      'Spa & Wellness Inspiration',
+      'Keepsake Pages + Love Letter to Herself',
+    ],
+    emoji: '💜',
+  },
+  {
+    name: 'The Sip & See Suite™',
+    subtitle: 'Baby Welcome Gathering Collection',
+    price: 27,
+    url: 'https://payhip.com/b/WbdBP',
+    badge: 'Available Now',
+    badgeColor: 'bg-spa-purple',
+    featured: false,
+    description: 'Baby is here. The world is ready to meet them. Your complete planning guide for a gathering that feels as soft, warm, and beautiful as the moment itself.',
+    includes: [
+      'Customizable Invitation & RSVP Card',
+      'Planning Timeline After Baby Arrives',
+      'Complete Celebration Checklist',
+      'Guest Tracker & RSVP Organizer',
+      'Budget Planner',
+      'Vendor Selection Guide',
+      'Theme & Decor Inspiration',
+      'Keepsake Pages + Letter to Baby',
+    ],
+    emoji: '🌸',
   },
 ];
 
 const howItWorks = [
   { icon: Download, step: '01', title: 'Purchase & Download', desc: 'Complete your purchase and instantly receive your digital access file.' },
-  { icon: Palette, step: '02', title: 'Open in Canva', desc: 'Click the secure Canva template link. A free Canva account works perfectly.' },
-  { icon: FileText, step: '03', title: 'Personalize', desc: 'Add your event details, colors, and personal touches. No design experience needed.' },
-  { icon: Clock, step: '04', title: 'Download & Share', desc: 'Export as PDF or PNG and share with your guests or send to print.' },
+  { icon: Palette, step: '02', title: 'Open & Personalize', desc: 'Fill in your event details digitally or print and complete by hand. No design experience needed.' },
+  { icon: FileText, step: '03', title: 'Print or Share', desc: 'Export as PDF, print at home, or use digitally on any device.' },
+  { icon: Clock, step: '04', title: 'Celebrate', desc: 'You\'re fully prepared. Now enjoy every moment of the celebration.' },
 ];
+
+const featuredSuite = suites[0];
+const remainingSuites = suites.slice(1);
 
 export default function CelebrationSuites() {
   return (
@@ -70,53 +144,57 @@ export default function CelebrationSuites() {
       {/* Hero */}
       <section className="w-full py-16 lg:py-24 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center">
-          <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Celebration Suites</span>
+          <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">The Celebration Suite Movement™</span>
           <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-spa-charcoal leading-tight mt-4">
             Every mama deserves an <span className="text-spa-purple">elevated</span> celebration.
           </h1>
           <p className="mt-6 text-lg text-spa-gray leading-relaxed max-w-2xl mx-auto">
-            Thoughtfully designed planning collections that take the stress out of celebrating. Beautiful, editable, and made with love for the mama in your life.
+            Six thoughtfully designed planning collections — one for every milestone on the journey to motherhood. Beautiful, editable, and made with love.
           </p>
+          <div className="mt-6 inline-flex items-center gap-2 bg-spa-lavender px-5 py-2 rounded-full">
+            <Sparkles size={14} className="text-spa-purple" />
+            <span className="text-sm text-spa-purple font-medium">All suites $27 · Digital Download · Instant Access</span>
+          </div>
         </div>
       </section>
 
-      {/* Featured Suite */}
+      {/* Flagship Suite */}
       <section className="w-full py-16 lg:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-12">
-            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Featured Suite</span>
-            <h2 className="section-title mt-4">Start here. <span className="text-spa-purple">Celebrate now.</span></h2>
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Where It All Began</span>
+            <h2 className="section-title mt-4">The <span className="text-spa-purple">Flagship Suite.</span></h2>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* Image */}
-            <div className="relative">
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-elegant">
-                <img src={activeSuite.image} alt={activeSuite.name} className="w-full h-full object-cover" />
+            {/* Badge side */}
+            <div className="relative flex items-center justify-center bg-spa-lavender rounded-2xl min-h-[360px]">
+              <div className="text-center p-12">
+                <div className="text-6xl mb-4">{featuredSuite.emoji}</div>
+                <div className="font-serif text-3xl text-spa-purple">{featuredSuite.name}</div>
+                <div className="text-spa-gray mt-2">{featuredSuite.subtitle}</div>
+                <div className="mt-6 w-20 h-20 rounded-full bg-spa-purple flex flex-col items-center justify-center mx-auto shadow-elegant">
+                  <span className="text-xs text-white/80">Only</span>
+                  <span className="font-bold text-2xl text-white">$27</span>
+                </div>
               </div>
               <div className="absolute top-4 left-4">
-                <span className="px-4 py-2 bg-spa-purple text-white rounded-full text-sm font-semibold">✨ Available Now</span>
-              </div>
-              {/* Price badge */}
-              <div className="absolute -bottom-5 -right-5 w-24 h-24 rounded-full bg-white shadow-elegant flex flex-col items-center justify-center border-2 border-spa-purple/20">
-                <span className="text-xs text-spa-gray">Only</span>
-                <span className="font-bold text-2xl text-spa-purple">$27</span>
+                <span className="px-4 py-2 bg-spa-purple text-white rounded-full text-sm font-semibold">✨ Flagship Suite</span>
               </div>
             </div>
 
             {/* Details */}
             <div>
-              <h3 className="font-serif text-3xl text-spa-charcoal">{activeSuite.name}</h3>
-              <p className="text-spa-purple font-medium mt-1">{activeSuite.subtitle}</p>
-              <p className="text-spa-gray leading-relaxed mt-4">{activeSuite.description}</p>
+              <h3 className="font-serif text-3xl text-spa-charcoal">{featuredSuite.name}</h3>
+              <p className="text-spa-purple font-medium mt-1">{featuredSuite.subtitle}</p>
+              <p className="text-spa-gray leading-relaxed mt-4">{featuredSuite.description}</p>
 
-              {/* What's included */}
               <div className="mt-8">
                 <p className="font-semibold text-spa-charcoal mb-4">✨ What's Included:</p>
                 <ul className="space-y-2">
-                  {activeSuite.includes.map((item) => (
+                  {featuredSuite.includes.map((item) => (
                     <li key={item} className="flex items-center gap-3 text-spa-gray">
-                      <Check size={16} className="text-green-500 flex-shrink-0" />
+                      <Check size={16} className="text-spa-purple flex-shrink-0" />
                       {item}
                     </li>
                   ))}
@@ -126,14 +204,13 @@ export default function CelebrationSuites() {
               <div className="mt-6 p-4 bg-spa-lavender rounded-xl">
                 <p className="text-xs text-spa-gray flex items-center gap-2">
                   <Star size={13} className="text-amber-400 fill-amber-400" />
-                  All templates are fully editable in Canva. A free Canva account works perfectly.
+                  Digital download. Print at home or complete digitally. No design experience needed.
                 </p>
               </div>
 
-              {/* CTA */}
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
                 <a
-                  href={activeSuite.url}
+                  href={featuredSuite.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-primary justify-center text-center"
@@ -142,7 +219,7 @@ export default function CelebrationSuites() {
                   <ArrowRight size={18} />
                 </a>
               </div>
-              <p className="text-xs text-spa-gray mt-3">Digital download. Instant access. No design experience needed.</p>
+              <p className="text-xs text-spa-gray mt-3">Instant access. Download immediately after purchase.</p>
             </div>
           </div>
         </div>
@@ -173,49 +250,116 @@ export default function CelebrationSuites() {
         </div>
       </section>
 
-      {/* Coming Soon Suites */}
+      {/* Full Suite Collection */}
       <section className="w-full py-16 lg:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-4">
-            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">The Collection</span>
-            <h2 className="section-title mt-4">More suites <span className="text-spa-purple">coming soon.</span></h2>
-            <p className="text-spa-gray mt-4 max-w-xl mx-auto">We're building out the full Celebration Suite collection — five milestone experiences for every stage of the journey.</p>
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">The Full Collection</span>
+            <h2 className="section-title mt-4">Five suites. <span className="text-spa-purple">Every milestone.</span></h2>
+            <p className="text-spa-gray mt-4 max-w-xl mx-auto">From the moment you share the news to the day the world meets your baby — there's a suite for every step of the journey.</p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
-            {comingSuites.map((suite) => (
-              <div key={suite.name} className="elegant-card group overflow-hidden opacity-80">
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <img src={suite.image} alt={suite.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-                  <div className="absolute inset-0 bg-spa-charcoal/40" />
-                  <div className="absolute top-3 left-3">
-                    <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white rounded-full text-xs font-medium">Coming Soon</span>
-                  </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+            {remainingSuites.map((suite) => (
+              <div key={suite.name} className="elegant-card group flex flex-col">
+                {/* Card header */}
+                <div className="bg-spa-lavender rounded-t-2xl p-8 text-center">
+                  <div className="text-4xl mb-3">{suite.emoji}</div>
+                  <span className="px-3 py-1 bg-spa-purple text-white rounded-full text-xs font-medium">
+                    {suite.badge}
+                  </span>
+                  <h3 className="font-serif text-xl text-spa-charcoal mt-4">{suite.name}</h3>
+                  <p className="text-spa-purple text-xs font-medium mt-1">{suite.subtitle}</p>
                 </div>
-                <div className="p-5">
-                  <h3 className="font-serif text-lg text-spa-charcoal">{suite.name}</h3>
-                  <p className="text-spa-purple text-xs font-medium mt-0.5">{suite.subtitle}</p>
-                  <p className="text-sm text-spa-gray mt-2 leading-relaxed">{suite.description}</p>
+
+                {/* Card body */}
+                <div className="p-6 flex flex-col flex-1">
+                  <p className="text-sm text-spa-gray leading-relaxed">{suite.description}</p>
+
+                  <div className="mt-5 space-y-1.5 flex-1">
+                    {suite.includes.slice(0, 5).map((item) => (
+                      <div key={item} className="flex items-center gap-2 text-xs text-spa-gray">
+                        <Check size={13} className="text-spa-purple flex-shrink-0" />
+                        {item}
+                      </div>
+                    ))}
+                    {suite.includes.length > 5 && (
+                      <div className="text-xs text-spa-purple font-medium pl-5">
+                        + {suite.includes.length - 5} more included
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Price + CTA */}
+                  <div className="mt-6 pt-5 border-t border-spa-lavender">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-xs text-spa-gray">Digital Download</span>
+                      <span className="font-bold text-2xl text-spa-purple">$27</span>
+                    </div>
+                    <a
+                      href={suite.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full btn-primary justify-center text-center text-sm py-3"
+                    >
+                      Get This Suite — $27
+                      <ArrowRight size={16} />
+                    </a>
+                    <p className="text-xs text-spa-gray text-center mt-2">Instant access after purchase</p>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Notify me */}
-          <div className="mt-16 bg-spa-lavender rounded-2xl p-8 lg:p-12 text-center">
-            <h3 className="font-serif text-2xl text-spa-charcoal">Be the first to know.</h3>
-            <p className="text-spa-gray mt-2 max-w-md mx-auto">Join our list and get notified when new Celebration Suites drop — plus exclusive early access pricing.</p>
-            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mt-6">
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="flex-1 px-4 py-3 bg-white rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
-              />
-              <button className="btn-primary whitespace-nowrap">
-                Notify Me
-              </button>
+      {/* Bundle callout */}
+      <section className="w-full py-16 lg:py-20 bg-spa-cream">
+        <div className="max-w-4xl mx-auto px-6 lg:px-12">
+          <div className="bg-spa-lavender rounded-2xl p-8 lg:p-12 text-center">
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">The Complete Journey</span>
+            <h3 className="font-serif text-2xl lg:text-3xl text-spa-charcoal mt-4">
+              Want to give her <span className="text-spa-purple">everything?</span>
+            </h3>
+            <p className="text-spa-gray mt-4 max-w-xl mx-auto leading-relaxed">
+              Each suite is $27 on its own — or gift her the full Celebration Suite Movement™ collection and cover every milestone from announcement to baby's first hello.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="https://payhip.com/SpaPregio"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary justify-center"
+              >
+                Shop All Suites
+                <ArrowRight size={18} />
+              </a>
             </div>
+            <p className="text-xs text-spa-gray mt-4">All suites $27 each · Digital download · Instant access · Print at home</p>
           </div>
+        </div>
+      </section>
+
+      {/* Suite Sisters CTA */}
+      <section className="w-full py-16 lg:py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
+          <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Suite Sisters™</span>
+          <h3 className="font-serif text-2xl lg:text-3xl text-spa-charcoal mt-4">
+            Love these suites? <span className="text-spa-purple">Share them and earn.</span>
+          </h3>
+          <p className="text-spa-gray mt-4 max-w-xl mx-auto leading-relaxed">
+            Join the Suite Sisters™ affiliate program and earn 30% commission on every suite you share. Beautiful products that practically sell themselves.
+          </p>
+          <a
+            href="https://payhip.com/auth/register/af699c7e55b3f58"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 mt-8 btn-primary justify-center"
+          >
+            Become a Suite Sister™
+            <ArrowRight size={18} />
+          </a>
         </div>
       </section>
 
@@ -223,20 +367,31 @@ export default function CelebrationSuites() {
       <section className="w-full py-16 lg:py-20 bg-spa-purple">
         <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
           <h2 className="font-serif text-3xl lg:text-4xl text-white">
-            Ready to celebrate <span className="text-spa-pink">her?</span>
+            Ready to celebrate <span className="italic">her?</span>
           </h2>
           <p className="mt-4 text-white/70 leading-relaxed">
-            The Celebration Suite™ is everything you need to plan a beautiful, elevated baby shower — all for $27.
+            Six suites. Every milestone. One movement built for the mama in your life.
           </p>
-          <a
-            href="https://payhip.com/b/4w08K"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-white text-spa-purple px-8 py-4 rounded-full font-semibold hover:bg-spa-cream transition-colors mt-8"
-          >
-            Get The Celebration Suite™ — $27
-            <ArrowRight size={18} />
-          </a>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+            <a
+              href="https://payhip.com/b/4w08K"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white text-spa-purple px-8 py-4 rounded-full font-semibold hover:bg-spa-cream transition-colors"
+            >
+              Get The Celebration Suite™ — $27
+              <ArrowRight size={18} />
+            </a>
+            <a
+              href="https://payhip.com/SpaPregio"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white/10 text-white px-8 py-4 rounded-full font-semibold hover:bg-white/20 transition-colors border border-white/30"
+            >
+              Shop All Suites
+              <ArrowRight size={18} />
+            </a>
+          </div>
         </div>
       </section>
 
