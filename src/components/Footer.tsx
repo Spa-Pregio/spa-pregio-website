@@ -11,9 +11,9 @@ const footerLinks = {
     { name: 'Become an Ambassador', href: '/ambassadors' },
   ],
   support: [
-    { name: 'Contact', href: '/about' },
-    { name: 'Privacy', href: '#' },
-    { name: 'Terms', href: '#' },
+    { name: 'Contact', href: '/contact' },
+    { name: 'Privacy', href: '/privacy' },
+    { name: 'Terms', href: '/terms' },
   ],
 };
 
