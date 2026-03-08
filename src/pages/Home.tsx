@@ -72,22 +72,6 @@ export default function Home() {
                 List Your Business
               </Link>
             </div>
-
-            {/* Trust Badges */}
-            <div className="flex flex-wrap items-center gap-6 mt-10">
-              <div className="flex items-center gap-2">
-                <Users size={18} className="text-spa-purple" />
-                <span className="text-sm text-spa-gray">12,000+ members</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Store size={18} className="text-spa-purple" />
-                <span className="text-sm text-spa-gray">800+ local vendors</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin size={18} className="text-spa-purple" />
-                <span className="text-sm text-spa-gray">500+ cities</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
