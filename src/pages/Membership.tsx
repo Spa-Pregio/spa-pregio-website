@@ -109,7 +109,6 @@ export default function Membership() {
 
   return (
     <div className="w-full pt-20">
-      {/* Hero Section */}
       <section className="w-full py-16 lg:py-24 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center max-w-3xl mx-auto">
@@ -124,7 +123,6 @@ export default function Membership() {
         </div>
       </section>
 
-      {/* Benefits Section */}
       <section className="w-full py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-16">
@@ -149,11 +147,9 @@ export default function Membership() {
         </div>
       </section>
 
-      {/* Signup/Login Section */}
       <section className="w-full py-16 lg:py-20 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Form */}
             <div className="bg-white rounded-2xl p-8 lg:p-10 shadow-elegant">
               <div className="flex gap-4 mb-8">
                 <button
@@ -304,7 +300,10 @@ export default function Membership() {
                   <div className="flex items-start gap-2">
                     <input type="checkbox" required className="mt-1 rounded border-spa-charcoal/20" />
                     <span className="text-sm text-spa-gray">
-                      I agree to the <a href="#" className="text-spa-purple hover:underline">Terms of Service</a> and <a href="#" className="text-spa-purple hover:underline">Privacy Policy</a>
+                      I agree to the{' '}
+                      <a href="/terms" className="text-spa-purple hover:underline">Terms of Service</a>
+                      {' '}and{' '}
+                      <a href="/privacy" className="text-spa-purple hover:underline">Privacy Policy</a>
                     </span>
                   </div>
 
@@ -326,7 +325,6 @@ export default function Membership() {
               )}
             </div>
 
-            {/* Testimonials */}
             <div>
               <h2 className="font-serif text-3xl lg:text-4xl text-spa-charcoal mb-6">
                 Why mothers love <span className="text-spa-purple">Spa-Pregio.</span>
@@ -365,7 +363,6 @@ export default function Membership() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="w-full py-16 lg:py-20 bg-spa-purple">
         <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
           <h2 className="font-serif text-3xl lg:text-4xl text-white">
