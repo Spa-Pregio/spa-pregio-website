@@ -8,7 +8,7 @@ export default function Privacy() {
           <h1 className="font-serif text-4xl md:text-5xl font-semibold text-spa-charcoal mb-4">
             Privacy Policy
           </h1>
-          <p className="text-spa-gray">Last updated: June 1, 2026</p>
+          <p className="text-spa-gray">Last updated: March 8, 2026</p>
         </div>
       </section>
 
@@ -18,7 +18,7 @@ export default function Privacy() {
 
           <div className="bg-white rounded-2xl p-8 border border-spa-purple/10">
             <p className="text-spa-gray leading-relaxed">
-              At Spa-Pregio®, your privacy matters deeply to us. This Privacy Policy explains what
+              At Spa-Pregio, your privacy matters deeply to us. This Privacy Policy explains what
               information we collect, how we use it, and how we protect it. By using our website
               or purchasing our products, you agree to the practices described here.
             </p>
@@ -95,7 +95,7 @@ export default function Privacy() {
 
           <PolicySection title="5. Children's Privacy">
             <p>
-              Spa-Pregio® is not directed to children under the age of 13. We do not knowingly
+              Spa-Pregio is not directed to children under the age of 13. We do not knowingly
               collect personal information from minors. If you believe a child has provided us
               with personal data, please contact us immediately.
             </p>

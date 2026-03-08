@@ -8,7 +8,7 @@ export default function Terms() {
           <h1 className="font-serif text-4xl md:text-5xl font-semibold text-spa-charcoal mb-4">
             Terms of Service
           </h1>
-          <p className="text-spa-gray">Last updated: June 1, 2026</p>
+          <p className="text-spa-gray">Last updated: March 8, 2026</p>
         </div>
       </section>
 
@@ -18,7 +18,7 @@ export default function Terms() {
 
           <div className="bg-white rounded-2xl p-8 border border-spa-purple/10">
             <p className="text-spa-gray leading-relaxed">
-              Welcome to Spa-Pregio®. By accessing this website or purchasing any of our
+              Welcome to Spa-Pregio. By accessing this website or purchasing any of our
               products, you agree to be bound by these Terms of Service. Please read them
               carefully. If you do not agree, please do not use our site or services.
             </p>
@@ -29,13 +29,13 @@ export default function Terms() {
               This website is intended for personal, non-commercial use. You agree not to
               misuse, copy, or exploit any content on this site for unauthorized purposes.
               All content — including text, images, graphics, and product materials — is the
-              property of Spa-Pregio® and protected by applicable intellectual property laws.
+              property of Spa-Pregio and protected by applicable intellectual property laws.
             </p>
           </TermsSection>
 
           <TermsSection title="2. Digital Products">
             <p>
-              All products sold through Spa-Pregio® are <strong>digital downloads</strong>.
+              All products sold through Spa-Pregio are <strong>digital downloads</strong>.
               Upon purchase, you will receive access to your product via Payhip.
             </p>
             <ul className="list-disc pl-5 space-y-2 mt-3">
@@ -47,7 +47,7 @@ export default function Terms() {
               <li>
                 <strong>Personal use only</strong> — Products are licensed for your personal
                 use and may not be resold, redistributed, or shared without written permission
-                from Spa-Pregio®.
+                from Spa-Pregio.
               </li>
               <li>
                 <strong>Access</strong> — You will receive a download link via email through
@@ -59,38 +59,38 @@ export default function Terms() {
           <TermsSection title="3. Suite Sisters™ Affiliate Program">
             <p>
               The Suite Sisters™ program allows approved ambassadors to earn commission by
-              referring customers to Spa-Pregio® products. By joining the program, you agree to:
+              referring customers to Spa-Pregio products. By joining the program, you agree to:
             </p>
             <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li>Represent Spa-Pregio® honestly and in alignment with our brand values</li>
+              <li>Represent Spa-Pregio honestly and in alignment with our brand values</li>
               <li>Not use misleading, deceptive, or spammy promotional tactics</li>
               <li>
                 Understand that commission rates and program terms may be updated with
                 reasonable notice
               </li>
               <li>
-                Acknowledge that Spa-Pregio® reserves the right to remove any affiliate from
+                Acknowledge that Spa-Pregio reserves the right to remove any affiliate from
                 the program for violations of these terms
               </li>
             </ul>
             <p className="mt-3">
-              Commission payments are processed through Payhip's affiliate system. Spa-Pregio®
+              Commission payments are processed through Payhip's affiliate system. Spa-Pregio
               is not responsible for delays caused by Payhip's payout schedule.
             </p>
           </TermsSection>
 
           <TermsSection title="4. Intellectual Property">
             <p>
-              The Spa-Pregio® name and logo are registered trademarks. The "Celebration Suite
+              The Spa-Pregio name and logo are registered trademarks. The "Celebration Suite
               Movement," "Suite Sisters™," and all associated branding are proprietary to
-              Spa-Pregio®. Unauthorized use of our trademarks or brand assets is strictly
+              Spa-Pregio. Unauthorized use of our trademarks or brand assets is strictly
               prohibited.
             </p>
           </TermsSection>
 
           <TermsSection title="5. Disclaimer of Warranties">
             <p>
-              Our products and website are provided "as is." Spa-Pregio® makes no warranties,
+              Our products and website are provided "as is." Spa-Pregio makes no warranties,
               expressed or implied, regarding the completeness, accuracy, or fitness for a
               particular purpose of any product or content. Use of our products is at your
               own discretion.
@@ -99,7 +99,7 @@ export default function Terms() {
 
           <TermsSection title="6. Limitation of Liability">
             <p>
-              To the fullest extent permitted by law, Spa-Pregio® shall not be liable for any
+              To the fullest extent permitted by law, Spa-Pregio shall not be liable for any
               indirect, incidental, or consequential damages arising from your use of this
               website or our digital products.
             </p>

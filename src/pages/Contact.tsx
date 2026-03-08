@@ -65,7 +65,7 @@ export default function Contact() {
             </div>
             <div>
               <p className="text-xs uppercase tracking-widest text-spa-purple mb-1">Facebook</p>
-              <p className="font-serif text-xl text-spa-charcoal">Spa-Pregio®</p>
+              <p className="font-serif text-xl text-spa-charcoal">Spa-Pregio</p>
               <p className="text-sm text-spa-gray mt-1">Follow us for updates and celebrations.</p>
             </div>
           </a>
