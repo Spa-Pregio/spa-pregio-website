@@ -33,7 +33,7 @@ const pricingTiers = [
     cta: 'Get Started',
     popular: false,
     badge: 'Founding Member Rate',
-    stripeLink: 'https://buy.stripe.com/test_8x23cwgC8d987N79Fx2go00',
+    stripeLink: 'https://buy.stripe.com/8x23cwgC8d987N79Fx2go00',
     eventAccess: 'Up to 2 events/month',
   },
   {
@@ -53,7 +53,7 @@ const pricingTiers = [
     cta: 'Become a Partner',
     popular: true,
     badge: 'Most Popular',
-    stripeLink: 'https://buy.stripe.com/test_9B6cN6adKfhg5EZ7xp2go01',
+    stripeLink: 'https://buy.stripe.com/9B6cN6adKfhg5EZ7xp2go01',
     eventAccess: 'Up to 5 events/month',
   },
   {
@@ -73,7 +73,7 @@ const pricingTiers = [
     cta: 'Contact Sales',
     popular: false,
     badge: 'Unlimited Events',
-    stripeLink: 'https://buy.stripe.com/test_8x24gA71y0mm6J304X2go02',
+    stripeLink: 'https://buy.stripe.com/8x24gA71y0mm6J304X2go02',
     eventAccess: 'Unlimited events',
   },
 ];
@@ -185,7 +185,6 @@ export default function ForVendors() {
             </p>
           </div>
 
-          {/* Event access callout */}
           <div className="bg-spa-purple/10 border border-spa-purple/20 rounded-2xl p-4 max-w-2xl mx-auto mb-12 text-center">
             <p className="text-spa-purple text-sm font-medium">
               🎉 All plans include event access — Enterprise members get <strong>unlimited</strong> events to showcase their products!
@@ -204,12 +203,9 @@ export default function ForVendors() {
                   <span className={`font-serif text-4xl ${tier.popular ? 'text-white' : 'text-spa-charcoal'}`}>${tier.price}</span>
                   <span className={`text-sm ${tier.popular ? 'text-white/70' : 'text-spa-gray'}`}>/{tier.period}</span>
                 </div>
-
-                {/* Event access badge */}
                 <div className={`mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${tier.popular ? 'bg-white/20 text-white' : 'bg-spa-purple/10 text-spa-purple'}`}>
                   <Store size={12} /> {tier.eventAccess}
                 </div>
-
                 <ul className="mt-6 space-y-3">
                   {tier.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-3">
@@ -236,7 +232,7 @@ export default function ForVendors() {
           <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Early Opportunity</span>
           <h2 className="section-title mt-4">Be the first vendor <span className="text-spa-purple">in your city.</span></h2>
           <p className="mt-4 text-spa-gray leading-relaxed max-w-2xl mx-auto">
-            Spa-Pregio® is growing fast. Early vendors get premium placement, founding member rates, and first access to every mama searching in their area. The sooner you list, the bigger your head start.
+            Spa-Pregio is growing fast. Early vendors get premium placement, founding member rates, and first access to every mama searching in their area. The sooner you list, the bigger your head start.
           </p>
           <div className="grid sm:grid-cols-3 gap-6 mt-10">
             {[
@@ -318,7 +314,6 @@ export default function ForVendors() {
                 <X size={18} />
               </button>
             </div>
-
             <div className="bg-spa-lavender rounded-2xl p-6 mb-6">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-serif text-xl text-spa-charcoal">{selectedTier.name}</h4>
@@ -329,11 +324,9 @@ export default function ForVendors() {
                 <Store size={14} /> {selectedTier.eventAccess}
               </div>
             </div>
-
             <p className="text-sm text-spa-gray mb-6 text-center">
               You'll be taken to Stripe's secure checkout to complete your subscription. Cancel anytime.
             </p>
-
             <div className="flex gap-3">
               <button onClick={() => setShowConfirmModal(false)} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">
                 Go Back
