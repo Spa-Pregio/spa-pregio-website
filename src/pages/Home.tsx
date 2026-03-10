@@ -2,42 +2,40 @@ import { Link } from "react-router-dom";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#fdf9f6] font-sans">
+    <div className="min-h-screen bg-spa-cream font-sans">
 
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#fdf4ee] via-[#fdf9f6] to-[#f0ebe6] py-24 px-6 text-center">
-        {/* Decorative blobs */}
-        <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#e8d5c4] opacity-30 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 -right-16 w-80 h-80 rounded-full bg-[#d4c5b5] opacity-20 blur-3xl" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-spa-lavender via-spa-cream to-spa-blush py-24 px-6 text-center">
+        <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-spa-pink opacity-20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 -right-16 w-80 h-80 rounded-full bg-spa-purple opacity-10 blur-3xl" />
 
         <div className="relative max-w-3xl mx-auto">
-          <span className="inline-block mb-4 text-xs tracking-[0.25em] uppercase text-[#9e7e65] font-semibold">
+          <span className="inline-block mb-4 text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
             The Celebration Suite Movement™
           </span>
           <h1
-            className="text-5xl md:text-6xl font-bold text-[#3b2a1e] leading-tight mb-6"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="text-5xl md:text-6xl font-bold text-spa-charcoal leading-tight mb-6 font-serif"
           >
-            Elevated Pregnancy Celebrations,{" "}
-            <span className="italic text-[#9e7e65]">Designed With Intention</span>
+            Elevated Pregnancy Celebrations,
+            <br />
+            <span className="italic text-spa-purple">Designed With Intention</span>
           </h1>
-          <p className="text-lg text-[#6b5044] max-w-xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg text-spa-gray max-w-xl mx-auto mb-10 leading-relaxed">
             Spa-Pregio™ Celebration Suites help families create beautiful,
             spa-inspired gatherings for every milestone — from baby showers to
             sip-and-sees and beyond.
           </p>
 
-          {/* DUAL CTA — immediately signals two audiences */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/suites"
-              className="px-8 py-4 rounded-full bg-[#9e7e65] text-white text-sm font-semibold tracking-wide shadow-md hover:bg-[#7d6250] transition-colors"
+              className="px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold tracking-wide shadow-elegant hover:bg-[#7d5fa0] transition-colors"
             >
               🌸 I'm Celebrating a Momma
             </Link>
             <Link
               to="/vendors"
-              className="px-8 py-4 rounded-full border-2 border-[#9e7e65] text-[#9e7e65] text-sm font-semibold tracking-wide hover:bg-[#9e7e65] hover:text-white transition-colors"
+              className="px-8 py-4 rounded-full border-2 border-spa-purple text-spa-purple text-sm font-semibold tracking-wide hover:bg-spa-purple hover:text-white transition-colors"
             >
               💼 I'm a Vendor / Partner
             </Link>
@@ -45,35 +43,32 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── TWO PATHS — crystal-clear audience split ── */}
+      {/* ── TWO PATHS ── */}
       <section className="py-16 px-6 bg-white">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
 
           {/* Momma path */}
-          <div className="rounded-3xl bg-[#fdf4ee] p-10 flex flex-col">
+          <div className="rounded-3xl bg-spa-blush p-10 flex flex-col">
             <div className="text-4xl mb-4">🌸</div>
-            <h2
-              className="text-2xl font-bold text-[#3b2a1e] mb-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
+            <h2 className="text-2xl font-bold text-spa-charcoal mb-3 font-serif">
               For Moms & Hosts
             </h2>
-            <p className="text-[#6b5044] leading-relaxed mb-6 flex-1">
+            <p className="text-spa-gray leading-relaxed mb-6 flex-1">
               Planning a baby shower, gender reveal, sip-and-see, or push
               present? Our digital Celebration Suites give you everything you
               need to host a meaningful, spa-inspired gathering — starting at{" "}
-              <strong>$27</strong>.
+              <strong className="text-spa-charcoal">$27</strong>.
             </p>
             <div className="flex flex-col gap-3">
               <Link
                 to="/suites"
-                className="text-center px-6 py-3 rounded-full bg-[#9e7e65] text-white text-sm font-semibold hover:bg-[#7d6250] transition-colors"
+                className="text-center px-6 py-3 rounded-full bg-spa-purple text-white text-sm font-semibold hover:bg-[#7d5fa0] transition-colors"
               >
                 Explore Celebration Suites
               </Link>
               <Link
                 to="/memberships"
-                className="text-center px-6 py-3 rounded-full border border-[#9e7e65] text-[#9e7e65] text-sm font-semibold hover:bg-[#fdf4ee] transition-colors"
+                className="text-center px-6 py-3 rounded-full border border-spa-purple text-spa-purple text-sm font-semibold hover:bg-spa-blush transition-colors"
               >
                 Join the Community
               </Link>
@@ -81,15 +76,12 @@ export default function Home() {
           </div>
 
           {/* Vendor path */}
-          <div className="rounded-3xl bg-[#f0ebe6] p-10 flex flex-col">
+          <div className="rounded-3xl bg-spa-light p-10 flex flex-col">
             <div className="text-4xl mb-4">💼</div>
-            <h2
-              className="text-2xl font-bold text-[#3b2a1e] mb-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
+            <h2 className="text-2xl font-bold text-spa-charcoal mb-3 font-serif">
               For Vendors & Partners
             </h2>
-            <p className="text-[#6b5044] leading-relaxed mb-6 flex-1">
+            <p className="text-spa-gray leading-relaxed mb-6 flex-1">
               Are you a doula, photographer, wellness pro, beauty professional,
               or event venue? Connect with hosts who are actively planning
               Spa-Pregio™ gatherings in your community.
@@ -97,13 +89,13 @@ export default function Home() {
             <div className="flex flex-col gap-3">
               <Link
                 to="/vendors"
-                className="text-center px-6 py-3 rounded-full bg-[#3b2a1e] text-white text-sm font-semibold hover:bg-[#5a3e2e] transition-colors"
+                className="text-center px-6 py-3 rounded-full bg-spa-charcoal text-white text-sm font-semibold hover:bg-[#555] transition-colors"
               >
                 Become a Vendor Partner
               </Link>
               <Link
                 to="/ambassadors"
-                className="text-center px-6 py-3 rounded-full border border-[#3b2a1e] text-[#3b2a1e] text-sm font-semibold hover:bg-[#f0ebe6] transition-colors"
+                className="text-center px-6 py-3 rounded-full border border-spa-charcoal text-spa-charcoal text-sm font-semibold hover:bg-spa-light transition-colors"
               >
                 Become a Suite Sister™
               </Link>
@@ -113,23 +105,20 @@ export default function Home() {
       </section>
 
       {/* ── WHAT IS SPA-PREGIO ── */}
-      <section className="py-20 px-6 bg-[#fdf9f6]">
+      <section className="py-20 px-6 bg-spa-lavender">
         <div className="max-w-3xl mx-auto text-center">
-          <span className="text-xs tracking-[0.25em] uppercase text-[#9e7e65] font-semibold">
+          <span className="text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
             Our Story
           </span>
-          <h2
-            className="text-4xl font-bold text-[#3b2a1e] mt-3 mb-6"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-          >
+          <h2 className="text-4xl font-bold text-spa-charcoal mt-3 mb-6 font-serif">
             A New Way to Celebrate Motherhood
           </h2>
-          <p className="text-[#6b5044] leading-relaxed text-lg mb-4">
+          <p className="text-spa-gray leading-relaxed text-lg mb-4">
             Spa-Pregio™ is a trademarked celebration concept that blends the joy
             of pregnancy gatherings with the calm, nurturing atmosphere of a spa
             experience.
           </p>
-          <p className="text-[#6b5044] leading-relaxed mb-8">
+          <p className="text-spa-gray leading-relaxed mb-8">
             Our Celebration Suites are beautifully designed digital planning
             kits that guide hosts through creating gatherings filled with
             meaningful connection, thoughtful details, and supportive community —
@@ -137,7 +126,7 @@ export default function Home() {
           </p>
           <Link
             to="/about"
-            className="inline-block px-8 py-3 rounded-full border-2 border-[#9e7e65] text-[#9e7e65] text-sm font-semibold hover:bg-[#9e7e65] hover:text-white transition-colors"
+            className="inline-block px-8 py-3 rounded-full border-2 border-spa-purple text-spa-purple text-sm font-semibold hover:bg-spa-purple hover:text-white transition-colors"
           >
             Meet the Founder
           </Link>
@@ -148,13 +137,10 @@ export default function Home() {
       <section className="py-20 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <span className="text-xs tracking-[0.25em] uppercase text-[#9e7e65] font-semibold">
+            <span className="text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
               Simple by Design
             </span>
-            <h2
-              className="text-4xl font-bold text-[#3b2a1e] mt-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
+            <h2 className="text-4xl font-bold text-spa-charcoal mt-3 font-serif">
               How Spa-Pregio Works
             </h2>
           </div>
@@ -177,21 +163,18 @@ export default function Home() {
               },
             ].map(({ step, title, desc }) => (
               <div key={step} className="text-center px-4">
-                <div
-                  className="text-6xl font-bold text-[#e8d5c4] mb-4 leading-none"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-                >
+                <div className="text-6xl font-bold text-spa-pink mb-4 leading-none font-serif">
                   {step}
                 </div>
-                <h3 className="text-lg font-bold text-[#3b2a1e] mb-3">{title}</h3>
-                <p className="text-[#6b5044] leading-relaxed text-sm">{desc}</p>
+                <h3 className="text-lg font-bold text-spa-charcoal mb-3">{title}</h3>
+                <p className="text-spa-gray leading-relaxed text-sm">{desc}</p>
               </div>
             ))}
           </div>
           <div className="text-center mt-12">
             <Link
               to="/suites"
-              className="inline-block px-8 py-4 rounded-full bg-[#9e7e65] text-white text-sm font-semibold shadow-md hover:bg-[#7d6250] transition-colors"
+              className="inline-block px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold shadow-elegant hover:bg-[#7d5fa0] transition-colors"
             >
               Browse Celebration Suites — Starting at $27
             </Link>
@@ -200,18 +183,15 @@ export default function Home() {
       </section>
 
       {/* ── HOSTING SPACES ── */}
-      <section className="py-20 px-6 bg-[#fdf4ee]">
+      <section className="py-20 px-6 bg-spa-blush">
         <div className="max-w-4xl mx-auto text-center">
-          <span className="text-xs tracking-[0.25em] uppercase text-[#9e7e65] font-semibold">
+          <span className="text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
             Gather Anywhere
           </span>
-          <h2
-            className="text-4xl font-bold text-[#3b2a1e] mt-3 mb-6"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-          >
+          <h2 className="text-4xl font-bold text-spa-charcoal mt-3 mb-6 font-serif">
             Host a Spa-Pregio Gathering
           </h2>
-          <p className="text-[#6b5044] mb-10 leading-relaxed">
+          <p className="text-spa-gray mb-10 leading-relaxed">
             Spa-Pregio events can take place in many types of spaces — from cozy
             homes to beautiful venues.
           </p>
@@ -220,7 +200,7 @@ export default function Home() {
               (space) => (
                 <span
                   key={space}
-                  className="px-5 py-2 rounded-full bg-white border border-[#d4c5b5] text-[#6b5044] text-sm font-medium"
+                  className="px-5 py-2 rounded-full bg-white border border-spa-pink text-spa-charcoal text-sm font-medium"
                 >
                   {space}
                 </span>
@@ -229,7 +209,7 @@ export default function Home() {
           </div>
           <Link
             to="/suites"
-            className="inline-block px-8 py-3 rounded-full bg-[#9e7e65] text-white text-sm font-semibold hover:bg-[#7d6250] transition-colors"
+            className="inline-block px-8 py-3 rounded-full bg-spa-purple text-white text-sm font-semibold hover:bg-[#7d5fa0] transition-colors"
           >
             Start Planning Your Gathering
           </Link>
@@ -237,18 +217,15 @@ export default function Home() {
       </section>
 
       {/* ── VENDOR PARTNERS ── */}
-      <section className="py-20 px-6 bg-[#3b2a1e]">
+      <section className="py-20 px-6 bg-spa-charcoal">
         <div className="max-w-4xl mx-auto text-center">
-          <span className="text-xs tracking-[0.25em] uppercase text-[#c4a882] font-semibold">
+          <span className="text-xs tracking-[0.25em] uppercase text-spa-pink font-semibold">
             Vendor Network
           </span>
-          <h2
-            className="text-4xl font-bold text-white mt-3 mb-6"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-          >
+          <h2 className="text-4xl font-bold text-white mt-3 mb-6 font-serif">
             Partner With Spa-Pregio™
           </h2>
-          <p className="text-[#c4a882] leading-relaxed mb-10 max-w-xl mx-auto">
+          <p className="text-spa-light leading-relaxed mb-10 max-w-xl mx-auto">
             We welcome vendors who support mothers and growing families —
             chiropractors, doulas, photographers, wellness practitioners,
             maternity boutiques, beauty professionals, and event venues.
@@ -256,13 +233,13 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/vendors"
-              className="px-8 py-4 rounded-full bg-[#9e7e65] text-white text-sm font-semibold hover:bg-[#c4a882] transition-colors"
+              className="px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold hover:bg-[#7d5fa0] transition-colors"
             >
               Become a Vendor Partner
             </Link>
             <Link
               to="/ambassadors"
-              className="px-8 py-4 rounded-full border-2 border-[#c4a882] text-[#c4a882] text-sm font-semibold hover:bg-[#c4a882] hover:text-[#3b2a1e] transition-colors"
+              className="px-8 py-4 rounded-full border-2 border-spa-pink text-spa-pink text-sm font-semibold hover:bg-spa-pink hover:text-spa-charcoal transition-colors"
             >
               Become a Suite Sister™
             </Link>
@@ -274,13 +251,10 @@ export default function Home() {
       <section className="py-20 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <span className="text-xs tracking-[0.25em] uppercase text-[#9e7e65] font-semibold">
+            <span className="text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
               Questions
             </span>
-            <h2
-              className="text-4xl font-bold text-[#3b2a1e] mt-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
+            <h2 className="text-4xl font-bold text-spa-charcoal mt-3 font-serif">
               Frequently Asked Questions
             </h2>
           </div>
@@ -307,9 +281,9 @@ export default function Home() {
                 a: "Digital suites are available anywhere in the US. Vendor participation and local events will expand as the community grows.",
               },
             ].map(({ q, a }) => (
-              <div key={q} className="border-b border-[#e8d5c4] pb-6">
-                <h3 className="font-bold text-[#3b2a1e] mb-2">{q}</h3>
-                <p className="text-[#6b5044] leading-relaxed text-sm">{a}</p>
+              <div key={q} className="border-b border-spa-light pb-6">
+                <h3 className="font-bold text-spa-charcoal mb-2">{q}</h3>
+                <p className="text-spa-gray leading-relaxed text-sm">{a}</p>
               </div>
             ))}
           </div>
@@ -317,15 +291,12 @@ export default function Home() {
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section className="py-24 px-6 bg-gradient-to-br from-[#fdf4ee] to-[#f0ebe6] text-center">
+      <section className="py-24 px-6 bg-gradient-to-br from-spa-lavender to-spa-blush text-center">
         <div className="max-w-2xl mx-auto">
-          <h2
-            className="text-4xl font-bold text-[#3b2a1e] mb-4"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-          >
+          <h2 className="text-4xl font-bold text-spa-charcoal mb-4 font-serif">
             Celebrate Motherhood With Intention
           </h2>
-          <p className="text-[#6b5044] mb-10 leading-relaxed">
+          <p className="text-spa-gray mb-10 leading-relaxed">
             Whether you're planning a gathering or looking to support mothers in
             your community, Spa-Pregio™ offers a new way to celebrate life's
             most meaningful milestones.
@@ -333,13 +304,13 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/suites"
-              className="px-8 py-4 rounded-full bg-[#9e7e65] text-white text-sm font-semibold shadow-md hover:bg-[#7d6250] transition-colors"
+              className="px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold shadow-elegant hover:bg-[#7d5fa0] transition-colors"
             >
               Explore Celebration Suites
             </Link>
             <Link
               to="/memberships"
-              className="px-8 py-4 rounded-full border-2 border-[#9e7e65] text-[#9e7e65] text-sm font-semibold hover:bg-[#9e7e65] hover:text-white transition-colors"
+              className="px-8 py-4 rounded-full border-2 border-spa-purple text-spa-purple text-sm font-semibold hover:bg-spa-purple hover:text-white transition-colors"
             >
               Join the Community
             </Link>
