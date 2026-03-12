@@ -1,6 +1,44 @@
-import { Mail, Instagram, Facebook } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Mail, Instagram, Facebook, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import emailjs from '@emailjs/browser';
+
+const SERVICE_ID = 'service_lmaajah';
+const TEMPLATE_ID = 'template_ifdr09o';
+const PUBLIC_KEY = 'IP7wMswqLXmcMy-K5';
 
 export default function Contact() {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [formData, setFormData] = useState({ from_name: '', email: '', message: '' });
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!formData.from_name || !formData.email || !formData.message) return;
+    setStatus('sending');
+    try {
+      await emailjs.send(
+        SERVICE_ID,
+        TEMPLATE_ID,
+        {
+          from_name: formData.from_name,
+          from_email: formData.email,
+          email: formData.email,
+          message: formData.message,
+        },
+        PUBLIC_KEY
+      );
+      setStatus('success');
+      setFormData({ from_name: '', email: '', message: '' });
+    } catch (err) {
+      console.error(err);
+      setStatus('error');
+    }
+  };
+
   return (
     <main className="min-h-screen bg-spa-cream">
       {/* Hero */}
@@ -17,9 +55,101 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Contact Cards */}
+      {/* Contact Form */}
       <section className="py-16 px-6">
         <div className="max-w-2xl mx-auto space-y-6">
+
+          {/* Contact Form Card */}
+          <div className="bg-white rounded-2xl p-8 border border-spa-purple/10 shadow-sm">
+            <p className="text-xs uppercase tracking-widest text-spa-purple mb-1">Send a Message</p>
+            <h2 className="font-serif text-2xl text-spa-charcoal mb-6">We'll get back to you within 1–2 business days.</h2>
+
+            {status === 'success' ? (
+              <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
+                <CheckCircle size={40} className="text-green-500" />
+                <p className="font-serif text-xl text-spa-charcoal">Message Received!</p>
+                <p className="text-spa-gray text-sm">Thank you for reaching out. We'll be in touch soon. 💜</p>
+                <button
+                  onClick={() => setStatus('idle')}
+                  className="mt-4 text-xs uppercase tracking-widest text-spa-purple underline underline-offset-4"
+                >
+                  Send another message
+                </button>
+              </div>
+            ) : (
+              <div ref={formRef as any} className="space-y-5">
+                {/* Name */}
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-spa-purple mb-2">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    name="from_name"
+                    value={formData.from_name}
+                    onChange={handleChange}
+                    placeholder="e.g. Jessica Williams"
+                    className="w-full px-4 py-3 rounded-xl border border-spa-purple/20 bg-spa-cream text-spa-charcoal placeholder-spa-gray/50 focus:outline-none focus:border-spa-purple/50 transition-colors duration-200 text-sm"
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-spa-purple mb-2">
+                    Your Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="e.g. jessica@email.com"
+                    className="w-full px-4 py-3 rounded-xl border border-spa-purple/20 bg-spa-cream text-spa-charcoal placeholder-spa-gray/50 focus:outline-none focus:border-spa-purple/50 transition-colors duration-200 text-sm"
+                  />
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-spa-purple mb-2">
+                    Message
+                  </label>
+                  <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder="Tell us how we can help..."
+                    rows={5}
+                    className="w-full px-4 py-3 rounded-xl border border-spa-purple/20 bg-spa-cream text-spa-charcoal placeholder-spa-gray/50 focus:outline-none focus:border-spa-purple/50 transition-colors duration-200 text-sm resize-none"
+                  />
+                </div>
+
+                {status === 'error' && (
+                  <div className="flex items-center gap-2 text-red-500 text-sm">
+                    <AlertCircle size={16} />
+                    <span>Something went wrong. Please try again or email us directly.</span>
+                  </div>
+                )}
+
+                <button
+                  onClick={handleSubmit}
+                  disabled={status === 'sending' || !formData.from_name || !formData.email || !formData.message}
+                  className="w-full flex items-center justify-center gap-2 bg-spa-purple text-white py-4 rounded-xl font-medium tracking-wide hover:bg-spa-purple/90 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {status === 'sending' ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send size={16} />
+                      Send Message
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Email */}
           <a
@@ -30,7 +160,7 @@ export default function Contact() {
               <Mail size={22} className="text-spa-charcoal group-hover:text-white transition-colors duration-200" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-widest text-spa-purple mb-1">Email Us</p>
+              <p className="text-xs uppercase tracking-widest text-spa-purple mb-1">Email Us Directly</p>
               <p className="font-serif text-xl text-spa-charcoal">support@spa-pregio.com</p>
               <p className="text-sm text-spa-gray mt-1">We typically respond within 1–2 business days.</p>
             </div>
