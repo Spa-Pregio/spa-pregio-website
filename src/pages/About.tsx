@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Heart, Users, Sparkles, Mail, MapPin } from 'lucide-react';
+import emailjs from '@emailjs/browser';
+
+const SERVICE_ID = 'service_lmaajah';
+const TEMPLATE_ID = 'template_ifdr09o';
+const PUBLIC_KEY = 'IP7wMswqLXmcMy-K5';
 
 const values = [
   { icon: Heart, title: 'Celebration is Sacred', desc: 'Every pregnancy — first or fifth — deserves to be honored. We believe the world needs more joy, more gathering, and more intentional celebration of the women bringing life into it.' },
@@ -9,29 +14,32 @@ const values = [
 ];
 
 export default function About() {
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus('sending');
-
-    const form = e.currentTarget;
-    const data = new FormData(form);
-
     try {
-      const response = await fetch('https://formspree.io/f/xaqpwggd', {
-        method: 'POST',
-        body: data,
-        headers: { Accept: 'application/json' },
-      });
-
-      if (response.ok) {
-        setStatus('success');
-        form.reset();
-      } else {
-        setStatus('error');
-      }
-    } catch {
+      await emailjs.send(
+        SERVICE_ID,
+        TEMPLATE_ID,
+        {
+          from_name: `${formData.firstName} ${formData.lastName}`.trim(),
+          from_email: formData.email,
+          email: formData.email,
+          message: formData.message,
+        },
+        PUBLIC_KEY
+      );
+      setStatus('success');
+      setFormData({ firstName: '', lastName: '', email: '', message: '' });
+    } catch (err) {
+      console.error(err);
       setStatus('error');
     }
   };
@@ -218,6 +226,8 @@ export default function About() {
                   <input
                     type="text"
                     name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
                     required
                     className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                   />
@@ -227,6 +237,8 @@ export default function About() {
                   <input
                     type="text"
                     name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
                     className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                   />
                 </div>
@@ -236,6 +248,8 @@ export default function About() {
                 <input
                   type="email"
                   name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                   className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                 />
@@ -245,13 +259,15 @@ export default function About() {
                 <textarea
                   rows={4}
                   name="message"
+                  value={formData.message}
+                  onChange={handleChange}
                   required
                   className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none"
                 />
               </div>
 
               {status === 'success' && (
-                <p className="text-green-600 text-sm font-medium">✅ Message sent! We'll be in touch soon.</p>
+                <p className="text-green-600 text-sm font-medium">✅ Message sent! We'll be in touch soon. 💜</p>
               )}
               {status === 'error' && (
                 <p className="text-red-500 text-sm font-medium">Something went wrong. Please try again or email us directly.</p>
@@ -280,7 +296,7 @@ export default function About() {
             Free membership. A community of mamas who celebrate each other. Local vendors who show up for you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <Link to="/membership" className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center justify-center gap-2">
+            <Link to="/memberships" className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center justify-center gap-2">
               Become a Member — Free
               <ArrowRight size={18} />
             </Link>
