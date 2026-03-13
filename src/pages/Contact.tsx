@@ -1,13 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Mail, Instagram, Facebook, Send, CheckCircle, AlertCircle } from 'lucide-react';
-import emailjs from '@emailjs/browser';
 
-const SERVICE_ID = 'service_lmaajah';
-const TEMPLATE_ID = 'template_ifdr09o';
-const PUBLIC_KEY = 'IP7wMswqLXmcMy-K5';
+const FORMSPREE_URL = 'https://formspree.io/f/xaqpwggd';
 
 export default function Contact() {
-  const formRef = useRef<HTMLFormElement>(null);
   const [formData, setFormData] = useState({ from_name: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
@@ -15,26 +11,27 @@ export default function Contact() {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e: React.MouseEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formData.from_name || !formData.email || !formData.message) return;
     setStatus('sending');
     try {
-      await emailjs.send(
-        SERVICE_ID,
-        TEMPLATE_ID,
-        {
-          from_name: formData.from_name,
-          from_email: formData.email,
+      const response = await fetch(FORMSPREE_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          name: formData.from_name,
           email: formData.email,
           message: formData.message,
-        },
-        PUBLIC_KEY
-      );
-      setStatus('success');
-      setFormData({ from_name: '', email: '', message: '' });
-    } catch (err) {
-      console.error(err);
+        }),
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      });
+      if (response.ok) {
+        setStatus('success');
+        setFormData({ from_name: '', email: '', message: '' });
+      } else {
+        setStatus('error');
+      }
+    } catch {
       setStatus('error');
     }
   };
@@ -77,7 +74,7 @@ export default function Contact() {
                 </button>
               </div>
             ) : (
-              <div ref={formRef as any} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Name */}
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-spa-purple mb-2">
@@ -131,7 +128,7 @@ export default function Contact() {
                 )}
 
                 <button
-                  onClick={handleSubmit}
+                  type="submit"
                   disabled={status === 'sending' || !formData.from_name || !formData.email || !formData.message}
                   className="w-full flex items-center justify-center gap-2 bg-spa-purple text-white py-4 rounded-xl font-medium tracking-wide hover:bg-spa-purple/90 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -147,7 +144,7 @@ export default function Contact() {
                     </>
                   )}
                 </button>
-              </div>
+              </form>
             )}
           </div>
 
