@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Mail, Instagram, Facebook, Send, CheckCircle, AlertCircle } from 'lucide-react';
 
-const FORMSPREE_URL = 'https://formspree.io/f/xaqpwggd';
+const WEB3FORMS_URL = 'https://api.web3forms.com/submit';
+const ACCESS_KEY = '8a7fd579-fb85-441e-a3e8-40a96c2ca782';
 
 export default function Contact() {
   const [formData, setFormData] = useState({ from_name: '', email: '', message: '' });
@@ -16,9 +17,10 @@ export default function Contact() {
     if (!formData.from_name || !formData.email || !formData.message) return;
     setStatus('sending');
     try {
-      const response = await fetch(FORMSPREE_URL, {
+      const response = await fetch(WEB3FORMS_URL, {
         method: 'POST',
         body: JSON.stringify({
+          access_key: ACCESS_KEY,
           name: formData.from_name,
           email: formData.email,
           message: formData.message,

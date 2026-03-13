@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Heart, Users, Sparkles, Mail, MapPin } from 'lucide-react';
 
-const FORMSPREE_URL = 'https://formspree.io/f/xaqpwggd';
+const WEB3FORMS_URL = 'https://api.web3forms.com/submit';
+const ACCESS_KEY = '8a7fd579-fb85-441e-a3e8-40a96c2ca782';
 
 const values = [
   { icon: Heart, title: 'Celebration is Sacred', desc: 'Every pregnancy — first or fifth — deserves to be honored. We believe the world needs more joy, more gathering, and more intentional celebration of the women bringing life into it.' },
@@ -18,13 +19,19 @@ export default function About() {
     setStatus('sending');
 
     const form = e.currentTarget;
-    const data = new FormData(form);
+    const formData = new FormData(form);
 
     try {
-      const response = await fetch(FORMSPREE_URL, {
+      const response = await fetch(WEB3FORMS_URL, {
         method: 'POST',
-        body: data,
-        headers: { Accept: 'application/json' },
+        body: JSON.stringify({
+          access_key: ACCESS_KEY,
+          firstName: formData.get('firstName'),
+          lastName: formData.get('lastName'),
+          email: formData.get('email'),
+          message: formData.get('message'),
+        }),
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       });
 
       if (response.ok) {
