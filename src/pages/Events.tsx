@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import {
   MapPin, Calendar, Users, Plus, Search, Filter,
   ChevronDown, ArrowRight, Store, X, Check,
-  Ticket, Utensils, DollarSign, AlertCircle, Sparkles
+  Ticket, Utensils, DollarSign, AlertCircle, Sparkles,
+  Upload, ImageIcon
 } from 'lucide-react';
 
 const SUPABASE_FUNCTIONS_URL = 'https://reompjeeiurwnbpbfhyj.supabase.co/functions/v1';
+const SUPABASE_STORAGE_URL = 'https://reompjeeiurwnbpbfhyj.supabase.co/storage/v1/object/public/event-images';
 
 const suiteShowcases = [
   {
@@ -76,6 +78,12 @@ export default function Events() {
   const [selectedTickets, setSelectedTickets] = useState<Record<number, number>>({});
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
+  // Photo upload state
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => { loadEvents(); checkUser(); }, []);
 
   const checkUser = async () => {
@@ -102,6 +110,33 @@ export default function Events() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const clearPhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const uploadPhoto = async (): Promise<string | null> => {
+    if (!photoFile) return null;
+    setPhotoUploading(true);
+    const ext = photoFile.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from('event-images').upload(fileName, photoFile, {
+      cacheControl: '3600',
+      upsert: false,
+    });
+    setPhotoUploading(false);
+    if (error) { console.error('Upload error:', error); return null; }
+    return `${SUPABASE_STORAGE_URL}/${fileName}`;
+  };
+
   const addTicket = () => setFormData({ ...formData, tickets: [...formData.tickets, { type: 'General Admission', price: '', description: '' }] });
   const updateTicket = (i: number, field: string, value: string) => {
     const t = [...formData.tickets]; t[i] = { ...t[i], [field]: value }; setFormData({ ...formData, tickets: t });
@@ -111,6 +146,13 @@ export default function Events() {
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitStatus('loading');
+
+    // Upload photo first if one was selected
+    let imageUrl: string | null = null;
+    if (photoFile) {
+      imageUrl = await uploadPhoto();
+    }
+
     const { error } = await supabase.from('events').insert([{
       title: formData.title, date: formData.date, time: formData.time,
       location: formData.location, type: formData.type, description: formData.description,
@@ -119,11 +161,13 @@ export default function Events() {
       special_offer: formData.special_offer, event_kind: createType,
       is_free: formData.is_free, tickets: formData.is_free ? [] : formData.tickets,
       connected_account_id: formData.connected_account_id || null,
+      image: imageUrl,
     }]);
     if (error) setSubmitStatus('error');
     else {
       setSubmitStatus('success');
       setFormData(emptyForm);
+      clearPhoto();
       loadEvents();
       setTimeout(() => { setShowCreateModal(false); setSubmitStatus('idle'); }, 2000);
     }
@@ -527,7 +571,7 @@ export default function Events() {
                   Create {createType === 'vendor' ? 'Vendor' : 'Member'} Event
                 </h3>
                 <button
-                  onClick={() => { setShowCreateModal(false); setSubmitStatus('idle'); }}
+                  onClick={() => { setShowCreateModal(false); setSubmitStatus('idle'); clearPhoto(); }}
                   className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors"
                 >
                   <X size={18} />
@@ -547,10 +591,52 @@ export default function Events() {
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Name</label>
                     <input type="text" name="title" required value={formData.title} onChange={handleChange} placeholder="e.g., Baby Shower Suite" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                   </div>
-                  <div className="p-4 bg-spa-lavender rounded-xl">
-                    <p className="text-sm font-medium text-spa-charcoal mb-1">📸 Event Photo</p>
-                    <p className="text-xs text-spa-gray">A default suite photo will be used automatically. Custom photo upload coming soon!</p>
+
+                  {/* Photo Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Photo</label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      className="hidden"
+                    />
+                    {photoPreview ? (
+                      <div className="relative rounded-xl overflow-hidden aspect-[16/7]">
+                        <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={clearPhoto}
+                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center text-spa-charcoal hover:text-red-500 transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                        <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/40 rounded-lg">
+                          <p className="text-white text-xs">Custom photo selected ✓</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full p-6 border-2 border-dashed border-spa-purple/20 rounded-xl bg-spa-lavender hover:border-spa-purple/40 transition-colors flex flex-col items-center gap-2 text-center"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-spa-purple/10 flex items-center justify-center">
+                          <ImageIcon size={20} className="text-spa-purple" />
+                        </div>
+                        <p className="text-sm font-medium text-spa-charcoal">Upload a photo</p>
+                        <p className="text-xs text-spa-gray">JPG, PNG or WEBP · Max 50MB</p>
+                        <span className="mt-1 inline-flex items-center gap-1 text-xs text-spa-purple font-medium">
+                          <Upload size={12} /> Choose file
+                        </span>
+                      </button>
+                    )}
+                    {!photoPreview && (
+                      <p className="text-xs text-spa-gray mt-1">No photo? A default suite photo will be used automatically.</p>
+                    )}
                   </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-spa-charcoal mb-1">Date</label>
@@ -641,8 +727,8 @@ export default function Events() {
                   {submitStatus === 'error' && (
                     <p className="text-red-500 text-sm">Something went wrong. Please try again.</p>
                   )}
-                  <button type="submit" disabled={submitStatus === 'loading'} className="btn-primary w-full justify-center mt-6 disabled:opacity-50">
-                    <Plus size={18} /> {submitStatus === 'loading' ? 'Creating...' : 'Create Event'}
+                  <button type="submit" disabled={submitStatus === 'loading' || photoUploading} className="btn-primary w-full justify-center mt-6 disabled:opacity-50">
+                    <Plus size={18} /> {photoUploading ? 'Uploading photo...' : submitStatus === 'loading' ? 'Creating...' : 'Create Event'}
                   </button>
                   <p className="text-xs text-spa-gray text-center">
                     Spa-Pregio™ takes a 10% platform fee on all paid ticket sales.
