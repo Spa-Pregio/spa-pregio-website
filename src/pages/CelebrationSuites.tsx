@@ -6,37 +6,48 @@ const SuiteIllustrations: Record<string, () => React.ReactElement> = {
   'The Baby Shower Suite™': () => (
     <svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       <rect width="280" height="180" fill="#F5EEF8" />
-      {/* Soft background circle */}
-      <circle cx="140" cy="90" r="70" fill="#EDD9F0" opacity="0.5" />
-      {/* Large peony bloom center */}
-      <ellipse cx="140" cy="85" rx="28" ry="26" fill="#D09AC6" opacity="0.9" />
-      <ellipse cx="140" cy="85" rx="20" ry="18" fill="#C87BB8" opacity="0.8" />
-      <ellipse cx="140" cy="85" rx="12" ry="11" fill="#B85FAA" opacity="0.7" />
-      {/* Petals outer ring */}
-      <ellipse cx="113" cy="72" rx="14" ry="10" fill="#D09AC6" opacity="0.7" transform="rotate(-30 113 72)" />
-      <ellipse cx="167" cy="72" rx="14" ry="10" fill="#D09AC6" opacity="0.7" transform="rotate(30 167 72)" />
-      <ellipse cx="112" cy="100" rx="14" ry="10" fill="#D09AC6" opacity="0.7" transform="rotate(30 112 100)" />
-      <ellipse cx="168" cy="100" rx="14" ry="10" fill="#D09AC6" opacity="0.7" transform="rotate(-30 168 100)" />
-      <ellipse cx="140" cy="58" rx="14" ry="10" fill="#D09AC6" opacity="0.7" />
-      <ellipse cx="140" cy="112" rx="14" ry="10" fill="#D09AC6" opacity="0.7" />
-      {/* Leaves */}
-      <ellipse cx="100" cy="110" rx="18" ry="8" fill="#9B7CB6" opacity="0.4" transform="rotate(-45 100 110)" />
-      <ellipse cx="180" cy="110" rx="18" ry="8" fill="#9B7CB6" opacity="0.4" transform="rotate(45 180 110)" />
-      <ellipse cx="95" cy="75" rx="14" ry="6" fill="#9B7CB6" opacity="0.35" transform="rotate(-60 95 75)" />
-      <ellipse cx="185" cy="75" rx="14" ry="6" fill="#9B7CB6" opacity="0.35" transform="rotate(60 185 75)" />
-      {/* Small accent blooms */}
-      <circle cx="82" cy="90" r="10" fill="#EDD9F0" opacity="0.8" />
-      <circle cx="82" cy="90" r="6" fill="#D09AC6" opacity="0.7" />
-      <circle cx="198" cy="90" r="10" fill="#EDD9F0" opacity="0.8" />
-      <circle cx="198" cy="90" r="6" fill="#D09AC6" opacity="0.7" />
-      {/* Decorative dots */}
-      <circle cx="65" cy="60" r="3" fill="#9B7CB6" opacity="0.4" />
-      <circle cx="215" cy="60" r="3" fill="#9B7CB6" opacity="0.4" />
-      <circle cx="70" cy="125" r="2" fill="#D09AC6" opacity="0.5" />
-      <circle cx="210" cy="125" r="2" fill="#D09AC6" opacity="0.5" />
-      {/* Bottom ribbon */}
-      <path d="M100 155 Q140 145 180 155" stroke="#9B7CB6" strokeWidth="1.5" fill="none" opacity="0.5" />
-      <path d="M115 158 Q140 150 165 158" stroke="#D09AC6" strokeWidth="1" fill="none" opacity="0.4" />
+      {/* Soft background glow */}
+      <circle cx="140" cy="95" r="72" fill="#EDD9F0" opacity="0.45" />
+      {/* Mama silhouette */}
+      {/* Head */}
+      <circle cx="148" cy="38" r="16" fill="#D09AC6" opacity="0.85" />
+      {/* Hair flow */}
+      <ellipse cx="148" cy="30" rx="16" ry="10" fill="#9B7CB6" opacity="0.6" />
+      <path d="M132 32 Q125 42 128 55" stroke="#9B7CB6" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.5" />
+      <path d="M164 32 Q170 48 166 58" stroke="#9B7CB6" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.4" />
+      {/* Neck */}
+      <rect x="142" y="52" width="12" height="12" rx="4" fill="#D09AC6" opacity="0.8" />
+      {/* Body/torso */}
+      <path d="M118 64 C112 68 108 80 110 100 C112 118 118 138 124 155 L172 155 C178 138 184 118 186 100 C188 80 184 68 178 64 C170 60 158 58 148 58 C138 58 126 60 118 64Z" fill="#D09AC6" opacity="0.8" />
+      {/* Pregnant belly bump */}
+      <ellipse cx="152" cy="108" rx="32" ry="36" fill="#EDD9F0" opacity="0.9" />
+      <ellipse cx="152" cy="108" rx="26" ry="30" fill="#E8C8E4" opacity="0.7" />
+      {/* Hands resting on belly */}
+      <path d="M120 100 C115 105 114 115 118 118 C122 121 128 118 130 112" fill="#D09AC6" opacity="0.75" />
+      <path d="M184 100 C189 105 190 115 186 118 C182 121 176 118 174 112" fill="#D09AC6" opacity="0.75" />
+      {/* Small heart on belly */}
+      <path d="M152 103 C152 100 148 98 146 101 C144 104 147 108 152 112 C157 108 160 104 158 101 C156 98 152 100 152 103Z" fill="#9B7CB6" opacity="0.6" />
+      {/* Decorative florals - left */}
+      <circle cx="75" cy="75" r="11" fill="#EDD9F0" opacity="0.9" />
+      <circle cx="75" cy="75" r="7" fill="#D09AC6" opacity="0.7" />
+      <circle cx="75" cy="75" r="3.5" fill="#9B7CB6" opacity="0.8" />
+      <ellipse cx="64" cy="68" rx="7" ry="4" fill="#D09AC6" opacity="0.45" transform="rotate(-35 64 68)" />
+      <ellipse cx="86" cy="68" rx="7" ry="4" fill="#D09AC6" opacity="0.45" transform="rotate(35 86 68)" />
+      <ellipse cx="64" cy="82" rx="7" ry="4" fill="#D09AC6" opacity="0.45" transform="rotate(35 64 82)" />
+      <ellipse cx="86" cy="82" rx="7" ry="4" fill="#D09AC6" opacity="0.45" transform="rotate(-35 86 82)" />
+      {/* Decorative florals - right */}
+      <circle cx="210" cy="70" r="9" fill="#EDD9F0" opacity="0.9" />
+      <circle cx="210" cy="70" r="5.5" fill="#D09AC6" opacity="0.7" />
+      <circle cx="210" cy="70" r="2.5" fill="#9B7CB6" opacity="0.8" />
+      <ellipse cx="200" cy="64" rx="6" ry="3.5" fill="#D09AC6" opacity="0.4" transform="rotate(-35 200 64)" />
+      <ellipse cx="220" cy="64" rx="6" ry="3.5" fill="#D09AC6" opacity="0.4" transform="rotate(35 220 64)" />
+      {/* Stars / sparkles */}
+      <circle cx="65" cy="110" r="2.5" fill="#9B7CB6" opacity="0.35" />
+      <circle cx="215" cy="100" r="2" fill="#D09AC6" opacity="0.4" />
+      <circle cx="95" cy="148" r="2" fill="#D09AC6" opacity="0.3" />
+      <circle cx="205" cy="140" r="2" fill="#9B7CB6" opacity="0.3" />
+      <path d="M88 50 L90 44 L92 50 L98 52 L92 54 L90 60 L88 54 L82 52Z" fill="#D09AC6" opacity="0.45" />
+      <path d="M218 118 L219.5 113 L221 118 L226 119.5 L221 121 L219.5 126 L218 121 L213 119.5Z" fill="#9B7CB6" opacity="0.35" />
     </svg>
   ),
 
