@@ -1,7 +1,6 @@
 import { useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import LocalVendorSearch, { VendorSearchHandle } from '../sections/LocalVendorSearch';
-
 const categories = [
   { name: 'Spas & Wellness', emoji: '💆‍♀️' },
   { name: 'Photographers', emoji: '📸' },
@@ -12,13 +11,10 @@ const categories = [
   { name: 'Doulas & Midwives', emoji: '🤱' },
   { name: 'Party Planners', emoji: '🎉' },
 ];
-
 export default function FindVendors() {
   const vendorSearchRef = useRef<VendorSearchHandle>(null);
-
   return (
     <div className="w-full pt-20">
-
       {/* Hero */}
       <section className="w-full py-16 lg:py-24 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center">
@@ -31,7 +27,6 @@ export default function FindVendors() {
           </p>
         </div>
       </section>
-
       {/* Quick Category Clicks */}
       <section className="w-full py-10 bg-white border-b border-spa-light">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -49,24 +44,22 @@ export default function FindVendors() {
           </div>
         </div>
       </section>
-
       {/* Search */}
       <section className="w-full py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <LocalVendorSearch ref={vendorSearchRef} />
         </div>
       </section>
-
       {/* Are you a vendor CTA */}
       <section className="w-full py-12 bg-spa-purple">
         <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
           <p className="text-white/80 text-lg">Are you a vendor who serves expectant mamas?</p>
+          <p className="text-white/60 text-sm mt-1">Start with a free basic listing — no credit card required.</p>
           <a href="/vendors" className="inline-flex items-center gap-2 bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors mt-4">
-            List Your Business — It's Free to Start <ArrowRight size={16} />
+            List Your Business Free <ArrowRight size={16} />
           </a>
         </div>
       </section>
-
     </div>
   );
 }

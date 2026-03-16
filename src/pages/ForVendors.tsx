@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { 
   ArrowRight, Check, Star, Users, MapPin, Store,
-  Image, Type, Palette, Eye, Download, Search, X
+  Image, Type, Palette, Eye, Download, Search, X, Zap, Clock
 } from 'lucide-react';
 import LocalVendorSearch, { VendorSearchHandle } from '../sections/LocalVendorSearch';
 
@@ -16,6 +16,25 @@ const vendorCategories = [
   { name: 'Party Planners', description: 'Full-service event planning and coordination', icon: Store, examples: ['Full planning', 'Day-of coordination', 'Styling', 'Vendors'] },
 ];
 
+const freeTier = {
+  name: 'Basic',
+  price: 0,
+  period: 'forever',
+  description: 'Get listed and get found — no credit card needed',
+  features: [
+    'Business name & category',
+    'City & state location',
+    'One contact method (phone or website)',
+    'Appears in local search results',
+    'No photos or featured placement',
+  ],
+  cta: 'Create Free Listing',
+  popular: false,
+  badge: 'Free',
+  stripeLink: '/contact',
+  eventAccess: 'Directory listing only',
+};
+
 const pricingTiers = [
   {
     name: 'Starter',
@@ -23,11 +42,10 @@ const pricingTiers = [
     period: 'month',
     description: 'Perfect for individual vendors just starting out',
     features: [
-      'Business profile page',
+      'Everything in Basic',
+      'Full business profile page',
       'Photo gallery (up to 15 images)',
-      'Contact information',
       'Website & social links',
-      'Appear in local search results',
       'Basic analytics',
     ],
     cta: 'Get Started',
@@ -78,6 +96,51 @@ const pricingTiers = [
   },
 ];
 
+const foundingTiers = [
+  {
+    name: 'Starter',
+    monthlyPrice: 29,
+    lifetimePrice: 199,
+    description: 'Lock in full Starter access — one payment, forever.',
+    features: [
+      'Everything in Starter plan',
+      'Founding Member badge',
+      'Never pay monthly',
+      'Price locked before platform grows',
+    ],
+    popular: false,
+    stripeLink: 'https://buy.stripe.com/8x23cwgC8d987N79Fx2go00',
+  },
+  {
+    name: 'Professional',
+    monthlyPrice: 79,
+    lifetimePrice: 499,
+    description: 'Full Professional access — pay once, own it forever.',
+    features: [
+      'Everything in Professional plan',
+      'Founding Member badge',
+      'Never pay monthly',
+      'Price locked before platform grows',
+    ],
+    popular: true,
+    stripeLink: 'https://buy.stripe.com/9B6cN6adKfhg5EZ7xp2go01',
+  },
+  {
+    name: 'Enterprise',
+    monthlyPrice: 149,
+    lifetimePrice: 999,
+    description: 'Maximum exposure — one investment, unlimited access.',
+    features: [
+      'Everything in Enterprise plan',
+      'Founding Member badge',
+      'Never pay monthly',
+      'Price locked before platform grows',
+    ],
+    popular: false,
+    stripeLink: 'https://buy.stripe.com/8x24gA71y0mm6J304X2go02',
+  },
+];
+
 const adSizes = [
   { name: 'Sidebar', dimensions: '300 x 600', width: 150, height: 300 },
   { name: 'Banner', dimensions: '728 x 90', width: 364, height: 45 },
@@ -85,22 +148,61 @@ const adSizes = [
   { name: 'Hero', dimensions: '1200 x 400', width: 300, height: 100 },
 ];
 
+type ModalTier = {
+  name: string;
+  price?: number;
+  lifetimePrice?: number;
+  period?: string;
+  description: string;
+  stripeLink: string;
+  eventAccess?: string;
+  isLifetime?: boolean;
+};
+
 export default function ForVendors() {
   const [showAdDesigner, setShowAdDesigner] = useState(false);
   const [selectedSize, setSelectedSize] = useState(adSizes[0]);
   const [adText, setAdText] = useState({ headline: '', description: '', cta: 'Learn More' });
-  const [selectedTier, setSelectedTier] = useState<typeof pricingTiers[0] | null>(null);
+  const [selectedTier, setSelectedTier] = useState<ModalTier | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const vendorSearchRef = useRef<VendorSearchHandle>(null);
 
-  const handleSelectTier = (tier: typeof pricingTiers[0]) => {
-    setSelectedTier(tier);
+  const handleSelectMonthlyTier = (tier: typeof pricingTiers[0]) => {
+    setSelectedTier({ ...tier, isLifetime: false });
+    setShowConfirmModal(true);
+  };
+
+  const handleSelectFreeTier = () => {
+    setSelectedTier({
+      name: 'Basic',
+      price: 0,
+      period: 'forever',
+      description: freeTier.description,
+      stripeLink: freeTier.stripeLink,
+      eventAccess: freeTier.eventAccess,
+      isLifetime: false,
+    });
+    setShowConfirmModal(true);
+  };
+
+  const handleSelectFoundingTier = (tier: typeof foundingTiers[0]) => {
+    setSelectedTier({
+      name: `${tier.name} — Founding Lifetime`,
+      lifetimePrice: tier.lifetimePrice,
+      description: tier.description,
+      stripeLink: tier.stripeLink,
+      isLifetime: true,
+    });
     setShowConfirmModal(true);
   };
 
   const handleProceedToCheckout = () => {
     if (selectedTier) {
-      window.open(selectedTier.stripeLink, '_blank');
+      if (selectedTier.price === 0) {
+        window.location.href = '/contact';
+      } else {
+        window.open(selectedTier.stripeLink, '_blank');
+      }
       setShowConfirmModal(false);
     }
   };
@@ -174,24 +276,57 @@ export default function ForVendors() {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Monthly Pricing */}
       <section id="pricing" className="w-full py-16 lg:py-20 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-6">
             <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Pricing</span>
             <h2 className="section-title mt-4">Choose your <span className="text-spa-purple">plan.</span></h2>
             <p className="mt-4 text-spa-gray max-w-xl mx-auto">
-              These are our founding member rates — locked in for early vendors. Prices increase as the platform grows.
+              Start free and upgrade anytime. Founding member rates are locked in for early vendors — prices increase as the platform grows.
             </p>
           </div>
 
           <div className="bg-spa-purple/10 border border-spa-purple/20 rounded-2xl p-4 max-w-2xl mx-auto mb-12 text-center">
             <p className="text-spa-purple text-sm font-medium">
-              🎉 All plans include event access — Enterprise members get <strong>unlimited</strong> events to showcase their products!
+              🎉 All paid plans include event access — Enterprise members get <strong>unlimited</strong> events to showcase their products!
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          {/* Free Tier + Paid Tiers */}
+          <div className="grid lg:grid-cols-4 gap-6">
+
+            {/* Free Basic Card */}
+            <div className="relative rounded-2xl p-8 bg-white border-2 border-dashed border-spa-purple/30">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-spa-charcoal/40 text-white text-xs font-medium uppercase tracking-wider rounded-full">
+                Free
+              </span>
+              <h3 className="font-serif text-2xl mt-2 text-spa-charcoal">{freeTier.name}</h3>
+              <p className="mt-2 text-sm text-spa-gray">{freeTier.description}</p>
+              <div className="mt-6">
+                <span className="font-serif text-4xl text-spa-charcoal">$0</span>
+                <span className="text-sm text-spa-gray"> / forever</span>
+              </div>
+              <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-spa-purple/10 text-spa-purple">
+                <Store size={12} /> {freeTier.eventAccess}
+              </div>
+              <ul className="mt-6 space-y-3">
+                {freeTier.features.map((feature, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <Check size={18} className="flex-shrink-0 mt-0.5 text-spa-purple" />
+                    <span className="text-sm text-spa-gray">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={handleSelectFreeTier}
+                className="w-full mt-8 py-3 rounded-full font-medium transition-colors border-2 border-spa-purple text-spa-purple hover:bg-spa-purple hover:text-white"
+              >
+                {freeTier.cta}
+              </button>
+            </div>
+
+            {/* Paid Tiers */}
             {pricingTiers.map((tier, index) => (
               <div key={index} className={`relative rounded-2xl p-8 ${tier.popular ? 'bg-spa-purple text-white' : 'bg-white'}`}>
                 <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 text-white text-xs font-medium uppercase tracking-wider rounded-full ${tier.popular ? 'bg-spa-pink' : 'bg-spa-charcoal/60'}`}>
@@ -215,7 +350,7 @@ export default function ForVendors() {
                   ))}
                 </ul>
                 <button
-                  onClick={() => handleSelectTier(tier)}
+                  onClick={() => handleSelectMonthlyTier(tier)}
                   className={`w-full mt-8 py-3 rounded-full font-medium transition-colors ${tier.popular ? 'bg-white text-spa-purple hover:bg-spa-cream' : 'bg-spa-purple text-white hover:bg-spa-purple/90'}`}
                 >
                   {tier.cta}
@@ -223,6 +358,82 @@ export default function ForVendors() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Founding Vendor Lifetime Pricing */}
+      <section className="w-full py-16 lg:py-20 bg-spa-charcoal">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="text-center mb-4">
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-pink">Limited Time Offer</span>
+            <h2 className="font-serif text-3xl lg:text-4xl text-white mt-4">
+              Founding Vendor <span className="text-spa-pink">Lifetime Access</span>
+            </h2>
+            <p className="mt-4 text-white/60 max-w-xl mx-auto">
+              One payment. No monthly fees. Ever. Limited to the first <strong className="text-white">100 vendors</strong> sitewide — once they're gone, so is this offer.
+            </p>
+          </div>
+
+          {/* Urgency Banner */}
+          <div className="flex items-center justify-center gap-2 mb-10">
+            <div className="flex items-center gap-2 bg-spa-pink/20 border border-spa-pink/40 rounded-full px-5 py-2">
+              <Clock size={14} className="text-spa-pink" />
+              <span className="text-spa-pink text-sm font-medium">Founding pricing closes at 100 vendors — claim yours now</span>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {foundingTiers.map((tier, index) => (
+              <div key={index} className={`relative rounded-2xl p-8 ${tier.popular ? 'bg-spa-purple' : 'bg-white/5 border border-white/10'}`}>
+                {tier.popular && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-spa-pink text-white text-xs font-medium uppercase tracking-wider rounded-full">
+                    Best Value
+                  </span>
+                )}
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap size={16} className={tier.popular ? 'text-spa-pink' : 'text-spa-pink'} />
+                  <h3 className="font-serif text-2xl text-white">{tier.name}</h3>
+                </div>
+                <p className={`text-sm mt-1 ${tier.popular ? 'text-white/70' : 'text-white/50'}`}>{tier.description}</p>
+
+                {/* Pricing */}
+                <div className="mt-6 flex items-end gap-3">
+                  <div>
+                    <span className="font-serif text-4xl text-white">${tier.lifetimePrice}</span>
+                    <span className="text-white/50 text-sm ml-1">one-time</span>
+                  </div>
+                  <div className="pb-1">
+                    <span className="text-white/40 text-xs line-through">${tier.monthlyPrice}/mo</span>
+                  </div>
+                </div>
+
+                {/* Savings callout */}
+                <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-spa-pink/20 text-spa-pink border border-spa-pink/30">
+                  Save ${(tier.monthlyPrice * 12) - tier.lifetimePrice > 0 ? (tier.monthlyPrice * 12) - tier.lifetimePrice : tier.monthlyPrice * 6}+ vs first year monthly
+                </div>
+
+                <ul className="mt-6 space-y-3">
+                  {tier.features.map((feature, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <Check size={18} className="flex-shrink-0 mt-0.5 text-spa-pink" />
+                      <span className="text-sm text-white/70">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  onClick={() => handleSelectFoundingTier(tier)}
+                  className={`w-full mt-8 py-3 rounded-full font-medium transition-colors ${tier.popular ? 'bg-white text-spa-purple hover:bg-spa-cream' : 'bg-spa-pink text-white hover:bg-spa-pink/90'}`}
+                >
+                  Claim Founding Rate — ${tier.lifetimePrice}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-white/30 text-xs mt-8">
+            Founding Lifetime Access includes all features of the corresponding monthly plan. One-time payment processed securely via Stripe.
+          </p>
         </div>
       </section>
 
@@ -297,10 +508,15 @@ export default function ForVendors() {
       <section className="w-full py-16 lg:py-20 bg-spa-purple">
         <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
           <h2 className="font-serif text-3xl lg:text-4xl text-white">Ready to grow your <span className="text-spa-pink">business?</span></h2>
-          <p className="mt-4 text-white/70 leading-relaxed">Get in front of local mamas who are ready to buy. List your business today.</p>
-          <a href="#pricing" className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center gap-2 mt-8">
-            List Your Business <ArrowRight size={18} />
-          </a>
+          <p className="mt-4 text-white/70 leading-relaxed">Get in front of local mamas who are ready to buy. Start free or go founding — your choice.</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+            <a href="#pricing" className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center gap-2">
+              Start Free <ArrowRight size={18} />
+            </a>
+            <a href="#founding" className="bg-spa-pink text-white px-6 py-3 rounded-full font-medium hover:bg-spa-pink/90 transition-colors inline-flex items-center gap-2">
+              <Zap size={18} /> Claim Founding Rate
+            </a>
+          </div>
         </div>
       </section>
 
@@ -317,22 +533,34 @@ export default function ForVendors() {
             <div className="bg-spa-lavender rounded-2xl p-6 mb-6">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-serif text-xl text-spa-charcoal">{selectedTier.name}</h4>
-                <span className="text-spa-purple font-medium">${selectedTier.price}/mo</span>
+                <span className="text-spa-purple font-medium">
+                  {selectedTier.isLifetime
+                    ? `$${selectedTier.lifetimePrice} one-time`
+                    : selectedTier.price === 0
+                    ? 'Free'
+                    : `$${selectedTier.price}/mo`}
+                </span>
               </div>
               <p className="text-sm text-spa-gray mb-4">{selectedTier.description}</p>
-              <div className="flex items-center gap-2 text-sm text-spa-purple font-medium">
-                <Store size={14} /> {selectedTier.eventAccess}
-              </div>
+              {selectedTier.eventAccess && (
+                <div className="flex items-center gap-2 text-sm text-spa-purple font-medium">
+                  <Store size={14} /> {selectedTier.eventAccess}
+                </div>
+              )}
             </div>
             <p className="text-sm text-spa-gray mb-6 text-center">
-              You'll be taken to Stripe's secure checkout to complete your subscription. Cancel anytime.
+              {selectedTier.price === 0
+                ? "You'll be taken to our contact form to set up your free listing."
+                : selectedTier.isLifetime
+                ? "You'll be taken to Stripe's secure checkout for a one-time payment. No recurring charges."
+                : "You'll be taken to Stripe's secure checkout to complete your subscription. Cancel anytime."}
             </p>
             <div className="flex gap-3">
               <button onClick={() => setShowConfirmModal(false)} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">
                 Go Back
               </button>
               <button onClick={handleProceedToCheckout} className="flex-1 btn-primary justify-center">
-                Proceed to Checkout <ArrowRight size={16} />
+                {selectedTier.price === 0 ? 'Get My Free Listing' : 'Proceed to Checkout'} <ArrowRight size={16} />
               </button>
             </div>
           </div>
