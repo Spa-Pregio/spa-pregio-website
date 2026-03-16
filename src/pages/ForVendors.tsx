@@ -109,7 +109,7 @@ const foundingTiers = [
       'Price locked before platform grows',
     ],
     popular: false,
-    stripeLink: 'https://buy.stripe.com/8x23cwgC8d987N79Fx2go00',
+    stripeLink: 'https://buy.stripe.com/7sYdRa0DaedcebvcRJ2go03',
   },
   {
     name: 'Professional',
@@ -123,7 +123,7 @@ const foundingTiers = [
       'Price locked before platform grows',
     ],
     popular: true,
-    stripeLink: 'https://buy.stripe.com/9B6cN6adKfhg5EZ7xp2go01',
+    stripeLink: 'https://buy.stripe.com/14A00kfy4edcebv3h92go04',
   },
   {
     name: 'Enterprise',
@@ -137,7 +137,7 @@ const foundingTiers = [
       'Price locked before platform grows',
     ],
     popular: false,
-    stripeLink: 'https://buy.stripe.com/8x24gA71y0mm6J304X2go02',
+    stripeLink: 'https://buy.stripe.com/4gMfZibhOd98aZjdVN2go05',
   },
 ];
 
