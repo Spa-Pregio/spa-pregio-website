@@ -1,7 +1,8 @@
+import React from 'react';
 import { ArrowRight, Check, Download, Palette, FileText, Clock, Star, Sparkles } from 'lucide-react';
 
 // Elegant SVG illustrations for each suite card
-const SuiteIllustrations: Record<string, () => JSX.Element> = {
+const SuiteIllustrations: Record<string, () => React.ReactElement> = {
   'The Baby Shower Suite™': () => (
     <svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       <rect width="280" height="180" fill="#F5EEF8" />
