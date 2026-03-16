@@ -1,5 +1,208 @@
 import { ArrowRight, Check, Download, Palette, FileText, Clock, Star, Sparkles } from 'lucide-react';
 
+// Elegant SVG illustrations for each suite card
+const SuiteIllustrations: Record<string, () => JSX.Element> = {
+  'The Baby Shower Suite™': () => (
+    <svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <rect width="280" height="180" fill="#F5EEF8" />
+      {/* Soft background circle */}
+      <circle cx="140" cy="90" r="70" fill="#EDD9F0" opacity="0.5" />
+      {/* Large peony bloom center */}
+      <ellipse cx="140" cy="85" rx="28" ry="26" fill="#D09AC6" opacity="0.9" />
+      <ellipse cx="140" cy="85" rx="20" ry="18" fill="#C87BB8" opacity="0.8" />
+      <ellipse cx="140" cy="85" rx="12" ry="11" fill="#B85FAA" opacity="0.7" />
+      {/* Petals outer ring */}
+      <ellipse cx="113" cy="72" rx="14" ry="10" fill="#D09AC6" opacity="0.7" transform="rotate(-30 113 72)" />
+      <ellipse cx="167" cy="72" rx="14" ry="10" fill="#D09AC6" opacity="0.7" transform="rotate(30 167 72)" />
+      <ellipse cx="112" cy="100" rx="14" ry="10" fill="#D09AC6" opacity="0.7" transform="rotate(30 112 100)" />
+      <ellipse cx="168" cy="100" rx="14" ry="10" fill="#D09AC6" opacity="0.7" transform="rotate(-30 168 100)" />
+      <ellipse cx="140" cy="58" rx="14" ry="10" fill="#D09AC6" opacity="0.7" />
+      <ellipse cx="140" cy="112" rx="14" ry="10" fill="#D09AC6" opacity="0.7" />
+      {/* Leaves */}
+      <ellipse cx="100" cy="110" rx="18" ry="8" fill="#9B7CB6" opacity="0.4" transform="rotate(-45 100 110)" />
+      <ellipse cx="180" cy="110" rx="18" ry="8" fill="#9B7CB6" opacity="0.4" transform="rotate(45 180 110)" />
+      <ellipse cx="95" cy="75" rx="14" ry="6" fill="#9B7CB6" opacity="0.35" transform="rotate(-60 95 75)" />
+      <ellipse cx="185" cy="75" rx="14" ry="6" fill="#9B7CB6" opacity="0.35" transform="rotate(60 185 75)" />
+      {/* Small accent blooms */}
+      <circle cx="82" cy="90" r="10" fill="#EDD9F0" opacity="0.8" />
+      <circle cx="82" cy="90" r="6" fill="#D09AC6" opacity="0.7" />
+      <circle cx="198" cy="90" r="10" fill="#EDD9F0" opacity="0.8" />
+      <circle cx="198" cy="90" r="6" fill="#D09AC6" opacity="0.7" />
+      {/* Decorative dots */}
+      <circle cx="65" cy="60" r="3" fill="#9B7CB6" opacity="0.4" />
+      <circle cx="215" cy="60" r="3" fill="#9B7CB6" opacity="0.4" />
+      <circle cx="70" cy="125" r="2" fill="#D09AC6" opacity="0.5" />
+      <circle cx="210" cy="125" r="2" fill="#D09AC6" opacity="0.5" />
+      {/* Bottom ribbon */}
+      <path d="M100 155 Q140 145 180 155" stroke="#9B7CB6" strokeWidth="1.5" fill="none" opacity="0.5" />
+      <path d="M115 158 Q140 150 165 158" stroke="#D09AC6" strokeWidth="1" fill="none" opacity="0.4" />
+    </svg>
+  ),
+
+  'The Gender Reveal Suite™': () => (
+    <svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <rect width="280" height="180" fill="#FDF0F5" />
+      {/* Soft glow */}
+      <circle cx="140" cy="85" r="65" fill="#F8D7E8" opacity="0.6" />
+      {/* Elegant ribbon bow - left loop */}
+      <path d="M140 85 C120 65 85 55 80 75 C75 95 110 100 140 85Z" fill="#D09AC6" opacity="0.9" />
+      <path d="M140 85 C125 70 95 62 92 78 C89 92 118 97 140 85Z" fill="#C87BB8" opacity="0.7" />
+      {/* Right loop */}
+      <path d="M140 85 C160 65 195 55 200 75 C205 95 170 100 140 85Z" fill="#D09AC6" opacity="0.9" />
+      <path d="M140 85 C155 70 185 62 188 78 C191 92 162 97 140 85Z" fill="#C87BB8" opacity="0.7" />
+      {/* Bottom left tail */}
+      <path d="M140 85 C130 100 105 120 100 140" stroke="#D09AC6" strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.8" />
+      <path d="M140 85 C128 102 103 122 98 142" stroke="#C87BB8" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.5" />
+      {/* Bottom right tail */}
+      <path d="M140 85 C150 100 175 120 180 140" stroke="#D09AC6" strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.8" />
+      <path d="M140 85 C152 102 177 122 182 142" stroke="#C87BB8" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.5" />
+      {/* Center knot */}
+      <ellipse cx="140" cy="85" rx="14" ry="12" fill="#9B7CB6" opacity="0.9" />
+      <ellipse cx="140" cy="85" rx="8" ry="7" fill="#7B5EA0" opacity="0.8" />
+      {/* Sparkle accents */}
+      <circle cx="75" cy="50" r="3" fill="#9B7CB6" opacity="0.5" />
+      <circle cx="205" cy="50" r="3" fill="#9B7CB6" opacity="0.5" />
+      <circle cx="60" cy="90" r="2" fill="#D09AC6" opacity="0.6" />
+      <circle cx="220" cy="90" r="2" fill="#D09AC6" opacity="0.6" />
+      <circle cx="80" cy="130" r="2.5" fill="#9B7CB6" opacity="0.4" />
+      <circle cx="200" cy="130" r="2.5" fill="#9B7CB6" opacity="0.4" />
+      {/* Star sparkles */}
+      <path d="M55 70 L57 65 L59 70 L64 72 L59 74 L57 79 L55 74 L50 72Z" fill="#D09AC6" opacity="0.6" />
+      <path d="M221 70 L223 65 L225 70 L230 72 L225 74 L223 79 L221 74 L216 72Z" fill="#D09AC6" opacity="0.6" />
+    </svg>
+  ),
+
+  'The Announcement Suite™': () => (
+    <svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <rect width="280" height="180" fill="#F8F3FB" />
+      {/* Soft radial glow */}
+      <radialGradient id="announcementGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="#EDD9F0" stopOpacity="0.8" />
+        <stop offset="100%" stopColor="#F8F3FB" stopOpacity="0" />
+      </radialGradient>
+      <circle cx="140" cy="85" r="80" fill="url(#announcementGlow)" />
+      {/* Envelope base */}
+      <rect x="70" y="65" width="140" height="90" rx="6" fill="white" opacity="0.95" stroke="#D09AC6" strokeWidth="1.5" />
+      {/* Envelope flap open */}
+      <path d="M70 65 L140 105 L210 65Z" fill="#EDD9F0" opacity="0.9" stroke="#D09AC6" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M70 65 L140 95 L210 65" fill="#E8C8E8" opacity="0.6" />
+      {/* Letter peeking out */}
+      <rect x="90" y="45" width="100" height="75" rx="4" fill="white" stroke="#D09AC6" strokeWidth="1" opacity="0.95" />
+      {/* Letter content lines */}
+      <line x1="103" y1="62" x2="177" y2="62" stroke="#9B7CB6" strokeWidth="2" opacity="0.3" />
+      <line x1="103" y1="72" x2="177" y2="72" stroke="#9B7CB6" strokeWidth="1.5" opacity="0.2" />
+      <line x1="103" y1="81" x2="160" y2="81" stroke="#9B7CB6" strokeWidth="1.5" opacity="0.2" />
+      {/* Heart seal */}
+      <path d="M140 56 C140 53 136 50 133 53 C130 56 133 60 140 64 C147 60 150 56 147 53 C144 50 140 53 140 56Z" fill="#D09AC6" opacity="0.9" />
+      {/* Floating stars/sparkles around */}
+      <path d="M58 55 L60 49 L62 55 L68 57 L62 59 L60 65 L58 59 L52 57Z" fill="#9B7CB6" opacity="0.5" />
+      <path d="M218 48 L220 43 L222 48 L227 50 L222 52 L220 57 L218 52 L213 50Z" fill="#D09AC6" opacity="0.5" />
+      <circle cx="62" cy="120" r="3" fill="#D09AC6" opacity="0.4" />
+      <circle cx="218" cy="120" r="3" fill="#9B7CB6" opacity="0.4" />
+      <circle cx="55" cy="85" r="2" fill="#9B7CB6" opacity="0.3" />
+      <circle cx="225" cy="85" r="2" fill="#D09AC6" opacity="0.3" />
+      {/* Small dots scattered */}
+      <circle cx="80" cy="145" r="2" fill="#D09AC6" opacity="0.3" />
+      <circle cx="200" cy="145" r="2" fill="#9B7CB6" opacity="0.3" />
+      <circle cx="140" cy="148" r="2" fill="#D09AC6" opacity="0.25" />
+    </svg>
+  ),
+
+  'The Push Present & Pampering Suite™': () => (
+    <svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <rect width="280" height="180" fill="#FBF5F0" />
+      {/* Warm soft glow */}
+      <circle cx="140" cy="85" r="70" fill="#F5E6DC" opacity="0.7" />
+      {/* Gift box base */}
+      <rect x="95" y="100" width="90" height="60" rx="4" fill="#9B7CB6" opacity="0.85" />
+      <rect x="95" y="100" width="90" height="60" rx="4" fill="white" opacity="0.1" />
+      {/* Gift box lid */}
+      <rect x="88" y="88" width="104" height="20" rx="4" fill="#7B5EA0" opacity="0.9" />
+      {/* Ribbon vertical */}
+      <rect x="133" y="88" width="14" height="72" fill="#D09AC6" opacity="0.9" />
+      {/* Ribbon horizontal on lid */}
+      <rect x="88" y="93" width="104" height="10" fill="#D09AC6" opacity="0.8" />
+      {/* Bow left loop */}
+      <path d="M140 88 C125 72 100 68 98 80 C96 90 120 90 140 88Z" fill="#EDD9F0" opacity="0.95" />
+      <path d="M140 88 C128 75 108 73 107 82 C106 89 125 89 140 88Z" fill="#D09AC6" opacity="0.6" />
+      {/* Bow right loop */}
+      <path d="M140 88 C155 72 180 68 182 80 C184 90 160 90 140 88Z" fill="#EDD9F0" opacity="0.95" />
+      <path d="M140 88 C152 75 172 73 173 82 C174 89 155 89 140 88Z" fill="#D09AC6" opacity="0.6" />
+      {/* Bow center */}
+      <ellipse cx="140" cy="88" rx="9" ry="7" fill="#9B7CB6" opacity="0.9" />
+      {/* Candle left */}
+      <rect x="68" y="105" width="12" height="40" rx="3" fill="#EDD9F0" opacity="0.9" stroke="#D09AC6" strokeWidth="1" />
+      <path d="M74 105 C72 98 76 95 74 90" stroke="#D09AC6" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <ellipse cx="74" cy="90" rx="4" ry="6" fill="#F5C842" opacity="0.8" />
+      <ellipse cx="74" cy="91" rx="2" ry="3" fill="#F5A020" opacity="0.9" />
+      {/* Candle right */}
+      <rect x="200" y="110" width="12" height="35" rx="3" fill="#EDD9F0" opacity="0.9" stroke="#D09AC6" strokeWidth="1" />
+      <path d="M206 110 C204 103 208 100 206 95" stroke="#D09AC6" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <ellipse cx="206" cy="95" rx="4" ry="6" fill="#F5C842" opacity="0.8" />
+      <ellipse cx="206" cy="96" rx="2" ry="3" fill="#F5A020" opacity="0.9" />
+      {/* Small rose left */}
+      <circle cx="72" cy="82" r="8" fill="#D09AC6" opacity="0.7" />
+      <circle cx="72" cy="82" r="5" fill="#C87BB8" opacity="0.8" />
+      <circle cx="72" cy="82" r="2.5" fill="#9B7CB6" opacity="0.9" />
+      {/* Small rose right */}
+      <circle cx="208" cy="88" r="8" fill="#D09AC6" opacity="0.7" />
+      <circle cx="208" cy="88" r="5" fill="#C87BB8" opacity="0.8" />
+      <circle cx="208" cy="88" r="2.5" fill="#9B7CB6" opacity="0.9" />
+      {/* Stars */}
+      <circle cx="110" cy="65" r="2" fill="#9B7CB6" opacity="0.4" />
+      <circle cx="170" cy="65" r="2" fill="#D09AC6" opacity="0.4" />
+      <circle cx="140" cy="58" r="2.5" fill="#9B7CB6" opacity="0.3" />
+    </svg>
+  ),
+
+  'The Sip & See Suite™': () => (
+    <svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <rect width="280" height="180" fill="#F2F8F5" />
+      {/* Soft background */}
+      <circle cx="140" cy="85" r="70" fill="#E0F0E8" opacity="0.6" />
+      {/* Teacup saucer */}
+      <ellipse cx="140" cy="138" rx="55" ry="10" fill="#D09AC6" opacity="0.4" />
+      <ellipse cx="140" cy="135" rx="48" ry="8" fill="#EDD9F0" opacity="0.8" />
+      {/* Teacup body */}
+      <path d="M100 100 Q98 135 140 135 Q182 135 180 100Z" fill="white" opacity="0.95" stroke="#D09AC6" strokeWidth="1.5" />
+      {/* Cup rim */}
+      <ellipse cx="140" cy="100" rx="40" ry="8" fill="white" opacity="0.95" stroke="#D09AC6" strokeWidth="1.5" />
+      {/* Tea surface */}
+      <ellipse cx="140" cy="100" rx="36" ry="6" fill="#E8D5B0" opacity="0.6" />
+      {/* Steam wisps */}
+      <path d="M125 95 C123 85 127 80 125 70" stroke="#9B7CB6" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.4" />
+      <path d="M140 93 C138 83 142 77 140 67" stroke="#9B7CB6" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.4" />
+      <path d="M155 95 C153 85 157 80 155 70" stroke="#9B7CB6" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.4" />
+      {/* Cup handle */}
+      <path d="M180 108 C200 108 200 128 180 128" stroke="#D09AC6" strokeWidth="3" fill="none" strokeLinecap="round" />
+      {/* Floral on cup */}
+      <circle cx="130" cy="118" r="7" fill="#D09AC6" opacity="0.5" />
+      <circle cx="130" cy="118" r="4" fill="#9B7CB6" opacity="0.6" />
+      <circle cx="148" cy="122" r="5" fill="#D09AC6" opacity="0.4" />
+      <circle cx="148" cy="122" r="3" fill="#9B7CB6" opacity="0.5" />
+      {/* Florals top left */}
+      <circle cx="80" cy="72" r="12" fill="#EDD9F0" opacity="0.8" />
+      <circle cx="80" cy="72" r="8" fill="#D09AC6" opacity="0.7" />
+      <circle cx="80" cy="72" r="4" fill="#9B7CB6" opacity="0.8" />
+      <ellipse cx="68" cy="65" rx="8" ry="5" fill="#D09AC6" opacity="0.5" transform="rotate(-30 68 65)" />
+      <ellipse cx="92" cy="65" rx="8" ry="5" fill="#D09AC6" opacity="0.5" transform="rotate(30 92 65)" />
+      {/* Florals top right */}
+      <circle cx="200" cy="68" r="12" fill="#EDD9F0" opacity="0.8" />
+      <circle cx="200" cy="68" r="8" fill="#D09AC6" opacity="0.7" />
+      <circle cx="200" cy="68" r="4" fill="#9B7CB6" opacity="0.8" />
+      <ellipse cx="188" cy="61" rx="8" ry="5" fill="#D09AC6" opacity="0.5" transform="rotate(-30 188 61)" />
+      <ellipse cx="212" cy="61" rx="8" ry="5" fill="#D09AC6" opacity="0.5" transform="rotate(30 212 61)" />
+      {/* Leaf accents */}
+      <ellipse cx="65" cy="90" rx="12" ry="5" fill="#7BAF8C" opacity="0.35" transform="rotate(-50 65 90)" />
+      <ellipse cx="215" cy="85" rx="12" ry="5" fill="#7BAF8C" opacity="0.35" transform="rotate(50 215 85)" />
+      {/* Dots */}
+      <circle cx="60" cy="115" r="2.5" fill="#D09AC6" opacity="0.4" />
+      <circle cx="220" cy="115" r="2.5" fill="#D09AC6" opacity="0.4" />
+      <circle cx="140" cy="52" r="2" fill="#9B7CB6" opacity="0.3" />
+    </svg>
+  ),
+};
+
 const suites = [
   {
     name: 'The Celebration Suite™',
@@ -18,7 +221,6 @@ const suites = [
       'Guest Tracker',
       'Budget Planner',
     ],
-    emoji: '✨',
   },
   {
     name: 'The Baby Shower Suite™',
@@ -39,7 +241,6 @@ const suites = [
       'Theme & Decor Inspiration',
       'Keepsake & Memory Pages',
     ],
-    emoji: '🛁',
   },
   {
     name: 'The Gender Reveal Suite™',
@@ -60,7 +261,6 @@ const suites = [
       'Theme & Decor Inspiration',
       'Keepsake & Memory Pages',
     ],
-    emoji: '🎀',
   },
   {
     name: 'The Announcement Suite™',
@@ -81,7 +281,6 @@ const suites = [
       'Contact & Reaction Tracker',
       'Keepsake Pages + Letter to Baby',
     ],
-    emoji: '📣',
   },
   {
     name: 'The Push Present & Pampering Suite™',
@@ -102,7 +301,6 @@ const suites = [
       'Spa & Wellness Inspiration',
       'Keepsake Pages + Love Letter to Herself',
     ],
-    emoji: '💜',
   },
   {
     name: 'The Sip & See Suite™',
@@ -123,7 +321,6 @@ const suites = [
       'Theme & Decor Inspiration',
       'Keepsake Pages + Letter to Baby',
     ],
-    emoji: '🌸',
   },
 ];
 
@@ -135,7 +332,13 @@ const howItWorks = [
 ];
 
 const featuredSuite = suites[0];
-const remainingSuites = suites.slice(1);
+const remainingSuites = [
+  suites.find(s => s.name === 'The Announcement Suite™')!,
+  suites.find(s => s.name === 'The Gender Reveal Suite™')!,
+  suites.find(s => s.name === 'The Baby Shower Suite™')!,
+  suites.find(s => s.name === 'The Sip & See Suite™')!,
+  suites.find(s => s.name === 'The Push Present & Pampering Suite™')!,
+];
 
 export default function CelebrationSuites() {
   return (
@@ -167,7 +370,6 @@ export default function CelebrationSuites() {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* Product mockup image */}
             <div className="relative">
               <div className="rounded-2xl overflow-hidden shadow-elegant">
                 <img
@@ -185,7 +387,6 @@ export default function CelebrationSuites() {
               </div>
             </div>
 
-            {/* Details */}
             <div>
               <h3 className="font-serif text-3xl text-spa-charcoal">{featuredSuite.name}</h3>
               <p className="text-spa-purple font-medium mt-1">{featuredSuite.subtitle}</p>
@@ -262,56 +463,65 @@ export default function CelebrationSuites() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-            {remainingSuites.map((suite) => (
-              <div key={suite.name} className="elegant-card group flex flex-col">
-                {/* Card header */}
-                <div className="bg-spa-lavender rounded-t-2xl p-8 text-center">
-                  <div className="text-4xl mb-3">{suite.emoji}</div>
-                  <span className="px-3 py-1 bg-spa-purple text-white rounded-full text-xs font-medium">
-                    {suite.badge}
-                  </span>
-                  <h3 className="font-serif text-xl text-spa-charcoal mt-4">{suite.name}</h3>
-                  <p className="text-spa-purple text-xs font-medium mt-1">{suite.subtitle}</p>
-                </div>
-
-                {/* Card body */}
-                <div className="p-6 flex flex-col flex-1">
-                  <p className="text-sm text-spa-gray leading-relaxed">{suite.description}</p>
-
-                  <div className="mt-5 space-y-1.5 flex-1">
-                    {suite.includes.slice(0, 5).map((item) => (
-                      <div key={item} className="flex items-center gap-2 text-xs text-spa-gray">
-                        <Check size={13} className="text-spa-purple flex-shrink-0" />
-                        {item}
-                      </div>
-                    ))}
-                    {suite.includes.length > 5 && (
-                      <div className="text-xs text-spa-purple font-medium pl-5">
-                        + {suite.includes.length - 5} more included
-                      </div>
+            {remainingSuites.map((suite) => {
+              const Illustration = SuiteIllustrations[suite.name];
+              return (
+                <div key={suite.name} className="elegant-card group flex flex-col">
+                  {/* Card header — elegant illustrated visual */}
+                  <div className="rounded-t-2xl overflow-hidden h-44 relative">
+                    {Illustration ? (
+                      <Illustration />
+                    ) : (
+                      <div className="w-full h-full bg-spa-lavender" />
                     )}
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2">
+                      <span className="px-3 py-1 bg-spa-purple text-white rounded-full text-xs font-medium whitespace-nowrap">
+                        {suite.badge}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Price + CTA */}
-                  <div className="mt-6 pt-5 border-t border-spa-lavender">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-xs text-spa-gray">Digital Download</span>
-                      <span className="font-bold text-2xl text-spa-purple">$27</span>
+                  {/* Card body */}
+                  <div className="p-6 flex flex-col flex-1">
+                    <h3 className="font-serif text-xl text-spa-charcoal">{suite.name}</h3>
+                    <p className="text-spa-purple text-xs font-medium mt-1">{suite.subtitle}</p>
+                    <p className="text-sm text-spa-gray leading-relaxed mt-3">{suite.description}</p>
+
+                    <div className="mt-5 space-y-1.5 flex-1">
+                      {suite.includes.slice(0, 5).map((item) => (
+                        <div key={item} className="flex items-center gap-2 text-xs text-spa-gray">
+                          <Check size={13} className="text-spa-purple flex-shrink-0" />
+                          {item}
+                        </div>
+                      ))}
+                      {suite.includes.length > 5 && (
+                        <div className="text-xs text-spa-purple font-medium pl-5">
+                          + {suite.includes.length - 5} more included
+                        </div>
+                      )}
                     </div>
-                    <a
-                      href={suite.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full btn-primary justify-center text-center text-sm py-3"
-                    >
-                      Get This Suite — $27
-                      <ArrowRight size={16} />
-                    </a>
-                    <p className="text-xs text-spa-gray text-center mt-2">Instant access after purchase</p>
+
+                    {/* Price + CTA */}
+                    <div className="mt-6 pt-5 border-t border-spa-lavender">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-xs text-spa-gray">Digital Download</span>
+                        <span className="font-bold text-2xl text-spa-purple">$27</span>
+                      </div>
+                      <a
+                        href={suite.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full btn-primary justify-center text-center text-sm py-3"
+                      >
+                        Get This Suite — $27
+                        <ArrowRight size={16} />
+                      </a>
+                      <p className="text-xs text-spa-gray text-center mt-2">Instant access after purchase</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -354,9 +564,7 @@ export default function CelebrationSuites() {
             Join the Suite Sisters™ affiliate program and earn 30% commission on every suite you share. Beautiful products that practically sell themselves.
           </p>
           <a
-            href="https://payhip.com/auth/register/af699c7e55b3f58"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/ambassadors"
             className="inline-flex items-center gap-2 mt-8 btn-primary justify-center"
           >
             Become a Suite Sister™
