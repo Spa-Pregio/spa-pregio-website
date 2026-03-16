@@ -362,7 +362,7 @@ export default function ForVendors() {
       </section>
 
       {/* Founding Vendor Lifetime Pricing */}
-      <section className="w-full py-16 lg:py-20 bg-spa-charcoal">
+      <section id="founding" className="w-full py-16 lg:py-20 bg-spa-charcoal">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-4">
             <span className="text-sm uppercase tracking-[0.15em] text-spa-pink">Limited Time Offer</span>
