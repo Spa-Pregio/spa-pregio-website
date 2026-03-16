@@ -1,14 +1,9 @@
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabaseClient';
 import {
   Users, DollarSign, CheckCircle, Clock, X, Check,
   ChevronDown, ChevronUp, ArrowRight
 } from 'lucide-react';
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
 
 type Affiliate = {
   id: string;
