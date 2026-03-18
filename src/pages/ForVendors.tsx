@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
 import { 
   ArrowRight, Check, Star, Users, MapPin, Store,
-  Image, Type, Palette, Eye, Download, Search, X, Zap, Clock
+  Image, Type, Palette, Eye, Download, Search, X, Zap, Clock, CheckCircle
 } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 import LocalVendorSearch, { VendorSearchHandle } from '../sections/LocalVendorSearch';
 
 const vendorCategories = [
@@ -31,7 +32,6 @@ const freeTier = {
   cta: 'Create Free Listing',
   popular: false,
   badge: 'Free',
-  stripeLink: '/contact',
   eventAccess: 'Directory listing only',
 };
 
@@ -88,7 +88,7 @@ const pricingTiers = [
       'Exclusive event sponsorships',
       'Dedicated account manager',
     ],
-    cta: 'Contact Sales',
+    cta: 'Upgrade to Enterprise',
     popular: false,
     badge: 'Unlimited Events',
     stripeLink: 'https://buy.stripe.com/8x24gA71y0mm6J304X2go02',
@@ -148,15 +148,41 @@ const adSizes = [
   { name: 'Hero', dimensions: '1200 x 400', width: 300, height: 100 },
 ];
 
+const vendorCategoryOptions = [
+  'Maternity Boutiques',
+  'Local Crafters',
+  'Spas & Wellness',
+  'Photographers',
+  'Caterers & Bakers',
+  'Event Venues',
+  'Florists',
+  'Party Planners',
+  'Doulas & Midwives',
+  'Chiropractors',
+  'Other',
+];
+
 type ModalTier = {
   name: string;
   price?: number;
   lifetimePrice?: number;
   period?: string;
   description: string;
-  stripeLink: string;
+  stripeLink?: string;
   eventAccess?: string;
   isLifetime?: boolean;
+  isFree?: boolean;
+};
+
+type FreeListingForm = {
+  business_name: string;
+  category: string;
+  city: string;
+  state: string;
+  contact_type: 'phone' | 'website';
+  contact_value: string;
+  owner_name: string;
+  email: string;
 };
 
 export default function ForVendors() {
@@ -165,24 +191,29 @@ export default function ForVendors() {
   const [adText, setAdText] = useState({ headline: '', description: '', cta: 'Learn More' });
   const [selectedTier, setSelectedTier] = useState<ModalTier | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showFreeListingModal, setShowFreeListingModal] = useState(false);
+  const [freeListingForm, setFreeListingForm] = useState<FreeListingForm>({
+    business_name: '',
+    category: 'Spas & Wellness',
+    city: '',
+    state: '',
+    contact_type: 'website',
+    contact_value: '',
+    owner_name: '',
+    email: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const vendorSearchRef = useRef<VendorSearchHandle>(null);
 
   const handleSelectMonthlyTier = (tier: typeof pricingTiers[0]) => {
-    setSelectedTier({ ...tier, isLifetime: false });
+    setSelectedTier({ ...tier, isLifetime: false, isFree: false });
     setShowConfirmModal(true);
   };
 
   const handleSelectFreeTier = () => {
-    setSelectedTier({
-      name: 'Basic',
-      price: 0,
-      period: 'forever',
-      description: freeTier.description,
-      stripeLink: freeTier.stripeLink,
-      eventAccess: freeTier.eventAccess,
-      isLifetime: false,
-    });
-    setShowConfirmModal(true);
+    setShowFreeListingModal(true);
   };
 
   const handleSelectFoundingTier = (tier: typeof foundingTiers[0]) => {
@@ -192,19 +223,63 @@ export default function ForVendors() {
       description: tier.description,
       stripeLink: tier.stripeLink,
       isLifetime: true,
+      isFree: false,
     });
     setShowConfirmModal(true);
   };
 
   const handleProceedToCheckout = () => {
-    if (selectedTier) {
-      if (selectedTier.price === 0) {
-        window.location.href = '/contact';
-      } else {
-        window.open(selectedTier.stripeLink, '_blank');
-      }
-      setShowConfirmModal(false);
+    if (selectedTier?.stripeLink) {
+      window.open(selectedTier.stripeLink, '_blank');
     }
+    setShowConfirmModal(false);
+  };
+
+  const handleFreeListingSubmit = async () => {
+    if (!freeListingForm.business_name || !freeListingForm.city || !freeListingForm.state || !freeListingForm.contact_value || !freeListingForm.email) {
+      setSubmitError('Please fill in all required fields.');
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError('');
+
+    const { error } = await supabase.from('vendors').insert({
+      business_name: freeListingForm.business_name,
+      category: freeListingForm.category,
+      city: freeListingForm.city,
+      state: freeListingForm.state,
+      contact_type: freeListingForm.contact_type,
+      contact_value: freeListingForm.contact_value,
+      owner_name: freeListingForm.owner_name || null,
+      email: freeListingForm.email,
+      plan: 'free',
+      status: 'pending',
+    });
+
+    setSubmitting(false);
+
+    if (error) {
+      setSubmitError('Something went wrong. Please try again.');
+    } else {
+      setSubmitSuccess(true);
+    }
+  };
+
+  const resetFreeListingModal = () => {
+    setShowFreeListingModal(false);
+    setSubmitSuccess(false);
+    setSubmitError('');
+    setFreeListingForm({
+      business_name: '',
+      category: 'Spas & Wellness',
+      city: '',
+      state: '',
+      contact_type: 'website',
+      contact_value: '',
+      owner_name: '',
+      email: '',
+    });
   };
 
   return (
@@ -289,7 +364,7 @@ export default function ForVendors() {
 
           <div className="bg-spa-purple/10 border border-spa-purple/20 rounded-2xl p-4 max-w-2xl mx-auto mb-12 text-center">
             <p className="text-spa-purple text-sm font-medium">
-              🎉 All paid plans include event access — Enterprise members get <strong>unlimited</strong> events to showcase their products!
+              All paid plans include event access — Enterprise members get <strong>unlimited</strong> events to showcase their products.
             </p>
           </div>
 
@@ -374,7 +449,6 @@ export default function ForVendors() {
             </p>
           </div>
 
-          {/* Urgency Banner */}
           <div className="flex items-center justify-center gap-2 mb-10">
             <div className="flex items-center gap-2 bg-spa-pink/20 border border-spa-pink/40 rounded-full px-5 py-2">
               <Clock size={14} className="text-spa-pink" />
@@ -391,12 +465,10 @@ export default function ForVendors() {
                   </span>
                 )}
                 <div className="flex items-center gap-2 mb-1">
-                  <Zap size={16} className={tier.popular ? 'text-spa-pink' : 'text-spa-pink'} />
+                  <Zap size={16} className="text-spa-pink" />
                   <h3 className="font-serif text-2xl text-white">{tier.name}</h3>
                 </div>
                 <p className={`text-sm mt-1 ${tier.popular ? 'text-white/70' : 'text-white/50'}`}>{tier.description}</p>
-
-                {/* Pricing */}
                 <div className="mt-6 flex items-end gap-3">
                   <div>
                     <span className="font-serif text-4xl text-white">${tier.lifetimePrice}</span>
@@ -406,12 +478,9 @@ export default function ForVendors() {
                     <span className="text-white/40 text-xs line-through">${tier.monthlyPrice}/mo</span>
                   </div>
                 </div>
-
-                {/* Savings callout */}
                 <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-spa-pink/20 text-spa-pink border border-spa-pink/30">
                   Save ${(tier.monthlyPrice * 12) - tier.lifetimePrice > 0 ? (tier.monthlyPrice * 12) - tier.lifetimePrice : tier.monthlyPrice * 6}+ vs first year monthly
                 </div>
-
                 <ul className="mt-6 space-y-3">
                   {tier.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-3">
@@ -420,7 +489,6 @@ export default function ForVendors() {
                     </li>
                   ))}
                 </ul>
-
                 <button
                   onClick={() => handleSelectFoundingTier(tier)}
                   className={`w-full mt-8 py-3 rounded-full font-medium transition-colors ${tier.popular ? 'bg-white text-spa-purple hover:bg-spa-cream' : 'bg-spa-pink text-white hover:bg-spa-pink/90'}`}
@@ -520,6 +588,161 @@ export default function ForVendors() {
         </div>
       </section>
 
+      {/* ── FREE LISTING MODAL ── */}
+      {showFreeListingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/60 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-8 shadow-2xl my-8">
+
+            {submitSuccess ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle size={32} className="text-green-600" />
+                </div>
+                <h3 className="font-serif text-2xl text-spa-charcoal mb-3">Listing Submitted!</h3>
+                <p className="text-spa-gray leading-relaxed mb-2">
+                  Thank you for listing <strong>{freeListingForm.business_name}</strong> on Spa-Pregio.
+                </p>
+                <p className="text-spa-gray text-sm leading-relaxed mb-8">
+                  Your listing is pending review and will appear in the directory within 24–48 hours. We'll reach out to <strong>{freeListingForm.email}</strong> once it's live.
+                </p>
+                <button onClick={resetFreeListingModal} className="btn-primary mx-auto inline-flex">
+                  Done <ArrowRight size={16} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="font-serif text-2xl text-spa-charcoal">Create Free Listing</h3>
+                    <p className="text-spa-gray text-sm mt-1">Your business will appear in our local vendor directory.</p>
+                  </div>
+                  <button onClick={resetFreeListingModal} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors flex-shrink-0">
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-2">Business Name <span className="text-spa-pink">*</span></label>
+                    <input
+                      type="text"
+                      placeholder="Your business name"
+                      value={freeListingForm.business_name}
+                      onChange={e => setFreeListingForm({ ...freeListingForm, business_name: e.target.value })}
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-2">Category <span className="text-spa-pink">*</span></label>
+                    <select
+                      value={freeListingForm.category}
+                      onChange={e => setFreeListingForm({ ...freeListingForm, category: e.target.value })}
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    >
+                      {vendorCategoryOptions.map(c => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-spa-charcoal mb-2">City <span className="text-spa-pink">*</span></label>
+                      <input
+                        type="text"
+                        placeholder="City"
+                        value={freeListingForm.city}
+                        onChange={e => setFreeListingForm({ ...freeListingForm, city: e.target.value })}
+                        className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-spa-charcoal mb-2">State <span className="text-spa-pink">*</span></label>
+                      <input
+                        type="text"
+                        placeholder="NC"
+                        maxLength={2}
+                        value={freeListingForm.state}
+                        onChange={e => setFreeListingForm({ ...freeListingForm, state: e.target.value.toUpperCase() })}
+                        className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-2">Contact Method <span className="text-spa-pink">*</span></label>
+                    <div className="flex gap-3 mb-3">
+                      {(['website', 'phone'] as const).map(type => (
+                        <button
+                          key={type}
+                          onClick={() => setFreeListingForm({ ...freeListingForm, contact_type: type, contact_value: '' })}
+                          className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors capitalize ${
+                            freeListingForm.contact_type === type
+                              ? 'bg-spa-purple text-white'
+                              : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/10'
+                          }`}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      type={freeListingForm.contact_type === 'phone' ? 'tel' : 'url'}
+                      placeholder={freeListingForm.contact_type === 'phone' ? '(555) 555-5555' : 'https://yourwebsite.com'}
+                      value={freeListingForm.contact_value}
+                      onChange={e => setFreeListingForm({ ...freeListingForm, contact_value: e.target.value })}
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-2">Your Name</label>
+                    <input
+                      type="text"
+                      placeholder="First and last name"
+                      value={freeListingForm.owner_name}
+                      onChange={e => setFreeListingForm({ ...freeListingForm, owner_name: e.target.value })}
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-2">Email Address <span className="text-spa-pink">*</span></label>
+                    <input
+                      type="email"
+                      placeholder="you@yourbusiness.com"
+                      value={freeListingForm.email}
+                      onChange={e => setFreeListingForm({ ...freeListingForm, email: e.target.value })}
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    />
+                  </div>
+
+                  {submitError && (
+                    <p className="text-red-500 text-sm">{submitError}</p>
+                  )}
+
+                  <p className="text-xs text-spa-gray">
+                    Your listing will be reviewed before going live. We'll email you once it's published.
+                  </p>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button onClick={resetFreeListingModal} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleFreeListingSubmit}
+                    disabled={submitting}
+                    className="flex-1 btn-primary justify-center disabled:opacity-50"
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Free Listing'} <ArrowRight size={16} />
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Plan Confirmation Modal */}
       {showConfirmModal && selectedTier && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm">
@@ -536,8 +759,6 @@ export default function ForVendors() {
                 <span className="text-spa-purple font-medium">
                   {selectedTier.isLifetime
                     ? `$${selectedTier.lifetimePrice} one-time`
-                    : selectedTier.price === 0
-                    ? 'Free'
                     : `$${selectedTier.price}/mo`}
                 </span>
               </div>
@@ -549,9 +770,7 @@ export default function ForVendors() {
               )}
             </div>
             <p className="text-sm text-spa-gray mb-6 text-center">
-              {selectedTier.price === 0
-                ? "You'll be taken to our contact form to set up your free listing."
-                : selectedTier.isLifetime
+              {selectedTier.isLifetime
                 ? "You'll be taken to Stripe's secure checkout for a one-time payment. No recurring charges."
                 : "You'll be taken to Stripe's secure checkout to complete your subscription. Cancel anytime."}
             </p>
@@ -560,7 +779,7 @@ export default function ForVendors() {
                 Go Back
               </button>
               <button onClick={handleProceedToCheckout} className="flex-1 btn-primary justify-center">
-                {selectedTier.price === 0 ? 'Get My Free Listing' : 'Proceed to Checkout'} <ArrowRight size={16} />
+                Proceed to Checkout <ArrowRight size={16} />
               </button>
             </div>
           </div>
