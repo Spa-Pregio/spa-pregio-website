@@ -15,7 +15,6 @@ export default function Navigation() {
     { name: 'Find Vendors', href: '/find-vendors' },
     { name: 'Events', href: '/events' },
     { name: 'Suite Sisters™', href: '/ambassadors' },
-    { name: 'Community', href: '/community' },
     { name: 'About', href: '/about' },
   ];
 
@@ -26,7 +25,7 @@ export default function Navigation() {
           <div className="flex items-center justify-between h-16 lg:h-20">
 
             {/* Logo */}
-            <Link to="/" className="inline-flex flex-col items-start">
+            <Link to="/" className="inline-flex flex-col items-start flex-shrink-0">
               <div className="flex items-baseline gap-0">
                 <span className="font-serif text-2xl lg:text-3xl font-semibold tracking-tight text-spa-purple">SPA</span>
                 <span className="font-serif text-2xl lg:text-3xl font-semibold tracking-tight text-spa-gray">-</span>
@@ -38,12 +37,12 @@ export default function Navigation() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-8">
+            <div className="hidden lg:flex items-center gap-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.href}
-                  className={`text-sm font-medium transition-colors duration-200 ${
+                  className={`text-sm font-medium transition-colors duration-200 whitespace-nowrap ${
                     location.pathname === link.href
                       ? 'text-spa-purple'
                       : 'text-spa-charcoal/70 hover:text-spa-purple'
@@ -55,7 +54,7 @@ export default function Navigation() {
             </div>
 
             {/* CTAs */}
-            <div className="hidden lg:flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
               <Link
                 to="/my-account"
                 title="My Account"
@@ -82,11 +81,11 @@ export default function Navigation() {
               </Link>
               <Link
                 to="/vendors"
-                className="text-sm font-medium text-spa-charcoal/70 hover:text-spa-purple transition-colors"
+                className="text-sm font-medium text-spa-charcoal/70 hover:text-spa-purple transition-colors whitespace-nowrap"
               >
                 List Your Business
               </Link>
-              <Link to="/community" className="btn-primary text-sm">
+              <Link to="/community" className="btn-primary text-sm whitespace-nowrap">
                 Join the Community
               </Link>
             </div>
@@ -113,7 +112,6 @@ export default function Navigation() {
         }`}
       >
         <div className="flex flex-col items-center justify-center h-full gap-6 pt-20">
-          {/* Logo in mobile menu */}
           <div className="flex items-baseline gap-0 mb-2">
             <span className="font-serif text-2xl font-semibold tracking-tight text-spa-purple">SPA</span>
             <span className="font-serif text-2xl font-semibold tracking-tight text-spa-gray">-</span>
