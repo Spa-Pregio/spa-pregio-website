@@ -29,7 +29,6 @@ export default function Home() {
               to="/suites"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold tracking-wide shadow-elegant hover:bg-[#7d5fa0] transition-colors"
             >
-              {/* Soft bloom icon */}
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="12" r="3" fill="white" opacity="0.9"/>
                 <ellipse cx="12" cy="6" rx="2.5" ry="4" fill="white" opacity="0.7"/>
@@ -47,7 +46,6 @@ export default function Home() {
               to="/vendors"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border-2 border-spa-purple text-spa-purple text-sm font-semibold tracking-wide hover:bg-spa-purple hover:text-white transition-colors group"
             >
-              {/* Store/vendor icon */}
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>
@@ -64,7 +62,6 @@ export default function Home() {
 
           {/* Momma path */}
           <div className="rounded-3xl bg-spa-blush p-10 flex flex-col">
-            {/* Elegant floral SVG */}
             <div className="mb-4 w-12 h-12">
               <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                 <circle cx="24" cy="24" r="6" fill="#9B7CB6" opacity="0.9"/>
@@ -96,7 +93,7 @@ export default function Home() {
                 Explore Celebration Suites
               </Link>
               <Link
-                to="/memberships"
+                to="/community"
                 className="text-center px-6 py-3 rounded-full border border-spa-purple text-spa-purple text-sm font-semibold hover:bg-spa-blush transition-colors"
               >
                 Join the Community
@@ -106,7 +103,6 @@ export default function Home() {
 
           {/* Vendor path */}
           <div className="rounded-3xl bg-spa-light p-10 flex flex-col">
-            {/* Elegant store/business SVG */}
             <div className="mb-4 w-12 h-12">
               <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                 <rect x="8" y="22" width="32" height="22" rx="3" fill="#9B7CB6" opacity="0.2"/>
@@ -349,7 +345,7 @@ export default function Home() {
               Explore Celebration Suites
             </Link>
             <Link
-              to="/memberships"
+              to="/community"
               className="px-8 py-4 rounded-full border-2 border-spa-purple text-spa-purple text-sm font-semibold hover:bg-spa-purple hover:text-white transition-colors"
             >
               Join the Community
