@@ -15,6 +15,16 @@ const vendorCategories = [
   { name: 'Event Venues', description: 'Spaces for baby showers and celebrations', icon: MapPin, examples: ['Country clubs', 'Restaurants', 'Hotels', 'Private estates'] },
   { name: 'Florists', description: 'Bouquets, centerpieces, and event florals', icon: Store, examples: ['Centerpieces', 'Bouquets', 'Installations', 'Corsages'] },
   { name: 'Party Planners', description: 'Full-service event planning and coordination', icon: Store, examples: ['Full planning', 'Day-of coordination', 'Styling', 'Vendors'] },
+  { name: 'Realtors', description: 'Home buying and family relocation specialists', icon: MapPin, examples: ['First-time buyers', 'Family homes', 'Relocation', 'Nursery-ready homes'] },
+  { name: 'Pediatricians', description: 'Child health and newborn care providers', icon: Users, examples: ['Newborn care', 'Well visits', 'Vaccinations', 'Child development'] },
+  { name: 'OB-GYN & Midwives', description: 'Prenatal and maternal healthcare providers', icon: Users, examples: ['Prenatal care', 'Birth planning', 'Postpartum care', 'Midwifery'] },
+  { name: 'Doulas', description: 'Birth and postpartum support for mothers', icon: Users, examples: ['Birth doulas', 'Postpartum doulas', 'Childbirth education', 'Breastfeeding support'] },
+  { name: 'Lactation Consultants', description: 'Breastfeeding guidance and support', icon: Users, examples: ['Latch support', 'Milk supply', 'Pumping guidance', 'Weaning support'] },
+  { name: 'Postpartum Support', description: 'Recovery and wellness services for new mothers', icon: Users, examples: ['Meal delivery', 'Night nurses', 'Mental health', 'Physical therapy'] },
+  { name: 'Family Therapists & Counselors', description: 'Mental health and relationship support for growing families', icon: Users, examples: ['Couples therapy', 'Prenatal anxiety', 'Postpartum depression', 'Family counseling'] },
+  { name: 'Insurance Agents', description: 'Life, health, and family protection planning', icon: Store, examples: ['Life insurance', 'Health coverage', 'Baby planning', 'Family policies'] },
+  { name: 'House Cleaning Services', description: 'Home cleaning and organization for growing families', icon: Store, examples: ['Deep cleaning', 'Newborn prep', 'Move-in cleaning', 'Regular maintenance'] },
+  { name: 'Estate Planning & Attorneys', description: 'Wills, trusts, and family financial protection', icon: Store, examples: ['Wills & trusts', 'Guardianship', 'Life planning', 'Asset protection'] },
 ];
 
 const freeTier = {
@@ -157,8 +167,16 @@ const vendorCategoryOptions = [
   'Event Venues',
   'Florists',
   'Party Planners',
-  'Doulas & Midwives',
-  'Chiropractors',
+  'Realtors',
+  'Pediatricians',
+  'OB-GYN & Midwives',
+  'Doulas',
+  'Lactation Consultants',
+  'Postpartum Support',
+  'Family Therapists & Counselors',
+  'Insurance Agents',
+  'Estate Planning & Attorneys',
+  'House Cleaning Services',
   'Other',
 ];
 
