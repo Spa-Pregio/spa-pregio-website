@@ -15,6 +15,7 @@ export default function Navigation() {
     { name: 'Find Vendors', href: '/find-vendors' },
     { name: 'Events', href: '/events' },
     { name: 'Suite Sisters™', href: '/ambassadors' },
+    { name: 'Community', href: '/community' },
     { name: 'About', href: '/about' },
   ];
 
@@ -85,8 +86,8 @@ export default function Navigation() {
               >
                 List Your Business
               </Link>
-              <Link to="/join" className="btn-primary text-sm">
-                Become a Member
+              <Link to="/community" className="btn-primary text-sm">
+                Join the Community
               </Link>
             </div>
 
@@ -158,8 +159,8 @@ export default function Navigation() {
             >
               List Your Business
             </Link>
-            <Link to="/join" className="btn-primary">
-              Become a Member
+            <Link to="/community" className="btn-primary">
+              Join the Community
             </Link>
           </div>
         </div>
