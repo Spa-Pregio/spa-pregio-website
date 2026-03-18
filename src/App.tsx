@@ -52,7 +52,7 @@ function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/sister-dashboard" element={<AffiliateDashboard />} />
-            <Route path="/admin/affiliates" element={<AdminAffiliates />} />
+            <Route path="/admin-affiliates" element={<AdminAffiliates />} />
             <Route path="/community" element={<Community />} />
           </Routes>
         </main>
