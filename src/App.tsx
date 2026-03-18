@@ -20,6 +20,7 @@ import Terms from './pages/Terms';
 import Contact from './pages/Contact';
 import AffiliateDashboard from './pages/AffiliateDashboard';
 import AdminAffiliates from './pages/AdminAffiliates';
+import Community from './pages/Community';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -52,6 +53,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/sister-dashboard" element={<AffiliateDashboard />} />
             <Route path="/admin/affiliates" element={<AdminAffiliates />} />
+            <Route path="/community" element={<Community />} />
           </Routes>
         </main>
         <Footer />
