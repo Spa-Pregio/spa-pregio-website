@@ -126,7 +126,7 @@ export default function Ambassadors() {
           <div className="text-center max-w-3xl mx-auto">
             <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Affiliate Program</span>
             <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-spa-charcoal leading-tight mt-4">
-              Become a <span className="text-spa-purple">Suite Sister™</span>
+              Become a <span className="text-spa-purple">Suite Sister</span>
             </h1>
             <p className="mt-6 text-lg text-spa-gray leading-relaxed">
               Two ways to earn. Share digital suites with mamas and earn 30% per sale.
@@ -137,7 +137,7 @@ export default function Ambassadors() {
                 href="/sister-dashboard"
                 className="btn-primary justify-center"
               >
-                Join the Suite Sisters™ — Free
+                Join the Suite Sisters — Free
                 <ArrowRight size={18} />
               </a>
             </div>
@@ -173,7 +173,7 @@ export default function Ambassadors() {
             <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">How You Earn</span>
             <h2 className="section-title mt-4">Two streams. <span className="text-spa-purple">One link.</span></h2>
             <p className="mt-4 text-spa-gray max-w-xl mx-auto">
-              Most affiliate programs pay once. Suite Sisters™ earn recurring income every month vendors stay active — on top of digital suite commissions.
+              Most affiliate programs pay once. Suite Sisters earn recurring income every month vendors stay active — on top of digital suite commissions.
             </p>
           </div>
 
@@ -351,13 +351,13 @@ export default function Ambassadors() {
             Ready to become a <span className="text-spa-pink">Suite Sister™?</span>
           </h2>
           <p className="mt-4 text-white/70 leading-relaxed max-w-xl mx-auto">
-            Join free. Share your link. Earn on digital sales and recurring vendor referrals. Help mamas celebrate — and get paid for it.
+            Join free. Share your link. Earn on digital sales and recurring vendor referrals. Help mamas celebrate — and get PAID for it!
           </p>
           <a
             href="/sister-dashboard"
             className="inline-flex items-center gap-2 bg-white text-spa-purple px-8 py-4 rounded-full font-semibold hover:bg-spa-cream transition-colors mt-8 text-lg"
           >
-            Join the Suite Sisters™ — It's Free
+            Join the Suite Sisters — It's Free
             <ArrowRight size={20} />
           </a>
           <p className="text-white/50 text-xs mt-4">No cost. No catch. Two commission streams.</p>
