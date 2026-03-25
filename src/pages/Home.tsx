@@ -11,7 +11,7 @@ export default function Home() {
 
         <div className="relative max-w-3xl mx-auto">
           <span className="inline-block mb-4 text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
-            The Celebration Suite Movement™
+            The Celebration Suite Movement
           </span>
           <h1 className="text-5xl md:text-6xl font-bold text-spa-charcoal leading-tight mb-6 font-serif">
             Elevated Pregnancy Celebrations,
@@ -133,7 +133,7 @@ export default function Home() {
                 to="/ambassadors"
                 className="text-center px-6 py-3 rounded-full border border-spa-charcoal text-spa-charcoal text-sm font-semibold hover:bg-spa-light transition-colors"
               >
-                Become a Suite Sister™
+                Become a Suite Sister
               </Link>
             </div>
           </div>
@@ -277,7 +277,7 @@ export default function Home() {
               to="/ambassadors"
               className="px-8 py-4 rounded-full border-2 border-spa-pink text-spa-pink text-sm font-semibold hover:bg-spa-pink hover:text-spa-charcoal transition-colors"
             >
-              Become a Suite Sister™
+              Become a Suite Sister
             </Link>
           </div>
         </div>
