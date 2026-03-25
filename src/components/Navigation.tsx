@@ -14,7 +14,7 @@ export default function Navigation() {
     { name: 'Celebration Suites', href: '/suites' },
     { name: 'Find Vendors', href: '/find-vendors' },
     { name: 'Events', href: '/events' },
-    { name: 'Suite Sisters™', href: '/ambassadors' },
+    { name: 'Suite Sisters', href: '/ambassadors' },
     { name: 'About', href: '/about' },
   ];
 
