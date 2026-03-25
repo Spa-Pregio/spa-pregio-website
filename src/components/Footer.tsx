@@ -7,7 +7,7 @@ const footerLinks = {
     { name: 'About', href: '/about' },
   ],
   ambassadors: [
-    { name: 'Suite Sisters™ Program', href: 'https://payhip.com/auth/register/af699c7e55b3f58', external: true },
+    { name: 'Suite Sisters Program', href: 'https://payhip.com/auth/register/af699c7e55b3f58', external: true },
     { name: 'Become an Ambassador', href: '/ambassadors' },
   ],
   support: [
