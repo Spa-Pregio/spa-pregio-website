@@ -134,10 +134,17 @@ export default function Ambassadors() {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="/sister-dashboard"
+                href="/join"
                 className="btn-primary justify-center"
               >
                 Join the Suite Sisters — Free
+                <ArrowRight size={18} />
+              </a>
+              <a
+                href="/sister-dashboard"
+                className="inline-flex items-center gap-2 justify-center border-2 border-spa-purple text-spa-purple px-6 py-3 rounded-full font-semibold hover:bg-spa-purple hover:text-white transition-colors"
+              >
+                Login
                 <ArrowRight size={18} />
               </a>
             </div>
@@ -353,13 +360,22 @@ export default function Ambassadors() {
           <p className="mt-4 text-white/70 leading-relaxed max-w-xl mx-auto">
             Join free. Share your link. Earn on digital sales and recurring vendor referrals. Help mamas celebrate — and get PAID for it!
           </p>
-          <a
-            href="/sister-dashboard"
-            className="inline-flex items-center gap-2 bg-white text-spa-purple px-8 py-4 rounded-full font-semibold hover:bg-spa-cream transition-colors mt-8 text-lg"
-          >
-            Join the Suite Sisters — It's Free
-            <ArrowRight size={20} />
-          </a>
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/join"
+              className="inline-flex items-center gap-2 justify-center bg-white text-spa-purple px-8 py-4 rounded-full font-semibold hover:bg-spa-cream transition-colors text-lg"
+            >
+              Join the Suite Sisters — It's Free
+              <ArrowRight size={20} />
+            </a>
+            <a
+              href="/sister-dashboard"
+              className="inline-flex items-center gap-2 justify-center border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-spa-purple transition-colors text-lg"
+            >
+              Login
+              <ArrowRight size={20} />
+            </a>
+          </div>
           <p className="text-white/50 text-xs mt-4">No cost. No catch. Two commission streams.</p>
         </div>
       </section>
