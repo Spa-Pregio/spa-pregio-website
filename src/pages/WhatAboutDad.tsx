@@ -1,17 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-// ─── Amazon Associates Tag ───────────────────────────────────────
 const TAG = "ihh25-20";
 const amzLink = (asin: string) =>
   `https://www.amazon.com/dp/${asin}?tag=${TAG}`;
 
-// ─── Types ───────────────────────────────────────────────────────
 interface Product {
   asin: string;
   name: string;
   description: string;
-  price?: string;
   badge?: string;
+  price?: string;
 }
 
 interface Section {
@@ -23,8 +21,13 @@ interface Section {
   products: Product[];
 }
 
-// ─── Product Data ────────────────────────────────────────────────
-// Replace ASINs + imageUrls with real Amazon products & photos
+const BADGE_COLORS: Record<string, { bg: string; text: string }> = {
+  "Fan Favorite":       { bg: "rgba(155,124,182,0.12)", text: "#7A5CAA" },
+  "Registry Must-Have": { bg: "rgba(190,216,180,0.2)",  text: "#6A9E5A" },
+  "We Love This":       { bg: "rgba(201,169,110,0.15)", text: "#A07830" },
+  "The Splurge":        { bg: "rgba(209,154,198,0.15)", text: "#C47AB0" },
+};
+
 const SECTIONS: Section[] = [
   {
     id: "for_the_new_dad",
@@ -78,18 +81,9 @@ const SECTIONS: Section[] = [
   },
 ];
 
-const BADGE_COLORS: Record<string, { bg: string; text: string }> = {
-  "Fan Favorite":       { bg: "rgba(155,124,182,0.12)", text: "#7A5CAA" },
-  "Registry Must-Have": { bg: "rgba(190,216,180,0.2)",  text: "#6A9E5A" },
-  "We Love This":       { bg: "rgba(201,169,110,0.15)", text: "#A07830" },
-  "The Splurge":        { bg: "rgba(209,154,198,0.15)", text: "#C47AB0" },
-};
-
-// ─── Product Card ────────────────────────────────────────────────
 function ProductCard({ product, accent }: { product: Product; accent: string }) {
   const [hovered, setHovered] = useState(false);
   const badge = product.badge ? BADGE_COLORS[product.badge] : null;
-  const hasImage = product.imageUrl && product.imageUrl.length > 0;
 
   return (
     <div
@@ -152,7 +146,6 @@ function ProductCard({ product, accent }: { product: Product; accent: string }) 
         }}>
           {product.name}
         </h3>
-
         <p style={{
           fontFamily: "'Jost',sans-serif", fontWeight: 200,
           fontSize: "12.5px", lineHeight: 1.7,
@@ -161,20 +154,19 @@ function ProductCard({ product, accent }: { product: Product; accent: string }) 
         }}>
           {product.description}
         </p>
-
         <div style={{
           display: "flex", alignItems: "center",
           justifyContent: "space-between",
-          marginTop: "8px",
-          paddingTop: "14px",
+          marginTop: "8px", paddingTop: "14px",
           borderTop: "1px solid rgba(155,124,182,0.1)",
         }}>
           <span style={{
-            fontFamily: "'Cormorant Garamond',serif",
-            fontSize: "18px", fontWeight: 400,
-            color: "#9B7CB6",
+            fontFamily: "'Jost',sans-serif", fontWeight: 300,
+            fontSize: "10px", letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            color: "rgba(60,35,80,0.38)",
           }}>
-            {product.price}
+            See price on Amazon
           </span>
           <a
             href={amzLink(product.asin)}
@@ -191,7 +183,7 @@ function ProductCard({ product, accent }: { product: Product; accent: string }) 
               fontFamily: "'Jost',sans-serif", fontWeight: 400,
               fontSize: "10px", letterSpacing: "0.22em",
               textTransform: "uppercase", textDecoration: "none",
-              transition: "all 0.25s",
+              transition: "all 0.25s", whiteSpace: "nowrap",
             }}
           >
             Shop →
@@ -202,7 +194,6 @@ function ProductCard({ product, accent }: { product: Product; accent: string }) 
   );
 }
 
-// ─── Section ─────────────────────────────────────────────────────
 function DadSection({ section }: { section: Section }) {
   return (
     <div style={{ marginBottom: "80px" }}>
@@ -232,41 +223,38 @@ function DadSection({ section }: { section: Section }) {
           {section.tagline}
         </p>
       </div>
-
       <div style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
         gap: "20px",
       }}>
-        {section.products.map((p, i) => (
-          <ProductCard key={i} product={p} accent={section.accent} />
+        {section.products.map((p) => (
+          <ProductCard key={p.asin} product={p} accent={section.accent} />
         ))}
       </div>
     </div>
   );
 }
 
-// ─── Main Page ───────────────────────────────────────────────────
 export default function WhatAboutDad() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div style={{
       minHeight: "100vh",
       background: "linear-gradient(165deg, #FAF6F9 0%, #F5EFF7 40%, #FDF8F0 75%, #FAF4EF 100%)",
       fontFamily: "'Jost',sans-serif",
     }}>
-
       <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap"
         rel="stylesheet"
       />
 
-      {/* ── Hero ── */}
+      {/* Hero */}
       <div style={{ textAlign: "center", padding: "88px 24px 72px" }}>
-
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: "14px",
-          marginBottom: "28px",
-        }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "14px", marginBottom: "28px" }}>
           <div style={{ width: "36px", height: "1px", background: "#C9A96E", opacity: 0.5 }} />
           <span style={{
             color: "#9B7CB6", fontFamily: "'Jost',sans-serif", fontWeight: 300,
@@ -288,7 +276,6 @@ export default function WhatAboutDad() {
           fontWeight: 300, fontSize: "clamp(52px,8vw,88px)",
           color: "#2D1F3D", lineHeight: 0.95,
           letterSpacing: "-0.02em", margin: "0 0 28px",
-          fontStyle: "italic",
         }}>
           <em style={{ color: "#C9A96E" }}>Dad?</em>
         </h1>
@@ -296,7 +283,7 @@ export default function WhatAboutDad() {
         <p style={{
           fontFamily: "'Jost',sans-serif", fontWeight: 200,
           fontSize: "clamp(14px,2vw,17px)", lineHeight: 1.8,
-          color: "rgba(60,35,80,0.62)", maxWidth: "500px",
+          color: "rgba(60,35,80,0.62)", maxWidth: "480px",
           margin: "0 auto 20px", letterSpacing: "0.04em",
         }}>
           He paced the floor. He held her hand through every contraction.
@@ -345,14 +332,14 @@ export default function WhatAboutDad() {
         </p>
       </div>
 
-      {/* ── Sections ── */}
+      {/* Sections */}
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px 100px" }}>
         {SECTIONS.map(section => (
           <DadSection key={section.id} section={section} />
         ))}
       </div>
 
-      {/* ── Bottom CTA ── */}
+      {/* Bottom CTA */}
       <div style={{
         textAlign: "center",
         padding: "48px 24px 80px",
@@ -375,7 +362,7 @@ export default function WhatAboutDad() {
           for the full experience.
         </p>
         <a
-          href="/celebration-suites"
+          href="/suites"
           style={{
             display: "inline-block",
             padding: "14px 36px",
@@ -400,7 +387,6 @@ export default function WhatAboutDad() {
           Shop Celebration Suites →
         </a>
       </div>
-
     </div>
   );
 }
