@@ -8,64 +8,54 @@ import {
   Sparkles, AlertCircle, Eye, EyeOff
 } from 'lucide-react';
 
-// All 5 Suites with Payhip links
+// All 5 Celebration Suites with real Payhip links
 const SUITES = [
   {
-    id: 'celebration',
-    name: 'The Celebration Suite™',
-    subtitle: 'The Flagship',
-    price: '$27',
-    payhip: 'https://payhip.com/b/celebration-suite',
-    color: 'from-spa-purple to-spa-pink',
-    icon: '👑',
-    description: 'The complete maternal celebration planning kit — checklists, vendor guides, budgeting tools & more.',
-  },
-  {
     id: 'baby-shower',
-    name: 'The Baby Shower Suite™',
+    name: 'Baby Shower Suite',
     subtitle: 'Plan the Perfect Shower',
     price: '$27',
-    payhip: 'https://payhip.com/b/baby-shower-suite',
+    payhip: 'https://payhip.com/b/lZ6WG',
     color: 'from-pink-300 to-spa-purple',
     icon: '🍼',
     description: 'Everything you need to host or attend the most beautiful baby shower — themes, timelines & checklists.',
   },
   {
     id: 'gender-reveal',
-    name: 'The Gender Reveal Suite™',
+    name: 'Gender Reveal Suite',
     subtitle: 'Make It a Moment',
     price: '$27',
-    payhip: 'https://payhip.com/b/gender-reveal-suite',
+    payhip: 'https://payhip.com/b/jLSWB',
     color: 'from-blue-300 to-pink-300',
     icon: '🎉',
     description: 'Creative reveal ideas, vendor checklists, and planning guides for an unforgettable gender reveal.',
   },
   {
     id: 'sip-and-see',
-    name: 'The Sip & See Suite™',
+    name: 'Sip & See Suite',
     subtitle: 'Welcome Baby in Style',
     price: '$27',
-    payhip: 'https://payhip.com/b/sip-and-see-suite',
+    payhip: 'https://payhip.com/b/WbdBP',
     color: 'from-green-200 to-spa-purple',
     icon: '🌸',
     description: 'Host a gorgeous post-birth sip & see that celebrates mama and baby with grace and ease.',
   },
   {
     id: 'push-present',
-    name: 'The Push Present Suite™',
+    name: 'Push Present & Pampering Suite',
     subtitle: 'She Deserves It',
     price: '$27',
-    payhip: 'https://payhip.com/b/push-present-suite',
+    payhip: 'https://payhip.com/b/Ldkxz',
     color: 'from-yellow-200 to-spa-pink',
     icon: '💐',
     description: 'Pampering gift guides, spa & wellness vendor lists, and self-care checklists for the new mama.',
   },
   {
     id: 'pregnancy-announcement',
-    name: 'The Announcement Suite™',
+    name: 'Pregnancy Announcement Suite',
     subtitle: 'Share Your Joy',
     price: '$27',
-    payhip: 'https://payhip.com/b/announcement-suite',
+    payhip: 'https://payhip.com/b/j6hfL',
     color: 'from-spa-pink to-yellow-200',
     icon: '✨',
     description: 'Creative pregnancy announcement ideas, photo guides, and keepsake checklists for your big reveal.',
@@ -228,7 +218,6 @@ export default function MommaDashboard() {
     return (
       <div className="min-h-screen bg-spa-cream flex items-center justify-center pt-20 px-4">
         <div className="w-full max-w-md">
-          {/* Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-spa-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <Baby size={28} className="text-spa-purple" />
@@ -243,7 +232,6 @@ export default function MommaDashboard() {
             </p>
           </div>
 
-          {/* Card */}
           <div className="bg-white rounded-2xl shadow-sm border border-spa-purple/10 p-8">
             {authStatus === 'verify' ? (
               <div className="text-center py-4">
@@ -348,12 +336,11 @@ export default function MommaDashboard() {
             )}
           </div>
 
-          {/* Suite Sisters CTA */}
           <div className="mt-6 text-center">
             <p className="text-spa-charcoal/50 text-xs font-sans">
               Want to earn commissions?{' '}
               <Link to="/ambassadors" className="text-spa-purple hover:underline">
-                Become a Suite Sister™
+                Become a Suite Sister
               </Link>
             </p>
           </div>
@@ -367,7 +354,6 @@ export default function MommaDashboard() {
 
   return (
     <div className="min-h-screen bg-spa-cream pt-20">
-      {/* Header Bar */}
       <div className="bg-white border-b border-spa-purple/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 py-4 flex items-center justify-between">
           <div>
@@ -383,7 +369,6 @@ export default function MommaDashboard() {
           </button>
         </div>
 
-        {/* Tab Navigation */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12">
           <div className="flex gap-0 overflow-x-auto">
             {tabs.map(tab => {
@@ -409,10 +394,9 @@ export default function MommaDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
 
-        {/* ── OVERVIEW TAB ───────────────────────────────────────────────────── */}
+        {/* ── OVERVIEW TAB ── */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
-            {/* Welcome card */}
             <div className="bg-gradient-to-r from-spa-purple to-spa-pink rounded-2xl p-6 text-white">
               <div className="flex items-center gap-3 mb-2">
                 <Sparkles size={20} />
@@ -426,7 +410,6 @@ export default function MommaDashboard() {
               </p>
             </div>
 
-            {/* Quick stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { label: 'Suites Owned', value: '—', icon: Download, note: 'Browse suites ↓' },
@@ -448,10 +431,9 @@ export default function MommaDashboard() {
               })}
             </div>
 
-            {/* Suite Shop preview */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-serif text-xl text-spa-charcoal">Shop Celebration Suites™</h3>
+                <h3 className="font-serif text-xl text-spa-charcoal">Shop Celebration Suites</h3>
                 <button onClick={() => setActiveTab('downloads')} className="text-spa-purple text-sm font-sans flex items-center gap-1 hover:underline">
                   View all <ChevronRight size={14} />
                 </button>
@@ -477,7 +459,6 @@ export default function MommaDashboard() {
               </div>
             </div>
 
-            {/* Upcoming Events preview */}
             {upcomingEvents.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -507,11 +488,11 @@ export default function MommaDashboard() {
           </div>
         )}
 
-        {/* ── DOWNLOADS / SUITES TAB ─────────────────────────────────────────── */}
+        {/* ── DOWNLOADS / SUITES TAB ── */}
         {activeTab === 'downloads' && (
           <div>
             <div className="mb-6">
-              <h2 className="font-serif text-2xl text-spa-charcoal mb-1">Celebration Suites™</h2>
+              <h2 className="font-serif text-2xl text-spa-charcoal mb-1">Celebration Suites</h2>
               <p className="text-spa-charcoal/50 font-sans text-sm">Each suite is a complete digital planning kit — download instantly after purchase.</p>
             </div>
 
@@ -543,23 +524,21 @@ export default function MommaDashboard() {
               ))}
             </div>
 
-            {/* Bundle note */}
             <div className="mt-8 bg-spa-purple/5 border border-spa-purple/20 rounded-2xl p-6 text-center">
               <Gift size={24} className="text-spa-purple mx-auto mb-3" />
-              <h3 className="font-serif text-lg text-spa-charcoal mb-1">Want All 6 Suites?</h3>
-              <p className="text-spa-charcoal/60 font-sans text-sm mb-4">A bundle option is coming soon. Join the Suite Sisters™ affiliate program to earn 30% on every suite you share!</p>
+              <h3 className="font-serif text-lg text-spa-charcoal mb-1">Want All 5 Suites?</h3>
+              <p className="text-spa-charcoal/60 font-sans text-sm mb-4">A bundle option is coming soon. Join the Suite Sisters affiliate program to earn 30% on every suite you share!</p>
               <Link to="/ambassadors" className="inline-flex items-center gap-2 bg-spa-purple text-white text-sm font-sans px-5 py-2.5 rounded-full hover:bg-spa-purple/90 transition-colors">
                 <Star size={14} />
-                Become a Suite Sister™
+                Become a Suite Sister
               </Link>
             </div>
           </div>
         )}
 
-        {/* ── EVENTS TAB ─────────────────────────────────────────────────────── */}
+        {/* ── EVENTS TAB ── */}
         {activeTab === 'events' && (
           <div className="space-y-8">
-            {/* My RSVPs */}
             <div>
               <h2 className="font-serif text-2xl text-spa-charcoal mb-1">My RSVPs & Tickets</h2>
               <p className="text-spa-charcoal/50 font-sans text-sm mb-5">Events you've signed up for or purchased tickets to.</p>
@@ -611,7 +590,6 @@ export default function MommaDashboard() {
               )}
             </div>
 
-            {/* Upcoming community events */}
             <div>
               <h2 className="font-serif text-2xl text-spa-charcoal mb-1">Upcoming Events</h2>
               <p className="text-spa-charcoal/50 font-sans text-sm mb-5">Community events you can join.</p>
@@ -660,7 +638,7 @@ export default function MommaDashboard() {
           </div>
         )}
 
-        {/* ── PROFILE TAB ────────────────────────────────────────────────────── */}
+        {/* ── PROFILE TAB ── */}
         {activeTab === 'profile' && (
           <div className="max-w-2xl">
             <div className="flex items-center justify-between mb-6">
@@ -696,14 +674,12 @@ export default function MommaDashboard() {
             </div>
 
             <div className="bg-white rounded-2xl border border-spa-purple/10 p-6 space-y-5">
-              {/* Account info (read-only) */}
               <div className="pb-5 border-b border-spa-charcoal/5">
                 <label className="block text-xs font-medium text-spa-charcoal/50 uppercase tracking-wider mb-1.5">Email Address</label>
                 <p className="font-sans text-spa-charcoal">{user.email}</p>
                 <p className="text-xs text-spa-charcoal/40 font-sans mt-0.5">Contact support to change your email</p>
               </div>
 
-              {/* Editable fields */}
               <div className="grid grid-cols-2 gap-4">
                 {[
                   { key: 'first_name', label: 'First Name', type: 'text', placeholder: 'First name' },
@@ -794,7 +770,6 @@ export default function MommaDashboard() {
               </div>
             </div>
 
-            {/* Danger zone */}
             <div className="mt-6 bg-red-50 border border-red-100 rounded-xl p-5">
               <h4 className="font-sans text-sm font-medium text-red-700 mb-1">Account</h4>
               <p className="text-xs text-red-500 font-sans mb-3">Need to delete your account or change your email? Contact us.</p>
