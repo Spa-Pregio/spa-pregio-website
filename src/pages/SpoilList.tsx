@@ -146,7 +146,7 @@ function ProductCard({ product, accent }: { product: Product; accent: string }) 
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
         <img
-          src={`/images/products/${product.asin}.jpg`}
+          src={`/images/${product.asin}.jpg`}
           alt={product.name}
           style={{
             width: "100%", height: "100%",
