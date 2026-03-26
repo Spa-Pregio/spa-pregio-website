@@ -674,7 +674,7 @@ export default function CelebrationSuites() {
           <span style={{
             color: "#9B7CB6", fontFamily: "'Jost',sans-serif", fontWeight: 300,
             fontSize: "9.5px", letterSpacing: "0.45em", textTransform: "uppercase",
-          }}>The Celebration Suite Movement™</span>
+          }}>The Celebration Suite Movement</span>
           <div style={{ width: "36px", height: "1px", background: "#C9A96E", opacity: 0.45 }}/>
         </div>
 
@@ -736,7 +736,7 @@ export default function CelebrationSuites() {
           color: "rgba(60,35,80,0.7)", lineHeight: 1.65,
           maxWidth: "420px", margin: "0 auto 30px",
         }}>
-          Suite Sisters™ earn 30% on every suite they share —
+          Suite Sisters earn 30% on every suite they share —
           and help others celebrate beautifully.
         </p>
         <a
@@ -746,12 +746,22 @@ export default function CelebrationSuites() {
           style={{
             display: "inline-block",
             padding: "15px 38px",
-            border: "1.5px solid rgba(155,124,182,0.4)",
-            color: "#E8D4A8", borderRadius: "100px",
-            fontFamily: "'Jost',sans-serif", fontWeight: 300,
+            border: "1.5px solid #9B7CB6",
+            color: "#7A5CAA", borderRadius: "100px",
+            fontFamily: "'Jost',sans-serif", fontWeight: 400,
             fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase",
             textDecoration: "none",
-            transition: "border-color 0.25s, background 0.25s",
+            transition: "border-color 0.25s, background 0.25s, color 0.25s",
+          }}
+          onMouseEnter={e => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.background = "#9B7CB6";
+            el.style.color = "#FDFCFA";
+          }}
+          onMouseLeave={e => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.background = "transparent";
+            el.style.color = "#7A5CAA";
           }}
         >
           Become a Suite Sister™
