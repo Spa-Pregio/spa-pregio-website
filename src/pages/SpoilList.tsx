@@ -146,7 +146,7 @@ function ProductCard({ product, accent }: { product: Product; accent: string }) 
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
         <img
-          src={`https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=${product.asin}&Format=_SL250_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&tag=${TAG}`}
+          src={`/images/products/${product.asin}.jpg`}
           alt={product.name}
           style={{
             width: "100%", height: "100%",
@@ -154,13 +154,6 @@ function ProductCard({ product, accent }: { product: Product; accent: string }) 
             padding: "12px",
             transition: "transform 0.4s ease",
             transform: hovered ? "scale(1.05)" : "scale(1)",
-          }}
-          onError={(e) => {
-            const img = e.currentTarget;
-            if (!img.dataset.tried) {
-              img.dataset.tried = "1";
-              img.src = `https://images-na.ssl-images-amazon.com/images/P/${product.asin}.01._SL250_.jpg`;
-            }
           }}
         />
         {badge && (
