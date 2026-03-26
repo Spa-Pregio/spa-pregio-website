@@ -10,9 +10,8 @@ interface Product {
   asin: string;
   name: string;
   description: string;
-  price: string;
+  price?: string;
   badge?: string;
-  imageUrl?: string;
 }
 
 interface Section {
@@ -112,47 +111,35 @@ function ProductCard({ product, accent }: { product: Product; accent: string }) 
     >
       {/* Product image */}
       <div style={{
-        width: "100%",
-        height: "220px",
-        background: hasImage
-          ? `url(${product.imageUrl}) center/cover no-repeat`
-          : `linear-gradient(135deg, ${accent}18 0%, ${accent}08 100%)`,
-        display: hasImage ? "block" : "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        overflow: "hidden",
+        width: "100%", height: "220px",
+        position: "relative", overflow: "hidden",
+        background: `linear-gradient(135deg, ${accent}14 0%, ${accent}06 100%)`,
+        display: "flex", alignItems: "center", justifyContent: "center",
       }}>
-        {/* Badge overlay */}
+        <img
+          src={`/images/${product.asin}.jpg`}
+          alt={product.name}
+          style={{
+            width: "100%", height: "100%",
+            objectFit: "contain",
+            padding: "12px",
+            transition: "transform 0.4s ease",
+            transform: hovered ? "scale(1.05)" : "scale(1)",
+          }}
+        />
         {badge && (
           <div style={{
             position: "absolute", top: "12px", left: "12px",
             background: badge.bg,
             backdropFilter: "blur(8px)",
             color: badge.text,
-            fontSize: "9px",
-            letterSpacing: "0.2em",
+            fontSize: "9px", letterSpacing: "0.2em",
             textTransform: "uppercase",
-            fontFamily: "'Jost',sans-serif",
-            fontWeight: 400,
-            padding: "5px 12px",
-            borderRadius: "100px",
+            fontFamily: "'Jost',sans-serif", fontWeight: 400,
+            padding: "5px 12px", borderRadius: "100px",
           }}>
             {product.badge}
           </div>
-        )}
-        {/* Placeholder when no image */}
-        {!hasImage && (
-          <p style={{
-            fontFamily: "'Cormorant Garamond',serif",
-            fontSize: "13px", fontWeight: 300,
-            color: `${accent}88`,
-            letterSpacing: "0.1em",
-            textAlign: "center",
-            padding: "0 20px",
-          }}>
-            Add product image
-          </p>
         )}
       </div>
 
