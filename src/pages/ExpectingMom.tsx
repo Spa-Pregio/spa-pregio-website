@@ -226,7 +226,7 @@ export default function ExpectingMom() {
           {/* Hero Image */}
           <div style={{
             position: "relative",
-            height: "60vh",
+            height: "75vh",
             overflow: "hidden",
             display: "flex",
             alignItems: "center",
@@ -236,7 +236,7 @@ export default function ExpectingMom() {
             <img
               src="/images/expecting-hero.png"
               alt="Expecting mother in Spa-Pregio robe"
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 20%" }}
             />
             {/* Soft overlay so text stays readable */}
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(42,31,51,0.72) 0%, rgba(74,46,90,0.58) 50%, rgba(122,78,138,0.4) 100%)" }} />
