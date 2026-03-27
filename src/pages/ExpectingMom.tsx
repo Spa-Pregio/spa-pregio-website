@@ -227,16 +227,19 @@ export default function ExpectingMom() {
           <div style={{
             position: "relative",
             height: "60vh",
-            background: "linear-gradient(160deg, #2a1f33 0%, #4a2e5a 50%, #7a4e8a 100%)",
             overflow: "hidden",
             display: "flex",
             alignItems: "center",
             justifyContent: "center"
           }}>
-            {/* Decorative circles */}
-            <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.08)", top: -100, right: -100 }} />
-            <div style={{ position: "absolute", width: 300, height: 300, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.06)", bottom: -80, left: -60 }} />
-            <div style={{ position: "absolute", width: 200, height: 200, borderRadius: "50%", background: "rgba(208,154,198,0.12)", top: "30%", left: "10%" }} />
+            {/* Full background photo */}
+            <img
+              src="/expecting-hero.png"
+              alt="Expecting mother in Spa-Pregio robe"
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
+            />
+            {/* Soft overlay so text stays readable */}
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(42,31,51,0.72) 0%, rgba(74,46,90,0.58) 50%, rgba(122,78,138,0.4) 100%)" }} />
 
             <div className="fade-in" style={{ textAlign: "center", padding: "0 24px", position: "relative", zIndex: 1 }}>
               <p style={{ color: "#D09AC6", fontFamily: "'Jost', sans-serif", letterSpacing: "0.2em", fontSize: 12, textTransform: "uppercase", marginBottom: 20 }}>
@@ -245,7 +248,7 @@ export default function ExpectingMom() {
               <h1 style={{ color: "white", fontSize: "clamp(36px, 6vw, 68px)", fontWeight: 300, lineHeight: 1.15, fontStyle: "italic", marginBottom: 16 }}>
                 You deserve to be<br />celebrated, Mama.
               </h1>
-              <p style={{ color: "rgba(255,255,255,0.65)", fontFamily: "'Jost', sans-serif", fontSize: 16, fontWeight: 300, maxWidth: 420, margin: "0 auto" }}>
+              <p style={{ color: "rgba(255,255,255,0.88)", fontFamily: "'Jost', sans-serif", fontSize: 16, fontWeight: 300, maxWidth: 420, margin: "0 auto" }}>
                 Answer a few questions and we'll create your personalized Celebration Suite preview — completely free.
               </p>
             </div>
