@@ -234,7 +234,7 @@ export default function ExpectingMom() {
           }}>
             {/* Full background photo */}
             <img
-              src="/expecting-hero.png"
+              src="/images/expecting-hero.png"
               alt="Expecting mother in Spa-Pregio robe"
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
             />
