@@ -23,6 +23,9 @@ import AdminAffiliates from './pages/AdminAffiliates';
 import Community from './pages/Community';
 import SpoilList from './pages/SpoilList';
 import WhatAboutDad from './pages/WhatAboutDad';
+// Funnel Pages
+import ExpectingMom from './pages/ExpectingMom';
+import Vendors from './pages/Vendors';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -58,6 +61,9 @@ function App() {
             <Route path="/community" element={<Community />} />
             <Route path="/spoil-list" element={<SpoilList />} />
             <Route path="/what-about-dad" element={<WhatAboutDad />} />
+            {/* Funnel Pages */}
+            <Route path="/expecting" element={<ExpectingMom />} />
+            <Route path="/join-as-vendor" element={<Vendors />} />
           </Routes>
         </main>
         <Footer />
