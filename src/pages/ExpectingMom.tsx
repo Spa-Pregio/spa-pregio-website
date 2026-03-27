@@ -236,7 +236,7 @@ export default function ExpectingMom() {
             <img
               src="/images/expecting-hero.png"
               alt="Expecting mother in Spa-Pregio robe"
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 20%" }}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 35%" }}
             />
             {/* Soft overlay so text stays readable */}
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(42,31,51,0.72) 0%, rgba(74,46,90,0.58) 50%, rgba(122,78,138,0.4) 100%)" }} />
