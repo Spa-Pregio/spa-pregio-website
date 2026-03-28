@@ -96,7 +96,7 @@ export default function Vendors() {
       setProfileId(data.id);
       setPhase("account");
     } catch (e: any) {
-      setError("Something went wrong. Please try again.");
+      setError(e?.message || JSON.stringify(e) || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
