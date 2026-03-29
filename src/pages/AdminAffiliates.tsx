@@ -55,16 +55,25 @@ type SuiteCommission = {
 
 type VendorListing = {
   id: string;
+  user_id: string | null;
   business_name: string;
-  category: string;
-  city: string;
-  state: string;
-  contact_type: string;
-  contact_value: string;
-  owner_name: string | null;
-  email: string;
-  plan: string;
+  category: string | null;
+  description: string | null;
+  location: string | null;
+  phone: string | null;
+  website: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  tiktok: string | null;
+  business_type: string | null;
+  service_area: string | null;
+  ideal_client: string | null;
+  current_reach: string | null;
+  motivation: string | null;
+  subscription_type: string | null;
+  founding_member: boolean;
   status: string;
+  email: string | null;
   created_at: string;
 };
 
@@ -120,7 +129,7 @@ export default function AdminAffiliates() {
     const { data: suites } = await supabase.from('affiliate_suite_commissions').select('*').order('created_at', { ascending: false });
     if (suites) setSuiteCommissions(suites);
 
-    const { data: vends } = await supabase.from('vendors').select('*').order('created_at', { ascending: false });
+    const { data: vends } = await supabase.from('vendor_profiles').select('*').order('created_at', { ascending: false });
     if (vends) setVendors(vends);
 
     setLoading(false);
@@ -215,19 +224,19 @@ export default function AdminAffiliates() {
 
   // ── VENDOR ACTIONS ──
   async function approveVendor(id: string) {
-    await supabase.from('vendors').update({ status: 'active' }).eq('id', id);
+    await supabase.from('vendor_profiles').update({ status: 'active' }).eq('id', id);
     loadAll();
   }
 
   async function denyVendor(id: string) {
-    await supabase.from('vendors').update({ status: 'denied', deny_reason: denyReason || null }).eq('id', id);
+    await supabase.from('vendor_profiles').update({ status: 'denied' }).eq('id', id);
     setDenyModal(null);
     setDenyReason('');
     loadAll();
   }
 
   async function removeVendor(id: string) {
-    await supabase.from('vendors').update({ status: 'removed' }).eq('id', id);
+    await supabase.from('vendor_profiles').update({ status: 'removed' }).eq('id', id);
     loadAll();
   }
 
@@ -247,12 +256,53 @@ export default function AdminAffiliates() {
     return 'bg-amber-100 text-amber-700';
   }
 
+  function friendlyBusinessType(val: string | null) {
+    if (!val) return '—';
+    const map: Record<string, string> = {
+      spa_wellness: 'Spa, Wellness & Beauty',
+      photography: 'Photography / Videography',
+      baby_products: 'Baby & Maternity Products',
+      food_nutrition: 'Food, Meal Prep & Nutrition',
+      events_gifting: 'Event Planning & Gifting',
+      other: 'Other Family Services',
+    };
+    return map[val] || val;
+  }
+
+  function friendlyServiceArea(val: string | null) {
+    if (!val) return '—';
+    const map: Record<string, string> = { local: 'Local / In-person', online: 'Online / Virtual', both: 'Both' };
+    return map[val] || val;
+  }
+
+  function friendlyIdealClient(val: string | null) {
+    if (!val) return '—';
+    const map: Record<string, string> = {
+      expecting: 'Expecting Mothers',
+      postpartum: 'New Moms (Postpartum)',
+      families: 'Families with Young Children',
+      all: 'All of the Above',
+    };
+    return map[val] || val;
+  }
+
+  function friendlyMotivation(val: string | null) {
+    if (!val) return '—';
+    const map: Record<string, string> = {
+      visibility: 'More Visibility',
+      referrals: 'Trusted Referral Network',
+      giving_back: 'Give Back to Mothers',
+      all: 'All of the Above',
+    };
+    return map[val] || val;
+  }
+
   // Computed
   const pendingSisters = affiliates.filter(a => a.status === 'pending');
   const activeSisters = affiliates.filter(a => a.status === 'active');
   const filteredSisters = sisterTab === 'pending' ? pendingSisters : sisterTab === 'active' ? activeSisters : affiliates;
 
-  const pendingVendors = vendors.filter(v => v.status === 'pending');
+  const pendingVendors = vendors.filter(v => v.status === 'pending' || v.status === 'pending_signup' || v.status === 'pending_review');
   const activeVendors = vendors.filter(v => v.status === 'active');
   const filteredVendors = vendorTab === 'pending' ? pendingVendors : vendorTab === 'active' ? activeVendors : vendors;
 
@@ -288,7 +338,7 @@ export default function AdminAffiliates() {
           <div className="flex gap-1">
             {([
               ['sisters', `Suite Sisters (${affiliates.length})`],
-              ['vendors', `Vendor Listings (${vendors.length})`],
+              ['vendors', `Vendor Applications (${vendors.length})`],
             ] as [AdminTab, string][]).map(([id, label]) => (
               <button
                 key={id}
@@ -314,13 +364,13 @@ export default function AdminAffiliates() {
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12 space-y-10">
 
-        {/* ── VENDOR LISTINGS TAB ── */}
+        {/* ── VENDOR APPLICATIONS TAB ── */}
         {adminTab === 'vendors' && (
           <>
             {/* Vendor Stats */}
             <div className="grid sm:grid-cols-3 gap-6">
               {[
-                { label: 'Total Listings', value: vendors.length, sub: 'All time', icon: Store },
+                { label: 'Total Applications', value: vendors.length, sub: 'All time', icon: Store },
                 { label: 'Pending Review', value: pendingVendors.length, sub: 'Need approval', icon: Clock },
                 { label: 'Active Listings', value: activeVendors.length, sub: 'Live on site', icon: CheckCircle },
               ].map((s, i) => (
@@ -342,7 +392,7 @@ export default function AdminAffiliates() {
                   <Clock size={20} className="text-amber-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-spa-charcoal">{pendingVendors.length} vendor listing{pendingVendors.length > 1 ? 's' : ''} waiting for approval</p>
+                  <p className="font-medium text-spa-charcoal">{pendingVendors.length} vendor application{pendingVendors.length > 1 ? 's' : ''} waiting for approval</p>
                   <p className="text-sm text-spa-gray">{pendingVendors.map(v => v.business_name).join(', ')}</p>
                 </div>
                 <button onClick={() => setVendorTab('pending')} className="flex-shrink-0 flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-amber-700 transition-colors">
@@ -354,9 +404,13 @@ export default function AdminAffiliates() {
             {/* Vendor List */}
             <div className="bg-white rounded-2xl shadow-elegant overflow-hidden">
               <div className="px-8 py-5 border-b border-spa-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h2 className="font-serif text-2xl text-spa-charcoal">Vendor Listings</h2>
+                <h2 className="font-serif text-2xl text-spa-charcoal">Vendor Applications</h2>
                 <div className="flex gap-1 bg-spa-cream rounded-full p-1">
-                  {([['pending', `Pending (${pendingVendors.length})`], ['active', `Active (${activeVendors.length})`], ['all', `All (${vendors.length})`]] as [VendorTab, string][]).map(([id, label]) => (
+                  {([
+                    ['pending', `Pending (${pendingVendors.length})`],
+                    ['active', `Active (${activeVendors.length})`],
+                    ['all', `All (${vendors.length})`],
+                  ] as [VendorTab, string][]).map(([id, label]) => (
                     <button
                       key={id}
                       onClick={() => setVendorTab(id)}
@@ -374,7 +428,7 @@ export default function AdminAffiliates() {
                 <div className="px-8 py-16 text-center">
                   <Store size={40} className="text-spa-purple/30 mx-auto mb-4" />
                   <p className="text-spa-gray">
-                    {vendorTab === 'pending' ? 'No pending listings — all caught up.' : 'No vendor listings yet.'}
+                    {vendorTab === 'pending' ? 'No pending applications — all caught up.' : 'No vendor applications yet.'}
                   </p>
                 </div>
               ) : (
@@ -391,13 +445,12 @@ export default function AdminAffiliates() {
                             <div className="flex items-center gap-3 flex-wrap">
                               <p className="font-medium text-spa-charcoal">{vendor.business_name}</p>
                               <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge(vendor.status)}`}>{vendor.status}</span>
-                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-spa-lavender text-spa-purple">{vendor.plan}</span>
-                              {vendor.status === 'pending' && (
+                              {(vendor.status === 'pending' || vendor.status === 'pending_signup' || vendor.status === 'pending_review') && (
                                 <span className="text-xs text-amber-600 font-medium animate-pulse">Needs approval</span>
                               )}
                             </div>
                             <p className="text-sm text-spa-gray mt-0.5">
-                              {vendor.category} · {vendor.city}, {vendor.state} · {formatDate(vendor.created_at)}
+                              {friendlyBusinessType(vendor.business_type)} · {vendor.location || '—'} · {formatDate(vendor.created_at)}
                             </p>
                           </div>
                           {isExpanded ? <ChevronUp size={18} className="text-spa-gray flex-shrink-0" /> : <ChevronDown size={18} className="text-spa-gray flex-shrink-0" />}
@@ -406,42 +459,65 @@ export default function AdminAffiliates() {
                         {isExpanded && (
                           <div className="bg-spa-cream/50 px-8 py-6 border-t border-spa-light space-y-5">
 
-                            {/* Listing Details */}
+                            {/* Application Details */}
                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                               <div className="bg-white rounded-xl p-4">
-                                <p className="text-spa-gray text-xs mb-1">Business</p>
+                                <p className="text-spa-gray text-xs mb-1">Business Name</p>
                                 <p className="font-medium text-spa-charcoal">{vendor.business_name}</p>
                               </div>
                               <div className="bg-white rounded-xl p-4">
-                                <p className="text-spa-gray text-xs mb-1">Category</p>
-                                <p className="font-medium text-spa-charcoal">{vendor.category}</p>
+                                <p className="text-spa-gray text-xs mb-1">Business Type</p>
+                                <p className="font-medium text-spa-charcoal">{friendlyBusinessType(vendor.business_type)}</p>
                               </div>
                               <div className="bg-white rounded-xl p-4">
                                 <p className="text-spa-gray text-xs mb-1">Location</p>
                                 <p className="font-medium text-spa-charcoal flex items-center gap-1">
-                                  <MapPin size={13} className="text-spa-purple" /> {vendor.city}, {vendor.state}
+                                  <MapPin size={13} className="text-spa-purple" /> {vendor.location || '—'}
                                 </p>
                               </div>
                               <div className="bg-white rounded-xl p-4">
-                                <p className="text-spa-gray text-xs mb-1">Contact</p>
-                                <p className="font-medium text-spa-charcoal flex items-center gap-1">
-                                  {vendor.contact_type === 'phone' ? <Phone size={13} className="text-spa-purple" /> : <Globe size={13} className="text-spa-purple" />}
-                                  {vendor.contact_value}
-                                </p>
+                                <p className="text-spa-gray text-xs mb-1">Service Area</p>
+                                <p className="font-medium text-spa-charcoal">{friendlyServiceArea(vendor.service_area)}</p>
                               </div>
                               <div className="bg-white rounded-xl p-4">
-                                <p className="text-spa-gray text-xs mb-1">Owner</p>
-                                <p className="font-medium text-spa-charcoal">{vendor.owner_name || '—'}</p>
+                                <p className="text-spa-gray text-xs mb-1">Ideal Client</p>
+                                <p className="font-medium text-spa-charcoal">{friendlyIdealClient(vendor.ideal_client)}</p>
+                              </div>
+                              <div className="bg-white rounded-xl p-4">
+                                <p className="text-spa-gray text-xs mb-1">Motivation</p>
+                                <p className="font-medium text-spa-charcoal">{friendlyMotivation(vendor.motivation)}</p>
                               </div>
                               <div className="bg-white rounded-xl p-4">
                                 <p className="text-spa-gray text-xs mb-1">Email</p>
-                                <p className="font-medium text-spa-charcoal">{vendor.email}</p>
+                                <p className="font-medium text-spa-charcoal">{vendor.email || '—'}</p>
                               </div>
+                              {vendor.phone && (
+                                <div className="bg-white rounded-xl p-4">
+                                  <p className="text-spa-gray text-xs mb-1">Phone</p>
+                                  <p className="font-medium text-spa-charcoal flex items-center gap-1">
+                                    <Phone size={13} className="text-spa-purple" /> {vendor.phone}
+                                  </p>
+                                </div>
+                              )}
+                              {vendor.website && (
+                                <div className="bg-white rounded-xl p-4">
+                                  <p className="text-spa-gray text-xs mb-1">Website</p>
+                                  <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="font-medium text-spa-purple flex items-center gap-1 hover:underline">
+                                    <Globe size={13} /> {vendor.website}
+                                  </a>
+                                </div>
+                              )}
+                              {vendor.instagram && (
+                                <div className="bg-white rounded-xl p-4">
+                                  <p className="text-spa-gray text-xs mb-1">Instagram</p>
+                                  <p className="font-medium text-spa-charcoal">{vendor.instagram}</p>
+                                </div>
+                              )}
                             </div>
 
                             {/* Action Buttons */}
                             <div className="flex flex-wrap gap-3">
-                              {vendor.status === 'pending' && (
+                              {(vendor.status === 'pending' || vendor.status === 'pending_signup' || vendor.status === 'pending_review') && (
                                 <>
                                   <button
                                     onClick={() => approveVendor(vendor.id)}
@@ -501,7 +577,7 @@ export default function AdminAffiliates() {
                     <s.icon size={20} className="text-spa-purple" />
                   </div>
                   <p className="text-spa-gray text-sm">{s.label}</p>
-                  <p className="font-serif text-3xl text-spa-charcoal mt-1">{s.raw ? s.value : s.value}</p>
+                  <p className="font-serif text-3xl text-spa-charcoal mt-1">{s.value}</p>
                   <p className="text-xs text-spa-gray mt-1">{s.sub}</p>
                 </div>
               ))}
@@ -693,7 +769,7 @@ export default function AdminAffiliates() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-serif text-2xl text-spa-charcoal">Deny Listing</h3>
+              <h3 className="font-serif text-2xl text-spa-charcoal">Deny Application</h3>
               <button onClick={() => setDenyModal(null)} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal"><X size={18} /></button>
             </div>
             <p className="text-sm text-spa-gray mb-6">Denying <strong>{denyModal.business_name}</strong>. You can add an optional reason below.</p>
@@ -707,7 +783,7 @@ export default function AdminAffiliates() {
             <div className="flex gap-3">
               <button onClick={() => setDenyModal(null)} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">Cancel</button>
               <button onClick={() => denyVendor(denyModal.id)} className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors">
-                <X size={16} /> Deny Listing
+                <X size={16} /> Deny Application
               </button>
             </div>
           </div>
@@ -751,7 +827,7 @@ export default function AdminAffiliates() {
               <div><label className="block text-sm font-medium text-spa-charcoal mb-2">Suite Name *</label><select value={suiteForm.suite_name} onChange={e => setSuiteForm({ ...suiteForm, suite_name: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30">{['Baby Shower Suite™', 'Gender Reveal Suite™', 'Sip & See Suite™', 'Push Present & Pampering Suite™', 'Pregnancy Announcement Suite™', 'The Celebration Suite™ (Flagship)'].map(s => <option key={s}>{s}</option>)}</select></div>
               <div><label className="block text-sm font-medium text-spa-charcoal mb-2">Sale Amount ($)</label><input type="number" value={suiteForm.sale_amount} onChange={e => setSuiteForm({ ...suiteForm, sale_amount: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" /></div>
               <div><label className="block text-sm font-medium text-spa-charcoal mb-2">Payhip Order ID (optional)</label><input type="text" placeholder="From Payhip dashboard" value={suiteForm.payhip_order_id} onChange={e => setSuiteForm({ ...suiteForm, payhip_order_id: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" /></div>
-              <div className="bg-spa-blush border border-spa-pink rounded-xl p-4 text-sm"><p className="text-spa-gray">Commission (30%)</p><p className="font-serif text-2xl text-spa-pink mt-1">{formatCurrency(parseFloat(suiteForm.sale_amount || '0') * 0.30)}</p></div>
+              <div className="bg-spa-lavender rounded-xl p-4 text-sm"><p className="text-spa-gray">Commission (30%)</p><p className="font-serif text-2xl text-spa-pink mt-1">{formatCurrency(parseFloat(suiteForm.sale_amount || '0') * 0.30)}</p></div>
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setAddSuiteModal(null)} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">Cancel</button>
