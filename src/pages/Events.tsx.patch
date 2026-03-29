@@ -1,0 +1,33 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// ONE CHANGE TO Events.tsx — make event cards link to /events/:id
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// In the Community Events Grid section, find the event card div:
+//
+//   <div
+//     key={event.id}
+//     className="elegant-card group cursor-pointer"
+//     onClick={() => {
+//       setSelectedEvent(event);
+//       setRsvpStatus('idle');
+//       setPaymentStatus('idle');
+//       setSelectedTickets({});
+//     }}
+//   >
+//
+// REPLACE it with a Link that navigates to the event detail page:
+//
+//   <Link
+//     key={event.id}
+//     to={`/events/${event.id}`}
+//     className="elegant-card group cursor-pointer block"
+//   >
+//
+// And close with </Link> instead of </div>
+//
+// NOTE: Link is already imported at the top of Events.tsx — no new imports needed.
+//
+// ─────────────────────────────────────────────────────────────────────────────
+// OPTIONAL: You can keep the modal for quick-preview and add a
+// "View full page" link inside it — but the above is the simplest path.
+// ─────────────────────────────────────────────────────────────────────────────
