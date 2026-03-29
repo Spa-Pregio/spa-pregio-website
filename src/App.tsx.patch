@@ -1,0 +1,18 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// CHANGES TO App.tsx — two lines only
+// ─────────────────────────────────────────────────────────────────────────────
+
+// 1. ADD this import with the other page imports (anywhere in the imports block):
+import EventDetail from './pages/EventDetail';
+
+// 2. ADD this route inside <Routes>, right after the /events route:
+<Route path="/events/:id" element={<EventDetail />} />
+
+// ─── Full routes block for reference (only the two new lines marked ★) ───────
+//
+//   <Route path="/" element={<Home />} />
+//   <Route path="/suites" element={<CelebrationSuites />} />
+//   <Route path="/events" element={<Events />} />
+//   <Route path="/events/:id" element={<EventDetail />} />   ← ★ ADD THIS
+//   <Route path="/vendors" element={<ForVendors />} />
+//   ... (everything else unchanged)
