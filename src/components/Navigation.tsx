@@ -27,15 +27,12 @@ export default function Navigation() {
           <div className="flex items-center justify-between h-16 lg:h-20">
 
             {/* Logo */}
-            <Link to="/" className="inline-flex flex-col items-start flex-shrink-0">
-              <div className="flex items-baseline gap-0">
-                <span className="font-serif text-2xl lg:text-3xl font-semibold tracking-tight text-spa-purple">SPA</span>
-                <span className="font-serif text-2xl lg:text-3xl font-semibold tracking-tight text-spa-gray">-</span>
-                <span className="font-serif text-2xl lg:text-3xl font-semibold tracking-tight text-spa-pink">PREGIO™</span>
-              </div>
-              <span className="text-[10px] lg:text-xs text-spa-purple/70 uppercase tracking-[0.15em] mt-0.5">
-                The Celebration Suite Movement
-              </span>
+            <Link to="/" className="inline-flex items-center flex-shrink-0">
+              <img
+                src="/images/spa-pregio-logo.png"
+                alt="Spa-Pregio™ — The Celebration Suite Movement"
+                className="h-10 lg:h-14 w-auto"
+              />
             </Link>
 
             {/* Desktop Navigation */}
@@ -114,11 +111,11 @@ export default function Navigation() {
         }`}
       >
         <div className="flex flex-col items-center justify-center h-full gap-6 pt-20">
-          <div className="flex items-baseline gap-0 mb-2">
-            <span className="font-serif text-2xl font-semibold tracking-tight text-spa-purple">SPA</span>
-            <span className="font-serif text-2xl font-semibold tracking-tight text-spa-gray">-</span>
-            <span className="font-serif text-2xl font-semibold tracking-tight text-spa-pink">PREGIO™</span>
-          </div>
+          <img
+            src="/images/spa-pregio-logo.png"
+            alt="Spa-Pregio™"
+            className="h-12 w-auto mb-2"
+          />
           {navLinks.map((link) => (
             <Link
               key={link.name}
