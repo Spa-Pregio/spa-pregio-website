@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import {
   Users, DollarSign, CheckCircle, Clock, X, Check,
-  ChevronDown, ChevronUp, ArrowRight, Gift, Store, Plus, MapPin, Phone, Globe
+  ChevronDown, ChevronUp, ArrowRight, Gift, Store, Plus, MapPin, Phone, Globe, Lock
 } from 'lucide-react';
 
 type Affiliate = {
@@ -81,7 +81,63 @@ type AdminTab = 'sisters' | 'vendors';
 type SisterTab = 'pending' | 'active' | 'all';
 type VendorTab = 'pending' | 'active' | 'all';
 
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'spa-admin-2024';
+
 export default function AdminAffiliates() {
+  // ── Password gate ──────────────────────────────────────────────────────────
+  const [authenticated, setAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === ADMIN_PASSWORD) {
+      setAuthenticated(true);
+      setPasswordError(false);
+    } else {
+      setPasswordError(true);
+      setPasswordInput('');
+    }
+  };
+
+  if (!authenticated) {
+    return (
+      <div className="w-full pt-20 min-h-screen bg-spa-cream flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-elegant p-10 max-w-sm w-full text-center">
+          <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-6">
+            <Lock size={28} className="text-spa-purple" />
+          </div>
+          <h1 className="font-serif text-2xl text-spa-charcoal mb-2">Admin Access</h1>
+          <p className="text-spa-gray text-sm mb-8">Enter your admin password to continue.</p>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={e => setPasswordInput(e.target.value)}
+              placeholder="Admin password"
+              autoFocus
+              className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30 text-center tracking-widest"
+            />
+            {passwordError && (
+              <p className="text-red-500 text-sm">Incorrect password. Try again.</p>
+            )}
+            <button
+              type="submit"
+              className="btn-primary w-full justify-center"
+            >
+              Enter Dashboard
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main admin dashboard (only renders if authenticated) ───────────────────
+  return <AdminDashboard />;
+}
+
+function AdminDashboard() {
   const [adminTab, setAdminTab] = useState<AdminTab>('sisters');
 
   // Sisters state
@@ -135,7 +191,6 @@ export default function AdminAffiliates() {
     setLoading(false);
   }
 
-  // ── SISTER ACTIONS ──
   async function updateSisterStatus(id: string, status: string) {
     await supabase.from('affiliates').update({ status }).eq('id', id);
     loadAll();
@@ -154,10 +209,8 @@ export default function AdminAffiliates() {
   async function handlePayout() {
     if (!payoutModal) return;
     setSaving(true);
-
     const confirmedRefs = referrals.filter(r => r.affiliate_id === payoutModal.id && r.status === 'confirmed');
     const confirmedSuites = suiteCommissions.filter(s => s.affiliate_id === payoutModal.id && s.status === 'confirmed');
-
     const { data: payout } = await supabase.from('affiliate_payouts').insert({
       affiliate_id: payoutModal.id,
       amount: parseFloat(payoutForm.amount),
@@ -165,7 +218,6 @@ export default function AdminAffiliates() {
       payment_reference: payoutForm.reference || null,
       notes: payoutForm.notes || null,
     }).select().single();
-
     if (payout) {
       if (confirmedRefs.length > 0) {
         await supabase.from('affiliate_payout_referrals').insert(confirmedRefs.map(r => ({ payout_id: payout.id, referral_id: r.id })));
@@ -175,7 +227,6 @@ export default function AdminAffiliates() {
         await supabase.from('affiliate_suite_commissions').update({ status: 'paid', paid_at: new Date().toISOString() }).in('id', confirmedSuites.map(s => s.id));
       }
     }
-
     setSaving(false);
     setPayoutModal(null);
     setPayoutForm({ amount: '', method: 'venmo', reference: '', notes: '' });
@@ -222,7 +273,6 @@ export default function AdminAffiliates() {
     loadAll();
   }
 
-  // ── VENDOR ACTIONS ──
   async function approveVendor(id: string) {
     await supabase.from('vendor_profiles').update({ status: 'active' }).eq('id', id);
     loadAll();
@@ -240,7 +290,6 @@ export default function AdminAffiliates() {
     loadAll();
   }
 
-  // ── HELPERS ──
   function formatCurrency(amount: number) {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
   }
@@ -297,7 +346,6 @@ export default function AdminAffiliates() {
     return map[val] || val;
   }
 
-  // Computed
   const pendingSisters = affiliates.filter(a => a.status === 'pending');
   const activeSisters = affiliates.filter(a => a.status === 'active');
   const filteredSisters = sisterTab === 'pending' ? pendingSisters : sisterTab === 'active' ? activeSisters : affiliates;
@@ -323,7 +371,6 @@ export default function AdminAffiliates() {
   return (
     <div className="w-full pt-20 min-h-screen bg-spa-cream">
 
-      {/* Header */}
       <section className="w-full py-12 bg-spa-charcoal">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <span className="text-spa-pink text-sm uppercase tracking-[0.15em]">Admin</span>
@@ -332,7 +379,6 @@ export default function AdminAffiliates() {
         </div>
       </section>
 
-      {/* Top Level Tabs */}
       <div className="w-full bg-white border-b border-spa-light sticky top-16 z-30">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="flex gap-1">
@@ -344,9 +390,7 @@ export default function AdminAffiliates() {
                 key={id}
                 onClick={() => setAdminTab(id)}
                 className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                  adminTab === id
-                    ? 'border-spa-purple text-spa-purple'
-                    : 'border-transparent text-spa-gray hover:text-spa-charcoal'
+                  adminTab === id ? 'border-spa-purple text-spa-purple' : 'border-transparent text-spa-gray hover:text-spa-charcoal'
                 }`}
               >
                 {label}
@@ -364,10 +408,8 @@ export default function AdminAffiliates() {
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12 space-y-10">
 
-        {/* ── VENDOR APPLICATIONS TAB ── */}
         {adminTab === 'vendors' && (
           <>
-            {/* Vendor Stats */}
             <div className="grid sm:grid-cols-3 gap-6">
               {[
                 { label: 'Total Applications', value: vendors.length, sub: 'All time', icon: Store },
@@ -385,7 +427,6 @@ export default function AdminAffiliates() {
               ))}
             </div>
 
-            {/* Pending Alert */}
             {pendingVendors.length > 0 && (
               <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
@@ -401,7 +442,6 @@ export default function AdminAffiliates() {
               </div>
             )}
 
-            {/* Vendor List */}
             <div className="bg-white rounded-2xl shadow-elegant overflow-hidden">
               <div className="px-8 py-5 border-b border-spa-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h2 className="font-serif text-2xl text-spa-charcoal">Vendor Applications</h2>
@@ -411,13 +451,8 @@ export default function AdminAffiliates() {
                     ['active', `Active (${activeVendors.length})`],
                     ['all', `All (${vendors.length})`],
                   ] as [VendorTab, string][]).map(([id, label]) => (
-                    <button
-                      key={id}
-                      onClick={() => setVendorTab(id)}
-                      className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                        vendorTab === id ? 'bg-spa-purple text-white' : 'text-spa-gray hover:text-spa-charcoal'
-                      }`}
-                    >
+                    <button key={id} onClick={() => setVendorTab(id)}
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${vendorTab === id ? 'bg-spa-purple text-white' : 'text-spa-gray hover:text-spa-charcoal'}`}>
                       {label}
                     </button>
                   ))}
@@ -427,9 +462,7 @@ export default function AdminAffiliates() {
               {filteredVendors.length === 0 ? (
                 <div className="px-8 py-16 text-center">
                   <Store size={40} className="text-spa-purple/30 mx-auto mb-4" />
-                  <p className="text-spa-gray">
-                    {vendorTab === 'pending' ? 'No pending applications — all caught up.' : 'No vendor applications yet.'}
-                  </p>
+                  <p className="text-spa-gray">{vendorTab === 'pending' ? 'No pending applications — all caught up.' : 'No vendor applications yet.'}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-spa-light">
@@ -437,10 +470,8 @@ export default function AdminAffiliates() {
                     const isExpanded = vendorExpanded === vendor.id;
                     return (
                       <div key={vendor.id}>
-                        <div
-                          className="px-8 py-5 flex flex-col sm:flex-row sm:items-center gap-4 cursor-pointer hover:bg-spa-cream/50 transition-colors"
-                          onClick={() => setVendorExpanded(isExpanded ? null : vendor.id)}
-                        >
+                        <div className="px-8 py-5 flex flex-col sm:flex-row sm:items-center gap-4 cursor-pointer hover:bg-spa-cream/50 transition-colors"
+                          onClick={() => setVendorExpanded(isExpanded ? null : vendor.id)}>
                           <div className="flex-1">
                             <div className="flex items-center gap-3 flex-wrap">
                               <p className="font-medium text-spa-charcoal">{vendor.business_name}</p>
@@ -458,97 +489,27 @@ export default function AdminAffiliates() {
 
                         {isExpanded && (
                           <div className="bg-spa-cream/50 px-8 py-6 border-t border-spa-light space-y-5">
-
-                            {/* Application Details */}
                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                              <div className="bg-white rounded-xl p-4">
-                                <p className="text-spa-gray text-xs mb-1">Business Name</p>
-                                <p className="font-medium text-spa-charcoal">{vendor.business_name}</p>
-                              </div>
-                              <div className="bg-white rounded-xl p-4">
-                                <p className="text-spa-gray text-xs mb-1">Business Type</p>
-                                <p className="font-medium text-spa-charcoal">{friendlyBusinessType(vendor.business_type)}</p>
-                              </div>
-                              <div className="bg-white rounded-xl p-4">
-                                <p className="text-spa-gray text-xs mb-1">Location</p>
-                                <p className="font-medium text-spa-charcoal flex items-center gap-1">
-                                  <MapPin size={13} className="text-spa-purple" /> {vendor.location || '—'}
-                                </p>
-                              </div>
-                              <div className="bg-white rounded-xl p-4">
-                                <p className="text-spa-gray text-xs mb-1">Service Area</p>
-                                <p className="font-medium text-spa-charcoal">{friendlyServiceArea(vendor.service_area)}</p>
-                              </div>
-                              <div className="bg-white rounded-xl p-4">
-                                <p className="text-spa-gray text-xs mb-1">Ideal Client</p>
-                                <p className="font-medium text-spa-charcoal">{friendlyIdealClient(vendor.ideal_client)}</p>
-                              </div>
-                              <div className="bg-white rounded-xl p-4">
-                                <p className="text-spa-gray text-xs mb-1">Motivation</p>
-                                <p className="font-medium text-spa-charcoal">{friendlyMotivation(vendor.motivation)}</p>
-                              </div>
-                              <div className="bg-white rounded-xl p-4">
-                                <p className="text-spa-gray text-xs mb-1">Email</p>
-                                <p className="font-medium text-spa-charcoal">{vendor.email || '—'}</p>
-                              </div>
-                              {vendor.phone && (
-                                <div className="bg-white rounded-xl p-4">
-                                  <p className="text-spa-gray text-xs mb-1">Phone</p>
-                                  <p className="font-medium text-spa-charcoal flex items-center gap-1">
-                                    <Phone size={13} className="text-spa-purple" /> {vendor.phone}
-                                  </p>
-                                </div>
-                              )}
-                              {vendor.website && (
-                                <div className="bg-white rounded-xl p-4">
-                                  <p className="text-spa-gray text-xs mb-1">Website</p>
-                                  <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="font-medium text-spa-purple flex items-center gap-1 hover:underline">
-                                    <Globe size={13} /> {vendor.website}
-                                  </a>
-                                </div>
-                              )}
-                              {vendor.instagram && (
-                                <div className="bg-white rounded-xl p-4">
-                                  <p className="text-spa-gray text-xs mb-1">Instagram</p>
-                                  <p className="font-medium text-spa-charcoal">{vendor.instagram}</p>
-                                </div>
-                              )}
+                              <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Business Name</p><p className="font-medium text-spa-charcoal">{vendor.business_name}</p></div>
+                              <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Business Type</p><p className="font-medium text-spa-charcoal">{friendlyBusinessType(vendor.business_type)}</p></div>
+                              <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Location</p><p className="font-medium text-spa-charcoal flex items-center gap-1"><MapPin size={13} className="text-spa-purple" /> {vendor.location || '—'}</p></div>
+                              <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Service Area</p><p className="font-medium text-spa-charcoal">{friendlyServiceArea(vendor.service_area)}</p></div>
+                              <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Ideal Client</p><p className="font-medium text-spa-charcoal">{friendlyIdealClient(vendor.ideal_client)}</p></div>
+                              <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Motivation</p><p className="font-medium text-spa-charcoal">{friendlyMotivation(vendor.motivation)}</p></div>
+                              <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Email</p><p className="font-medium text-spa-charcoal">{vendor.email || '—'}</p></div>
+                              {vendor.phone && <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Phone</p><p className="font-medium text-spa-charcoal flex items-center gap-1"><Phone size={13} className="text-spa-purple" /> {vendor.phone}</p></div>}
+                              {vendor.website && <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Website</p><a href={vendor.website} target="_blank" rel="noopener noreferrer" className="font-medium text-spa-purple flex items-center gap-1 hover:underline"><Globe size={13} /> {vendor.website}</a></div>}
+                              {vendor.instagram && <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Instagram</p><p className="font-medium text-spa-charcoal">{vendor.instagram}</p></div>}
                             </div>
-
-                            {/* Action Buttons */}
                             <div className="flex flex-wrap gap-3">
                               {(vendor.status === 'pending' || vendor.status === 'pending_signup' || vendor.status === 'pending_review') && (
                                 <>
-                                  <button
-                                    onClick={() => approveVendor(vendor.id)}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors shadow-sm"
-                                  >
-                                    <Check size={15} /> Approve Listing
-                                  </button>
-                                  <button
-                                    onClick={() => setDenyModal(vendor)}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors"
-                                  >
-                                    <X size={15} /> Deny
-                                  </button>
+                                  <button onClick={() => approveVendor(vendor.id)} className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors shadow-sm"><Check size={15} /> Approve Listing</button>
+                                  <button onClick={() => setDenyModal(vendor)} className="flex items-center gap-2 px-5 py-2.5 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors"><X size={15} /> Deny</button>
                                 </>
                               )}
-                              {vendor.status === 'active' && (
-                                <button
-                                  onClick={() => removeVendor(vendor.id)}
-                                  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors"
-                                >
-                                  <X size={14} /> Remove Listing
-                                </button>
-                              )}
-                              {(vendor.status === 'denied' || vendor.status === 'removed') && (
-                                <button
-                                  onClick={() => approveVendor(vendor.id)}
-                                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors"
-                                >
-                                  <Check size={14} /> Reactivate
-                                </button>
-                              )}
+                              {vendor.status === 'active' && <button onClick={() => removeVendor(vendor.id)} className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors"><X size={14} /> Remove Listing</button>}
+                              {(vendor.status === 'denied' || vendor.status === 'removed') && <button onClick={() => approveVendor(vendor.id)} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors"><Check size={14} /> Reactivate</button>}
                             </div>
                           </div>
                         )}
@@ -561,10 +522,8 @@ export default function AdminAffiliates() {
           </>
         )}
 
-        {/* ── SUITE SISTERS TAB ── */}
         {adminTab === 'sisters' && (
           <>
-            {/* Summary Stats */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 { icon: Users, label: 'Total Sisters', value: affiliates.length, sub: `${pendingSisters.length} pending approval` },
@@ -573,9 +532,7 @@ export default function AdminAffiliates() {
                 { icon: DollarSign, label: 'Total Paid Out', value: formatCurrency(totalPaid), sub: 'All time', raw: true },
               ].map((s, i) => (
                 <div key={i} className="bg-white rounded-2xl p-6 shadow-elegant">
-                  <div className="w-10 h-10 rounded-full bg-spa-purple/10 flex items-center justify-center mb-4">
-                    <s.icon size={20} className="text-spa-purple" />
-                  </div>
+                  <div className="w-10 h-10 rounded-full bg-spa-purple/10 flex items-center justify-center mb-4"><s.icon size={20} className="text-spa-purple" /></div>
                   <p className="text-spa-gray text-sm">{s.label}</p>
                   <p className="font-serif text-3xl text-spa-charcoal mt-1">{s.value}</p>
                   <p className="text-xs text-spa-gray mt-1">{s.sub}</p>
@@ -583,35 +540,24 @@ export default function AdminAffiliates() {
               ))}
             </div>
 
-            {/* Pending Alert */}
             {pendingSisters.length > 0 && (
               <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                  <Clock size={20} className="text-amber-600" />
-                </div>
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0"><Clock size={20} className="text-amber-600" /></div>
                 <div className="flex-1">
                   <p className="font-medium text-spa-charcoal">{pendingSisters.length} application{pendingSisters.length > 1 ? 's' : ''} waiting for your approval</p>
                   <p className="text-sm text-spa-gray">{pendingSisters.map(p => p.full_name).join(', ')}</p>
                 </div>
-                <button onClick={() => setSisterTab('pending')} className="flex-shrink-0 flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-amber-700 transition-colors">
-                  Review Now <ArrowRight size={14} />
-                </button>
+                <button onClick={() => setSisterTab('pending')} className="flex-shrink-0 flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-amber-700 transition-colors">Review Now <ArrowRight size={14} /></button>
               </div>
             )}
 
-            {/* Sisters List */}
             <div className="bg-white rounded-2xl shadow-elegant overflow-hidden">
               <div className="px-8 py-5 border-b border-spa-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h2 className="font-serif text-2xl text-spa-charcoal">Sisters</h2>
                 <div className="flex gap-1 bg-spa-cream rounded-full p-1">
                   {([['pending', `Pending (${pendingSisters.length})`], ['active', `Active (${activeSisters.length})`], ['all', `All (${affiliates.length})`]] as [SisterTab, string][]).map(([id, label]) => (
-                    <button
-                      key={id}
-                      onClick={() => setSisterTab(id)}
-                      className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                        sisterTab === id ? 'bg-spa-purple text-white' : 'text-spa-gray hover:text-spa-charcoal'
-                      }`}
-                    >
+                    <button key={id} onClick={() => setSisterTab(id)}
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${sisterTab === id ? 'bg-spa-purple text-white' : 'text-spa-gray hover:text-spa-charcoal'}`}>
                       {label}
                     </button>
                   ))}
@@ -634,19 +580,15 @@ export default function AdminAffiliates() {
 
                     return (
                       <div key={aff.id}>
-                        <div
-                          className="px-8 py-5 flex flex-col sm:flex-row sm:items-center gap-4 cursor-pointer hover:bg-spa-cream/50 transition-colors"
-                          onClick={() => setExpanded(isExpanded ? null : aff.id)}
-                        >
+                        <div className="px-8 py-5 flex flex-col sm:flex-row sm:items-center gap-4 cursor-pointer hover:bg-spa-cream/50 transition-colors"
+                          onClick={() => setExpanded(isExpanded ? null : aff.id)}>
                           <div className="flex-1">
                             <div className="flex items-center gap-3 flex-wrap">
                               <p className="font-medium text-spa-charcoal">{aff.full_name}</p>
                               <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge(aff.status)}`}>{aff.status}</span>
                               {aff.status === 'pending' && <span className="text-xs text-amber-600 font-medium animate-pulse">Needs approval</span>}
                             </div>
-                            <p className="text-sm text-spa-gray mt-0.5">
-                              {aff.email} · <span className="font-mono text-spa-purple">{aff.referral_code}</span> · {formatDate(aff.created_at)}
-                            </p>
+                            <p className="text-sm text-spa-gray mt-0.5">{aff.email} · <span className="font-mono text-spa-purple">{aff.referral_code}</span> · {formatDate(aff.created_at)}</p>
                           </div>
                           <div className="flex items-center gap-6 text-sm">
                             <div className="text-center"><p className="text-spa-gray text-xs">Vendors</p><p className="font-medium text-spa-charcoal">{s?.total_conversions || 0}</p></div>
@@ -662,34 +604,16 @@ export default function AdminAffiliates() {
                             <div className="flex flex-wrap gap-3">
                               {aff.status === 'pending' && (
                                 <>
-                                  <button onClick={() => updateSisterStatus(aff.id, 'active')} className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors shadow-sm">
-                                    <Check size={15} /> Approve Sister
-                                  </button>
-                                  <button onClick={() => updateSisterStatus(aff.id, 'denied')} className="flex items-center gap-2 px-5 py-2.5 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors">
-                                    <X size={15} /> Deny
-                                  </button>
+                                  <button onClick={() => updateSisterStatus(aff.id, 'active')} className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors shadow-sm"><Check size={15} /> Approve Sister</button>
+                                  <button onClick={() => updateSisterStatus(aff.id, 'denied')} className="flex items-center gap-2 px-5 py-2.5 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors"><X size={15} /> Deny</button>
                                 </>
                               )}
-                              {aff.status === 'active' && (
-                                <button onClick={() => updateSisterStatus(aff.id, 'paused')} className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors">
-                                  <X size={14} /> Pause
-                                </button>
-                              )}
-                              {aff.status === 'paused' && (
-                                <button onClick={() => updateSisterStatus(aff.id, 'active')} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors">
-                                  <Check size={14} /> Reactivate
-                                </button>
-                              )}
-                              <button onClick={() => setAddReferralModal(aff)} className="flex items-center gap-2 px-4 py-2 bg-spa-purple text-white rounded-full text-sm font-medium hover:bg-spa-purple/90 transition-colors">
-                                <Plus size={14} /> Add Vendor Referral
-                              </button>
-                              <button onClick={() => setAddSuiteModal(aff)} className="flex items-center gap-2 px-4 py-2 bg-spa-pink text-white rounded-full text-sm font-medium hover:bg-spa-pink/90 transition-colors">
-                                <Plus size={14} /> Add Suite Commission
-                              </button>
+                              {aff.status === 'active' && <button onClick={() => updateSisterStatus(aff.id, 'paused')} className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors"><X size={14} /> Pause</button>}
+                              {aff.status === 'paused' && <button onClick={() => updateSisterStatus(aff.id, 'active')} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors"><Check size={14} /> Reactivate</button>}
+                              <button onClick={() => setAddReferralModal(aff)} className="flex items-center gap-2 px-4 py-2 bg-spa-purple text-white rounded-full text-sm font-medium hover:bg-spa-purple/90 transition-colors"><Plus size={14} /> Add Vendor Referral</button>
+                              <button onClick={() => setAddSuiteModal(aff)} className="flex items-center gap-2 px-4 py-2 bg-spa-pink text-white rounded-full text-sm font-medium hover:bg-spa-pink/90 transition-colors"><Plus size={14} /> Add Suite Commission</button>
                               {confirmedTotal > 0 && (
-                                <button onClick={() => { setPayoutModal(aff); setPayoutForm({ ...payoutForm, amount: String(confirmedTotal.toFixed(2)) }); }} className="flex items-center gap-2 px-4 py-2 bg-spa-charcoal text-white rounded-full text-sm font-medium hover:bg-spa-charcoal/90 transition-colors">
-                                  <DollarSign size={14} /> Record Payout ({formatCurrency(confirmedTotal)})
-                                </button>
+                                <button onClick={() => { setPayoutModal(aff); setPayoutForm({ ...payoutForm, amount: String(confirmedTotal.toFixed(2)) }); }} className="flex items-center gap-2 px-4 py-2 bg-spa-charcoal text-white rounded-full text-sm font-medium hover:bg-spa-charcoal/90 transition-colors"><DollarSign size={14} /> Record Payout ({formatCurrency(confirmedTotal)})</button>
                               )}
                             </div>
 
@@ -706,9 +630,7 @@ export default function AdminAffiliates() {
                                 <div className="flex items-center gap-2 mb-3"><Store size={16} className="text-spa-purple" /><h4 className="font-medium text-spa-charcoal text-sm">Vendor Referrals ({affRefs.length})</h4></div>
                                 <div className="bg-white rounded-xl overflow-hidden">
                                   <table className="w-full text-sm">
-                                    <thead className="bg-spa-cream">
-                                      <tr>{['Vendor', 'Tier', 'Type', 'Sale', 'Commission', 'Status', 'Date', ''].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-medium text-spa-gray uppercase tracking-wider">{h}</th>)}</tr>
-                                    </thead>
+                                    <thead className="bg-spa-cream"><tr>{['Vendor', 'Tier', 'Type', 'Sale', 'Commission', 'Status', 'Date', ''].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-medium text-spa-gray uppercase tracking-wider">{h}</th>)}</tr></thead>
                                     <tbody className="divide-y divide-spa-light">
                                       {affRefs.map(ref => (
                                         <tr key={ref.id} className="hover:bg-spa-cream/50 transition-colors">
@@ -733,9 +655,7 @@ export default function AdminAffiliates() {
                                 <div className="flex items-center gap-2 mb-3"><Gift size={16} className="text-spa-pink" /><h4 className="font-medium text-spa-charcoal text-sm">Suite Commissions ({affSuites.length})</h4></div>
                                 <div className="bg-white rounded-xl overflow-hidden">
                                   <table className="w-full text-sm">
-                                    <thead className="bg-spa-cream">
-                                      <tr>{['Suite', 'Sale', 'Commission', 'Status', 'Date', ''].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-medium text-spa-gray uppercase tracking-wider">{h}</th>)}</tr>
-                                    </thead>
+                                    <thead className="bg-spa-cream"><tr>{['Suite', 'Sale', 'Commission', 'Status', 'Date', ''].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-medium text-spa-gray uppercase tracking-wider">{h}</th>)}</tr></thead>
                                     <tbody className="divide-y divide-spa-light">
                                       {affSuites.map(sc => (
                                         <tr key={sc.id} className="hover:bg-spa-cream/50 transition-colors">
@@ -764,7 +684,7 @@ export default function AdminAffiliates() {
         )}
       </div>
 
-      {/* ── DENY VENDOR MODAL ── */}
+      {/* DENY MODAL */}
       {denyModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
@@ -772,25 +692,17 @@ export default function AdminAffiliates() {
               <h3 className="font-serif text-2xl text-spa-charcoal">Deny Application</h3>
               <button onClick={() => setDenyModal(null)} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal"><X size={18} /></button>
             </div>
-            <p className="text-sm text-spa-gray mb-6">Denying <strong>{denyModal.business_name}</strong>. You can add an optional reason below.</p>
-            <textarea
-              rows={3}
-              placeholder="Reason for denial (optional — for your records)"
-              value={denyReason}
-              onChange={e => setDenyReason(e.target.value)}
-              className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none mb-6"
-            />
+            <p className="text-sm text-spa-gray mb-6">Denying <strong>{denyModal.business_name}</strong>.</p>
+            <textarea rows={3} placeholder="Reason for denial (optional)" value={denyReason} onChange={e => setDenyReason(e.target.value)} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none mb-6" />
             <div className="flex gap-3">
               <button onClick={() => setDenyModal(null)} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">Cancel</button>
-              <button onClick={() => denyVendor(denyModal.id)} className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors">
-                <X size={16} /> Deny Application
-              </button>
+              <button onClick={() => denyVendor(denyModal.id)} className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors"><X size={16} /> Deny Application</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── ADD VENDOR REFERRAL MODAL ── */}
+      {/* ADD REFERRAL MODAL */}
       {addReferralModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
@@ -814,7 +726,7 @@ export default function AdminAffiliates() {
         </div>
       )}
 
-      {/* ── ADD SUITE COMMISSION MODAL ── */}
+      {/* ADD SUITE MODAL */}
       {addSuiteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
@@ -837,7 +749,7 @@ export default function AdminAffiliates() {
         </div>
       )}
 
-      {/* ── PAYOUT MODAL ── */}
+      {/* PAYOUT MODAL */}
       {payoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
