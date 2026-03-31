@@ -143,7 +143,6 @@ function ShareRow({ event }: { event: any }) {
       document.execCommand('copy');
       document.body.removeChild(el);
     }
-
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -174,19 +173,14 @@ function ShareRow({ event }: { event: any }) {
         <div className="flex-1 px-3 py-2 bg-spa-lavender rounded-xl text-xs text-spa-gray truncate font-mono">
           spa-pregio.com/events/{event.id}
         </div>
-
         <button
           onClick={handleCopy}
           className="flex items-center gap-1.5 px-3 py-2 bg-spa-purple text-white text-xs font-medium rounded-xl whitespace-nowrap transition-colors hover:bg-spa-purple/90"
         >
           {copied ? (
-            <>
-              <Check size={13} /> Copied!
-            </>
+            <><Check size={13} /> Copied!</>
           ) : (
-            <>
-              <Link2 size={13} /> Copy link
-            </>
+            <><Link2 size={13} /> Copy link</>
           )}
         </button>
       </div>
@@ -210,21 +204,11 @@ export default function EventDetail() {
   const [rsvpName, setRsvpName] = useState('');
   const [rsvpEmail, setRsvpEmail] = useState('');
 
-  const [rsvpStatus, setRsvpStatus] = useState<
-    'idle' | 'loading' | 'success' | 'error'
-  >('idle');
+  const [rsvpStatus, setRsvpStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [vendorPaymentStatus, setVendorPaymentStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  const [paymentStatus, setPaymentStatus] = useState<
-    'idle' | 'loading' | 'success' | 'error'
-  >('idle');
-
-  const [vendorPaymentStatus, setVendorPaymentStatus] = useState<
-    'idle' | 'loading' | 'success' | 'error'
-  >('idle');
-
-  const [selectedTickets, setSelectedTickets] = useState<Record<number, number>>(
-    {}
-  );
+  const [selectedTickets, setSelectedTickets] = useState<Record<number, number>>({});
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -233,12 +217,8 @@ export default function EventDetail() {
   }, [id]);
 
   const checkUser = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
+    const { data: { user } } = await supabase.auth.getUser();
     setCurrentUser(user);
-
     if (user) {
       setRsvpEmail(user.email || '');
       setRsvpName(user.user_metadata?.first_name || '');
@@ -247,7 +227,6 @@ export default function EventDetail() {
 
   const loadEvent = async () => {
     if (!id) return;
-
     setLoading(true);
     setNotFound(false);
 
@@ -276,13 +255,11 @@ export default function EventDetail() {
 
     setRsvpCount(attendeeOnly.length);
     setVendorTableCount(vendorsOnly.length);
-
     setLoading(false);
   };
 
   const getTotalPrice = () => {
     const tickets = Array.isArray(event?.tickets) ? event.tickets : [];
-
     return tickets.reduce((total: number, ticket: any, index: number) => {
       return total + Number(ticket?.price || 0) * (selectedTickets[index] || 0);
     }, 0);
@@ -291,18 +268,13 @@ export default function EventDetail() {
   const handleFreeRsvp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!event) return;
-
     setRsvpStatus('loading');
-
-    const { error } = await supabase.from('event_rsvps').insert([
-      {
-        event_id: String(event.id),
-        user_email: rsvpEmail,
-        user_name: rsvpName,
-        is_vendor: false,
-      },
-    ]);
-
+    const { error } = await supabase.from('event_rsvps').insert([{
+      event_id: String(event.id),
+      user_email: rsvpEmail,
+      user_name: rsvpName,
+      is_vendor: false,
+    }]);
     if (error) {
       setRsvpStatus('error');
     } else {
@@ -311,80 +283,84 @@ export default function EventDetail() {
     }
   };
 
+  // ── Paid ticket checkout — redirects to Stripe Checkout ──────────────────
   const handlePaidCheckout = async () => {
     const total = getTotalPrice();
     if (!event || total === 0 || !rsvpEmail || !rsvpName) return;
-
     setPaymentStatus('loading');
 
     try {
-      const response = await fetch(
-        `${SUPABASE_FUNCTIONS_URL}/create-payment-intent`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: Math.round(total * 100),
-            currency: 'usd',
-            connected_account_id: event.connected_account_id || '',
-            event_title: event.title,
-            event_id: event.id,
-            customer_email: rsvpEmail,
-            success_url: `https://spa-pregio.com/events/${event.id}?success=true`,
-            cancel_url: `https://spa-pregio.com/events/${event.id}?cancelled=true`,
-          }),
-        }
-      );
+      const ticketsPayload = (Array.isArray(event.tickets) ? event.tickets : [])
+        .map((t: any, i: number) => ({
+          type: t.type,
+          price: t.price,
+          description: t.description,
+          quantity: selectedTickets[i] || 0,
+        }))
+        .filter((t: any) => t.quantity > 0);
+
+      const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/create-checkout-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_id: event.id,
+          event_title: event.title,
+          tickets: ticketsPayload,
+          connected_account_id: event.connected_account_id || '',
+          customer_email: rsvpEmail,
+          customer_name: rsvpName,
+        }),
+      });
 
       const data = await response.json();
 
       if (data.url) {
         window.location.href = data.url;
-        return;
+      } else {
+        console.error('Checkout error:', data.error);
+        setPaymentStatus('error');
       }
-
-      console.error('Paid checkout error response:', data);
-      setPaymentStatus('error');
     } catch (err) {
-      console.error('Paid checkout exception:', err);
+      console.error('Checkout exception:', err);
       setPaymentStatus('error');
     }
   };
 
+  // ── Vendor table checkout — redirects to Stripe Checkout ─────────────────
   const handleVendorTableCheckout = async () => {
     if (!event || !rsvpEmail || !rsvpName) return;
     if (vendorTablesRemaining <= 0) return;
-
     setVendorPaymentStatus('loading');
 
     try {
-      const response = await fetch(
-        `${SUPABASE_FUNCTIONS_URL}/create-payment-intent`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: Math.round(Number(event.vendor_table_price || 0) * 100),
-            currency: 'usd',
-            connected_account_id: event.connected_account_id || '',
-            event_title: `${event.title} (Vendor Table)`,
-            event_id: event.id,
-            customer_email: rsvpEmail,
-            success_url: `https://spa-pregio.com/events/${event.id}?vendor_success=true`,
-            cancel_url: `https://spa-pregio.com/events/${event.id}?vendor_cancelled=true`,
-          }),
-        }
-      );
+      const vendorPrice = Number(event.vendor_table_price || 0);
+
+      const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/create-checkout-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_id: event.id,
+          event_title: `${event.title} — Vendor Table`,
+          tickets: [{
+            type: 'Vendor Table',
+            price: vendorPrice,
+            description: `Vendor table at ${event.title}`,
+            quantity: 1,
+          }],
+          connected_account_id: event.connected_account_id || '',
+          customer_email: rsvpEmail,
+          customer_name: rsvpName,
+        }),
+      });
 
       const data = await response.json();
 
       if (data.url) {
         window.location.href = data.url;
-        return;
+      } else {
+        console.error('Vendor checkout error:', data.error);
+        setVendorPaymentStatus('error');
       }
-
-      console.error('Vendor checkout error response:', data);
-      setVendorPaymentStatus('error');
     } catch (err) {
       console.error('Vendor checkout exception:', err);
       setVendorPaymentStatus('error');
@@ -407,9 +383,7 @@ export default function EventDetail() {
       <div className="w-full pt-20 min-h-screen bg-spa-cream flex items-center justify-center">
         <div className="text-center max-w-md px-6">
           <span className="text-5xl mb-4 block">🎉</span>
-          <h2 className="font-serif text-3xl text-spa-charcoal mb-3">
-            Event not found
-          </h2>
+          <h2 className="font-serif text-3xl text-spa-charcoal mb-3">Event not found</h2>
           <p className="text-spa-gray mb-6">
             This event may have ended or the link may be incorrect.
           </p>
@@ -428,12 +402,8 @@ export default function EventDetail() {
       : 0;
 
   const vendorTablesAvailable = Number(event.vendor_tables || 0);
-  const vendorTablesRemaining = Math.max(
-    vendorTablesAvailable - vendorTableCount,
-    0
-  );
-  const hasVendorTables =
-    vendorTablesAvailable > 0 && Number(event.vendor_table_price || 0) > 0;
+  const vendorTablesRemaining = Math.max(vendorTablesAvailable - vendorTableCount, 0);
+  const hasVendorTables = vendorTablesAvailable > 0 && Number(event.vendor_table_price || 0) > 0;
 
   return (
     <div className="w-full pt-20 min-h-screen bg-spa-cream">
@@ -454,28 +424,16 @@ export default function EventDetail() {
               alt={event.title}
               className="w-full h-full object-cover"
             />
-
-            <div
-              className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold ${
-                event.is_free
-                  ? 'bg-green-500 text-white'
-                  : 'bg-spa-pink text-white'
-              }`}
-            >
+            <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold ${event.is_free ? 'bg-green-500 text-white' : 'bg-spa-pink text-white'}`}>
               {event.is_free ? 'Free Event' : `From $${minPrice}`}
             </div>
-
             <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
-              <span className="text-xs font-medium text-spa-purple tracking-wide">
-                Spa-Pregio®
-              </span>
+              <span className="text-xs font-medium text-spa-purple tracking-wide">Spa-Pregio®</span>
             </div>
           </div>
 
           <div className="p-6 lg:p-10">
-            <span className="text-xs uppercase tracking-[0.15em] text-spa-purple">
-              {event.type}
-            </span>
+            <span className="text-xs uppercase tracking-[0.15em] text-spa-purple">{event.type}</span>
 
             <h1 className="font-serif text-3xl lg:text-4xl text-spa-charcoal mt-2 mb-5 leading-tight">
               {event.title}
@@ -484,15 +442,12 @@ export default function EventDetail() {
             <div className="space-y-2 mb-6">
               <div className="flex items-center gap-2 text-sm text-spa-gray">
                 <Calendar size={16} className="text-spa-purple flex-shrink-0" />
-                {event.date}
-                {event.time ? ` · ${event.time}` : ''}
+                {event.date}{event.time ? ` · ${event.time}` : ''}
               </div>
-
               <div className="flex items-center gap-2 text-sm text-spa-gray">
                 <MapPin size={16} className="text-spa-purple flex-shrink-0" />
                 {event.location}
               </div>
-
               <div className="flex items-center gap-2 text-sm text-spa-gray">
                 <Users size={16} className="text-spa-purple flex-shrink-0" />
                 {rsvpCount} / {event.max_attendees || 50} attending
@@ -500,13 +455,12 @@ export default function EventDetail() {
             </div>
 
             {event.description && (
-              <p className="text-spa-gray leading-relaxed mb-2">
-                {event.description}
-              </p>
+              <p className="text-spa-gray leading-relaxed mb-2">{event.description}</p>
             )}
 
             <ShareRow event={event} />
 
+            {/* ── Vendor Tables ── */}
             {hasVendorTables && (
               <div className="mt-6 pt-6 border-t border-spa-charcoal/5">
                 <div className="bg-spa-lavender rounded-2xl p-6">
@@ -516,11 +470,8 @@ export default function EventDetail() {
                         <Store size={18} className="text-spa-purple" />
                         Vendor Tables
                       </h4>
-                      <p className="text-sm text-spa-gray mt-1">
-                        Showcase your business at this event.
-                      </p>
+                      <p className="text-sm text-spa-gray mt-1">Showcase your business at this event.</p>
                     </div>
-
                     <div className="text-right">
                       <p className="text-lg font-semibold text-spa-purple">
                         ${Number(event.vendor_table_price).toFixed(2)}
@@ -536,19 +487,15 @@ export default function EventDetail() {
                       <p className="text-sm text-spa-gray mb-3">
                         Create a free account to reserve a vendor table.
                       </p>
-                      <Link to="/join" className="btn-primary justify-center">
-                        Create Free Account
-                      </Link>
+                      <Link to="/join" className="btn-primary justify-center">Create Free Account</Link>
                     </div>
                   ) : vendorPaymentStatus === 'success' ? (
                     <div className="mt-4 bg-white rounded-xl p-4">
                       <div className="flex items-center gap-2 text-spa-purple font-medium">
-                        <Check size={18} />
-                        Vendor table reserved
+                        <Check size={18} /> Vendor table reserved
                       </div>
                       <p className="text-sm text-spa-gray mt-1">
-                        Your vendor reservation has been recorded for{' '}
-                        {event.title}.
+                        Your vendor reservation has been recorded for {event.title}.
                       </p>
                     </div>
                   ) : (
@@ -556,25 +503,19 @@ export default function EventDetail() {
                       {vendorPaymentStatus === 'error' && (
                         <div className="flex items-center gap-2 text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl">
                           <AlertCircle size={16} />
-                          Vendor table payment failed. Please try again.
+                          Payment failed. Please try again.
                         </div>
                       )}
-
                       <button
                         onClick={handleVendorTableCheckout}
-                        disabled={
-                          vendorTablesRemaining <= 0 ||
-                          vendorPaymentStatus === 'loading'
-                        }
+                        disabled={vendorTablesRemaining <= 0 || vendorPaymentStatus === 'loading'}
                         className="btn-primary w-full justify-center disabled:opacity-50"
                       >
                         {vendorTablesRemaining <= 0
                           ? 'Vendor Tables Sold Out'
                           : vendorPaymentStatus === 'loading'
-                          ? 'Processing...'
-                          : `Reserve Vendor Table — $${Number(
-                              event.vendor_table_price
-                            ).toFixed(2)}`}
+                          ? 'Redirecting to checkout...'
+                          : `Reserve Vendor Table — $${Number(event.vendor_table_price).toFixed(2)}`}
                       </button>
                     </div>
                   )}
@@ -582,39 +523,30 @@ export default function EventDetail() {
               </div>
             )}
 
+            {/* ── RSVP / Ticket Section ── */}
             <div className="mt-6 pt-6 border-t border-spa-charcoal/5">
               {!currentUser ? (
                 <div className="text-center bg-spa-lavender rounded-2xl p-8">
                   <p className="text-spa-gray mb-4">
                     You need a free account to RSVP or purchase tickets.
                   </p>
-                  <Link to="/join" className="btn-primary justify-center">
-                    Create Free Account
-                  </Link>
+                  <Link to="/join" className="btn-primary justify-center">Create Free Account</Link>
                 </div>
-              ) : rsvpStatus === 'success' || paymentStatus === 'success' ? (
+              ) : rsvpStatus === 'success' ? (
                 <div className="text-center py-8 bg-spa-lavender rounded-2xl">
                   <div className="w-14 h-14 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4">
                     <Check size={26} className="text-spa-purple" />
                   </div>
-                  <h4 className="font-serif text-2xl text-spa-charcoal mb-1">
-                    You're in!
-                  </h4>
-                  <p className="text-spa-gray text-sm">
-                    We'll see you at {event.title}.
-                  </p>
+                  <h4 className="font-serif text-2xl text-spa-charcoal mb-1">You're in!</h4>
+                  <p className="text-spa-gray text-sm">We'll see you at {event.title}.</p>
                 </div>
               ) : event.is_free ? (
                 <form onSubmit={handleFreeRsvp} className="space-y-4">
                   <h4 className="font-serif text-xl text-spa-charcoal flex items-center gap-2">
-                    <Ticket size={18} className="text-spa-purple" /> RSVP —
-                    Free Event
+                    <Ticket size={18} className="text-spa-purple" /> RSVP — Free Event
                   </h4>
-
                   <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">
-                      Your Name
-                    </label>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Your Name</label>
                     <input
                       type="text"
                       required
@@ -623,11 +555,8 @@ export default function EventDetail() {
                       className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">
-                      Your Email
-                    </label>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Your Email</label>
                     <input
                       type="email"
                       required
@@ -636,96 +565,57 @@ export default function EventDetail() {
                       className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                     />
                   </div>
-
                   {rsvpStatus === 'error' && (
-                    <p className="text-red-500 text-sm">
-                      Something went wrong. Please try again.
-                    </p>
+                    <p className="text-red-500 text-sm">Something went wrong. Please try again.</p>
                   )}
-
                   <button
                     type="submit"
                     disabled={rsvpStatus === 'loading'}
                     className="btn-primary w-full justify-center disabled:opacity-50"
                   >
-                    {rsvpStatus === 'loading'
-                      ? 'Saving...'
-                      : 'Confirm RSVP — Free'}
+                    {rsvpStatus === 'loading' ? 'Saving...' : 'Confirm RSVP — Free'}
                     <Check size={18} />
                   </button>
                 </form>
               ) : (
                 <div className="space-y-4">
                   <h4 className="font-serif text-xl text-spa-charcoal flex items-center gap-2">
-                    <Ticket size={18} className="text-spa-purple" /> Select
-                    Tickets
+                    <Ticket size={18} className="text-spa-purple" /> Select Tickets
                   </h4>
 
                   {tickets.map((ticket: any, index: number) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-4 bg-spa-lavender rounded-xl"
-                    >
+                    <div key={index} className="flex items-center justify-between p-4 bg-spa-lavender rounded-xl">
                       <div>
                         <div className="flex items-center gap-2">
-                          {(ticket.type || '').includes('Buffet') ||
-                          (ticket.type || '').includes('Plated') ? (
-                            <Utensils
-                              size={14}
-                              className="text-spa-purple"
-                            />
+                          {(ticket.type || '').includes('Buffet') || (ticket.type || '').includes('Plated') ? (
+                            <Utensils size={14} className="text-spa-purple" />
                           ) : (
                             <Ticket size={14} className="text-spa-purple" />
                           )}
-
-                          <p className="font-medium text-spa-charcoal text-sm">
-                            {ticket.type}
-                          </p>
+                          <p className="font-medium text-spa-charcoal text-sm">{ticket.type}</p>
                         </div>
-
-                        <p className="text-xs text-spa-gray mt-0.5 ml-5">
-                          {ticket.description}
-                        </p>
+                        <p className="text-xs text-spa-gray mt-0.5 ml-5">{ticket.description}</p>
                       </div>
-
                       <div className="flex items-center gap-3">
-                        <span className="font-medium text-spa-purple">
-                          ${Number(ticket.price || 0)}
-                        </span>
-
+                        <span className="font-medium text-spa-purple">${Number(ticket.price || 0)}</span>
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() =>
-                              setSelectedTickets({
-                                ...selectedTickets,
-                                [index]: Math.max(
-                                  0,
-                                  (selectedTickets[index] || 0) - 1
-                                ),
-                              })
-                            }
+                            onClick={() => setSelectedTickets({
+                              ...selectedTickets,
+                              [index]: Math.max(0, (selectedTickets[index] || 0) - 1),
+                            })}
                             className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-spa-charcoal hover:bg-spa-purple hover:text-white transition-colors font-bold"
-                          >
-                            −
-                          </button>
-
-                          <span className="w-5 text-center text-sm font-medium">
-                            {selectedTickets[index] || 0}
-                          </span>
-
+                          >−</button>
+                          <span className="w-5 text-center text-sm font-medium">{selectedTickets[index] || 0}</span>
                           <button
                             type="button"
-                            onClick={() =>
-                              setSelectedTickets({
-                                ...selectedTickets,
-                                [index]: (selectedTickets[index] || 0) + 1,
-                              })
-                            }
+                            onClick={() => setSelectedTickets({
+                              ...selectedTickets,
+                              [index]: (selectedTickets[index] || 0) + 1,
+                            })}
                             className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-spa-charcoal hover:bg-spa-purple hover:text-white transition-colors font-bold"
-                          >
-                            +
-                          </button>
+                          >+</button>
                         </div>
                       </div>
                     </div>
@@ -734,23 +624,15 @@ export default function EventDetail() {
                   {getTotalPrice() > 0 && (
                     <div className="bg-spa-purple/10 rounded-xl p-4">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-spa-charcoal">
-                          Total
-                        </span>
-                        <span className="font-serif text-xl text-spa-purple">
-                          ${getTotalPrice()}
-                        </span>
+                        <span className="font-medium text-spa-charcoal">Total</span>
+                        <span className="font-serif text-xl text-spa-purple">${getTotalPrice()}</span>
                       </div>
-                      <p className="text-xs text-spa-gray mt-1">
-                        Includes 10% Spa-Pregio™ platform fee
-                      </p>
+                      <p className="text-xs text-spa-gray mt-1">Includes 10% Spa-Pregio™ platform fee</p>
                     </div>
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">
-                      Your Name
-                    </label>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Your Name</label>
                     <input
                       type="text"
                       required
@@ -759,11 +641,8 @@ export default function EventDetail() {
                       className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">
-                      Your Email
-                    </label>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Your Email</label>
                     <input
                       type="email"
                       required
@@ -786,14 +665,16 @@ export default function EventDetail() {
                     className="btn-primary w-full justify-center disabled:opacity-50"
                   >
                     {paymentStatus === 'loading'
-                      ? 'Processing...'
+                      ? 'Redirecting to checkout...'
                       : getTotalPrice() === 0
                       ? 'Select tickets above'
                       : `Pay $${getTotalPrice()}`}
-                    {paymentStatus !== 'loading' && getTotalPrice() > 0 && (
-                      <DollarSign size={18} />
-                    )}
+                    {paymentStatus !== 'loading' && getTotalPrice() > 0 && <DollarSign size={18} />}
                   </button>
+
+                  <p className="text-xs text-spa-gray text-center">
+                    You'll be redirected to Stripe's secure checkout page.
+                  </p>
                 </div>
               )}
             </div>
