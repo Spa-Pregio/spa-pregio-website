@@ -328,33 +328,25 @@ export default function EventDetail() {
             currency: 'usd',
             connected_account_id: event.connected_account_id || '',
             event_title: event.title,
+            event_id: event.id,
+            customer_email: rsvpEmail,
+            success_url: `https://spa-pregio.com/events/${event.id}?success=true`,
+            cancel_url: `https://spa-pregio.com/events/${event.id}?cancelled=true`,
           }),
         }
       );
 
       const data = await response.json();
 
-      if (data.id || data.client_secret) {
-        const { error } = await supabase.from('event_rsvps').insert([
-          {
-            event_id: String(event.id),
-            user_email: rsvpEmail,
-            user_name: rsvpName,
-            is_vendor: false,
-          },
-        ]);
-
-        if (error) {
-          setPaymentStatus('error');
-          return;
-        }
-
-        setPaymentStatus('success');
-        setRsvpCount((c) => c + 1);
-      } else {
-        setPaymentStatus('error');
+      if (data.url) {
+        window.location.href = data.url;
+        return;
       }
-    } catch {
+
+      console.error('Paid checkout error response:', data);
+      setPaymentStatus('error');
+    } catch (err) {
+      console.error('Paid checkout exception:', err);
       setPaymentStatus('error');
     }
   };
@@ -376,33 +368,25 @@ export default function EventDetail() {
             currency: 'usd',
             connected_account_id: event.connected_account_id || '',
             event_title: `${event.title} (Vendor Table)`,
+            event_id: event.id,
+            customer_email: rsvpEmail,
+            success_url: `https://spa-pregio.com/events/${event.id}?vendor_success=true`,
+            cancel_url: `https://spa-pregio.com/events/${event.id}?vendor_cancelled=true`,
           }),
         }
       );
 
       const data = await response.json();
 
-      if (data.id || data.client_secret) {
-        const { error } = await supabase.from('event_rsvps').insert([
-          {
-            event_id: String(event.id),
-            user_email: rsvpEmail,
-            user_name: rsvpName,
-            is_vendor: true,
-          },
-        ]);
-
-        if (error) {
-          setVendorPaymentStatus('error');
-          return;
-        }
-
-        setVendorPaymentStatus('success');
-        setVendorTableCount((count) => count + 1);
-      } else {
-        setVendorPaymentStatus('error');
+      if (data.url) {
+        window.location.href = data.url;
+        return;
       }
-    } catch {
+
+      console.error('Vendor checkout error response:', data);
+      setVendorPaymentStatus('error');
+    } catch (err) {
+      console.error('Vendor checkout exception:', err);
       setVendorPaymentStatus('error');
     }
   };
