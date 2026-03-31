@@ -68,7 +68,7 @@ export default function VendorDashboard() {
     setUser(user);
     if (user) {
       await loadProfile(user.id);
-      await loadMyEvents(user.id);
+      await loadMyEvents(user.email || '');
     }
     setLoading(false);
   };
@@ -94,19 +94,16 @@ export default function VendorDashboard() {
     }
   };
 
-  const loadMyEvents = async (userId: string) => {
-    const { data: rsvps } = await supabase
+  const loadMyEvents = async (email: string) => {
+    const { data } = await supabase
       .from('event_rsvps')
-      .select('event_id')
-      .eq('user_email', user?.email || '');
+      .select('*, events(*)')
+      .eq('user_email', email)
+      .order('created_at', { ascending: false });
 
-    if (rsvps && rsvps.length > 0) {
-      const eventIds = rsvps.map((r: any) => r.event_id);
-      const { data: events } = await supabase
-        .from('events')
-        .select('*')
-        .in('id', eventIds);
-      setMyEvents(events || []);
+    if (data) {
+      const events = data.map((r: any) => r.events).filter(Boolean);
+      setMyEvents(events);
     }
   };
 
@@ -296,13 +293,12 @@ export default function VendorDashboard() {
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            {/* Stats */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { label: 'Profile Views', value: '—', icon: Eye, note: 'Coming soon' },
                 { label: 'Events Joined', value: myEvents.length, icon: Calendar, note: eventLimits[profile?.tier || 'Starter'] },
                 { label: 'Inquiries', value: '—', icon: Users, note: 'Coming soon' },
-                { label: 'Listing Status', value: profile ? 'Active' : 'Incomplete', icon: TrendingUp, note: profile ? 'Visible to mamas' : 'Complete your profile' },
+                { label: 'Listing Status', value: profile?.business_name ? 'Active' : 'Incomplete', icon: TrendingUp, note: profile?.business_name ? 'Visible to mamas' : 'Complete your profile' },
               ].map((stat, i) => (
                 <div key={i} className="bg-white rounded-2xl p-6 shadow-elegant">
                   <div className="flex items-center justify-between mb-3">
@@ -315,7 +311,6 @@ export default function VendorDashboard() {
               ))}
             </div>
 
-            {/* Profile completion prompt */}
             {!profile?.business_name && (
               <div className="bg-spa-purple/10 border border-spa-purple/20 rounded-2xl p-6 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -331,7 +326,6 @@ export default function VendorDashboard() {
               </div>
             )}
 
-            {/* Quick actions */}
             <div className="grid sm:grid-cols-2 gap-4">
               <button onClick={() => setActiveTab('profile')} className="bg-white rounded-2xl p-6 shadow-elegant text-left hover:shadow-elegant-hover transition-all group">
                 <User size={20} className="text-spa-purple mb-3" />
@@ -374,7 +368,6 @@ export default function VendorDashboard() {
               </div>
             )}
 
-            {/* Photo placeholder */}
             <div className="mb-8">
               <label className="block text-sm font-medium text-spa-charcoal mb-3">Business Photos</label>
               <div className="grid grid-cols-4 gap-3">
@@ -489,7 +482,6 @@ export default function VendorDashboard() {
           <div className="space-y-6">
             <h2 className="font-serif text-2xl text-spa-charcoal">Subscription</h2>
 
-            {/* Current plan */}
             <div className="bg-white rounded-2xl shadow-elegant p-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 rounded-full bg-spa-purple/10 flex items-center justify-center">
@@ -514,7 +506,6 @@ export default function VendorDashboard() {
               </a>
             </div>
 
-            {/* Upgrade options */}
             {profile?.tier !== 'Enterprise' && (
               <div className="bg-spa-purple rounded-2xl p-8 text-white">
                 <h3 className="font-serif text-2xl mb-2">Upgrade your plan</h3>
