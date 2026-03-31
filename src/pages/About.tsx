@@ -289,7 +289,7 @@ export default function About() {
             Free membership. A community of mamas who celebrate each other. Local vendors who show up for you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <Link to="/memberships" className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center justify-center gap-2">
+            <Link to="/join" className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center justify-center gap-2">
               Become a Member — Free
               <ArrowRight size={18} />
             </Link>
