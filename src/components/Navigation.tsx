@@ -32,6 +32,7 @@ export default function Navigation() {
                 src="/images/spa-pregio-logo.png"
                 alt="Spa-Pregio™ — The Celebration Suite Movement"
                 className="h-10 lg:h-14 w-auto"
+                style={{ mixBlendMode: 'multiply' }}
               />
             </Link>
 
@@ -115,6 +116,7 @@ export default function Navigation() {
             src="/images/spa-pregio-logo.png"
             alt="Spa-Pregio™"
             className="h-12 w-auto mb-2"
+            style={{ mixBlendMode: 'multiply' }}
           />
           {navLinks.map((link) => (
             <Link
