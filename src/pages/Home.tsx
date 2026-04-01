@@ -24,25 +24,10 @@ export default function Home() {
             sip-and-sees and beyond.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/suites" className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold tracking-wide shadow-elegant hover:bg-[#7d5fa0] transition-colors">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="3" fill="white" opacity="0.9"/>
-                <ellipse cx="12" cy="6" rx="2.5" ry="4" fill="white" opacity="0.7"/>
-                <ellipse cx="12" cy="18" rx="2.5" ry="4" fill="white" opacity="0.7"/>
-                <ellipse cx="6" cy="12" rx="4" ry="2.5" fill="white" opacity="0.7"/>
-                <ellipse cx="18" cy="12" rx="4" ry="2.5" fill="white" opacity="0.7"/>
-                <ellipse cx="7.8" cy="7.8" rx="2.5" ry="4" fill="white" opacity="0.5" transform="rotate(45 7.8 7.8)"/>
-                <ellipse cx="16.2" cy="16.2" rx="2.5" ry="4" fill="white" opacity="0.5" transform="rotate(45 16.2 16.2)"/>
-                <ellipse cx="16.2" cy="7.8" rx="2.5" ry="4" fill="white" opacity="0.5" transform="rotate(-45 16.2 7.8)"/>
-                <ellipse cx="7.8" cy="16.2" rx="2.5" ry="4" fill="white" opacity="0.5" transform="rotate(-45 7.8 16.2)"/>
-              </svg>
+            <Link to="/suites" className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold tracking-wide shadow-elegant hover:bg-[#7d5fa0] transition-colors">
               Celebrating a Mama
             </Link>
-            <Link to="/vendors" className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border-2 border-spa-purple text-spa-purple text-sm font-semibold tracking-wide hover:bg-spa-purple hover:text-white transition-colors">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-              </svg>
+            <Link to="/vendors" className="inline-flex items-center justify-center px-8 py-4 rounded-full border-2 border-spa-purple text-spa-purple text-sm font-semibold tracking-wide hover:bg-spa-purple hover:text-white transition-colors">
               Vendor or Partner
             </Link>
           </div>
@@ -54,20 +39,6 @@ export default function Home() {
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
 
           <div className="rounded-3xl bg-spa-blush p-10 flex flex-col">
-            <div className="mb-4 w-12 h-12">
-              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <circle cx="24" cy="24" r="6" fill="#9B7CB6" opacity="0.9"/>
-                <ellipse cx="24" cy="12" rx="5" ry="8" fill="#D09AC6" opacity="0.75"/>
-                <ellipse cx="24" cy="36" rx="5" ry="8" fill="#D09AC6" opacity="0.75"/>
-                <ellipse cx="12" cy="24" rx="8" ry="5" fill="#D09AC6" opacity="0.75"/>
-                <ellipse cx="36" cy="24" rx="8" ry="5" fill="#D09AC6" opacity="0.75"/>
-                <ellipse cx="15.5" cy="15.5" rx="5" ry="8" fill="#D09AC6" opacity="0.5" transform="rotate(45 15.5 15.5)"/>
-                <ellipse cx="32.5" cy="32.5" rx="5" ry="8" fill="#D09AC6" opacity="0.5" transform="rotate(45 32.5 32.5)"/>
-                <ellipse cx="32.5" cy="15.5" rx="5" ry="8" fill="#D09AC6" opacity="0.5" transform="rotate(-45 32.5 15.5)"/>
-                <ellipse cx="15.5" cy="32.5" rx="5" ry="8" fill="#D09AC6" opacity="0.5" transform="rotate(-45 15.5 32.5)"/>
-                <circle cx="24" cy="24" r="4" fill="#9B7CB6"/>
-              </svg>
-            </div>
             <h2 className="text-2xl font-bold text-spa-charcoal mb-3 font-serif">For Moms & Hosts</h2>
             <p className="text-spa-gray leading-relaxed mb-6 flex-1">
               Planning a baby shower, gender reveal, sip-and-see, or push present? Our digital Celebration Suites give you everything you need to host a meaningful, spa-inspired gathering — starting at <strong className="text-spa-charcoal">$27</strong>.
@@ -79,17 +50,6 @@ export default function Home() {
           </div>
 
           <div className="rounded-3xl bg-spa-light p-10 flex flex-col">
-            <div className="mb-4 w-12 h-12">
-              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <rect x="8" y="22" width="32" height="22" rx="3" fill="#9B7CB6" opacity="0.2"/>
-                <rect x="8" y="22" width="32" height="22" rx="3" stroke="#9B7CB6" strokeWidth="2"/>
-                <path d="M6 22l6-14h24l6 14H6z" fill="#D09AC6" opacity="0.4" stroke="#9B7CB6" strokeWidth="2" strokeLinejoin="round"/>
-                <rect x="19" y="30" width="10" height="14" rx="2" fill="#9B7CB6" opacity="0.6"/>
-                <rect x="10" y="28" width="8" height="8" rx="2" fill="#9B7CB6" opacity="0.4"/>
-                <rect x="30" y="28" width="8" height="8" rx="2" fill="#9B7CB6" opacity="0.4"/>
-                <line x1="24" y1="8" x2="24" y2="22" stroke="#9B7CB6" strokeWidth="1.5" opacity="0.4"/>
-              </svg>
-            </div>
             <h2 className="text-2xl font-bold text-spa-charcoal mb-3 font-serif">For Vendors & Partners</h2>
             <p className="text-spa-gray leading-relaxed mb-6 flex-1">
               Are you a doula, photographer, wellness pro, beauty professional, or event venue? Connect with hosts who are actively planning Spa-Pregio™ gatherings in your community.
@@ -147,7 +107,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ENTERPRISE VENDOR BANNER — only renders if active Enterprise vendors have saved ads */}
+      {/* ENTERPRISE VENDOR BANNER */}
       <EnterpriseBanner />
 
       {/* HOSTING SPACES */}
