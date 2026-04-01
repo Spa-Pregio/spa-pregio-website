@@ -2,8 +2,17 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import {
-  MapPin, Calendar, Users, ArrowLeft, Check,
-  Ticket, Utensils, DollarSign, AlertCircle, Link2, Store,
+  MapPin,
+  Calendar,
+  Users,
+  ArrowLeft,
+  Check,
+  Ticket,
+  Utensils,
+  DollarSign,
+  AlertCircle,
+  Link2,
+  Store,
 } from 'lucide-react';
 
 const SUPABASE_FUNCTIONS_URL = 'https://reompjeeiurwnbpbfhyj.supabase.co/functions/v1';
@@ -13,11 +22,13 @@ const SUPABASE_ANON_KEY =
 function setMeta(property: string, content: string) {
   const attr = property.startsWith('og:') || property.startsWith('twitter:') ? 'property' : 'name';
   let el = document.querySelector(`meta[${attr}="${property}"]`) as HTMLMetaElement | null;
+
   if (!el) {
     el = document.createElement('meta');
     el.setAttribute(attr, property);
     document.head.appendChild(el);
   }
+
   el.setAttribute('content', content);
 }
 
@@ -117,6 +128,7 @@ function ShareRow({ event }: { event: any }) {
       document.execCommand('copy');
       document.body.removeChild(el);
     }
+
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -126,6 +138,7 @@ function ShareRow({ event }: { event: any }) {
       <p className="text-xs uppercase tracking-[0.12em] text-spa-gray mb-3 font-medium">
         Share this event
       </p>
+
       <div className="flex items-center gap-2 mb-3">
         {platforms.map((p) => (
           <a
@@ -141,10 +154,12 @@ function ShareRow({ event }: { event: any }) {
           </a>
         ))}
       </div>
+
       <div className="flex items-center gap-2">
         <div className="flex-1 px-3 py-2 bg-spa-lavender rounded-xl text-xs text-spa-gray truncate font-mono">
           spa-pregio.com/events/{event.id}
         </div>
+
         <button
           onClick={handleCopy}
           className="flex items-center gap-1.5 px-3 py-2 bg-spa-purple text-white text-xs font-medium rounded-xl whitespace-nowrap transition-colors hover:bg-spa-purple/90"
@@ -191,6 +206,9 @@ export default function EventDetail() {
   useEffect(() => {
     if (searchParams.get('canceled') === 'true') {
       setPaymentStatus('error');
+      window.history.replaceState({}, '', window.location.pathname);
+    } else {
+      setPaymentStatus('idle');
     }
   }, [searchParams]);
 
@@ -241,6 +259,7 @@ export default function EventDetail() {
 
   const getTotalPrice = () => {
     const tickets = Array.isArray(event?.tickets) ? event.tickets : [];
+
     return tickets.reduce(
       (total: number, ticket: any, index: number) =>
         total + Number(ticket?.price || 0) * (selectedTickets[index] || 0),
@@ -293,7 +312,7 @@ export default function EventDetail() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
           event_id: event.id,
@@ -330,7 +349,7 @@ export default function EventDetail() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
           event_id: event.id,
@@ -419,6 +438,7 @@ export default function EventDetail() {
               alt={event.title}
               className="w-full h-full object-cover"
             />
+
             <div
               className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold ${
                 event.is_free ? 'bg-green-500 text-white' : 'bg-spa-pink text-white'
@@ -426,6 +446,7 @@ export default function EventDetail() {
             >
               {event.is_free ? 'Free Event' : `From $${minPrice}`}
             </div>
+
             <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
               <span className="text-xs font-medium text-spa-purple tracking-wide">
                 Spa-PregioTM
@@ -611,8 +632,10 @@ export default function EventDetail() {
                           ) : (
                             <Ticket size={14} className="text-spa-purple" />
                           )}
+
                           <p className="font-medium text-spa-charcoal text-sm">{ticket.type}</p>
                         </div>
+
                         <p className="text-xs text-spa-gray mt-0.5 ml-5">
                           {ticket.description}
                         </p>
@@ -622,6 +645,7 @@ export default function EventDetail() {
                         <span className="font-medium text-spa-purple">
                           ${Number(ticket.price || 0)}
                         </span>
+
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
@@ -635,9 +659,11 @@ export default function EventDetail() {
                           >
                             −
                           </button>
+
                           <span className="w-5 text-center text-sm font-medium">
                             {selectedTickets[index] || 0}
                           </span>
+
                           <button
                             type="button"
                             onClick={() =>
@@ -663,6 +689,7 @@ export default function EventDetail() {
                           ${getTotalPrice()}
                         </span>
                       </div>
+
                       <p className="text-xs text-spa-gray mt-1">
                         Includes 10% Spa-PregioTM platform fee
                       </p>
@@ -712,6 +739,7 @@ export default function EventDetail() {
                       : getTotalPrice() === 0
                       ? 'Select tickets above'
                       : `Pay $${getTotalPrice()}`}
+
                     {paymentStatus !== 'loading' && getTotalPrice() > 0 && (
                       <DollarSign size={18} />
                     )}
