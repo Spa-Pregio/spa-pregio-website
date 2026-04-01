@@ -88,7 +88,7 @@ const audiences = [
     title: 'Share the movement. Earn real income.',
     description: 'Refer vendors and digital suites to your network and earn recurring commissions every month. Two income streams, zero cost to join.',
     cta: 'Become a Suite Sister',
-    href: '/sister-dashboard',
+    href: '/ambassadors',
     color: 'bg-amber-50 border-amber-300',
     iconBg: 'bg-amber-400',
     ctaStyle: 'bg-amber-400 text-white hover:bg-amber-500',
@@ -167,7 +167,6 @@ export default function Community() {
               suite drops, and behind-the-scenes of the movement.
             </p>
           </div>
-
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {socials.map((s) => {
               const SocialIcon = s.icon;
@@ -180,9 +179,7 @@ export default function Community() {
                   className={`${s.color} rounded-2xl p-7 flex flex-col gap-4 group hover:scale-[1.02] transition-transform duration-200`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className={s.textColor}>
-                      <SocialIcon />
-                    </div>
+                    <div className={s.textColor}><SocialIcon /></div>
                     <ArrowRight size={18} className={`${s.accentColor} group-hover:translate-x-1 transition-transform`} />
                   </div>
                   <div>
@@ -214,26 +211,16 @@ export default function Community() {
                 relationship wisdom, and the real story behind the movement.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mt-8 justify-center lg:justify-start">
-                <a
-                  href="https://tiktok.com/@spapregio"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 bg-spa-pink text-white px-7 py-3.5 rounded-full font-medium hover:bg-spa-pink/90 transition-colors"
-                >
+                <a href="https://tiktok.com/@spapregio" target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-spa-pink text-white px-7 py-3.5 rounded-full font-medium hover:bg-spa-pink/90 transition-colors">
                   <Play size={18} /> Follow @spapregio
                 </a>
-                <a
-                  href="https://instagram.com/spapregio"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 border border-white/20 text-white px-7 py-3.5 rounded-full font-medium hover:bg-white/10 transition-colors"
-                >
+                <a href="https://instagram.com/spapregio" target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 border border-white/20 text-white px-7 py-3.5 rounded-full font-medium hover:bg-white/10 transition-colors">
                   <Instagram size={18} /> Instagram Too
                 </a>
               </div>
             </div>
-
-            {/* Faux TikTok video cards */}
             <div className="flex-shrink-0 flex gap-4 items-end">
               {tiktokPreviews.map((card, i) => (
                 <div key={i} className={`${card.bg} ${card.height} w-32 rounded-2xl border border-white/10 flex flex-col justify-end p-3 relative overflow-hidden`}>
@@ -270,7 +257,7 @@ export default function Community() {
             <a href="/vendors" className="inline-flex items-center gap-2 px-7 py-3.5 border-2 border-spa-purple text-spa-purple rounded-full font-medium hover:bg-spa-purple hover:text-white transition-colors">
               List Your Business
             </a>
-            <a href="/sister-dashboard" className="inline-flex items-center gap-2 px-7 py-3.5 border-2 border-spa-charcoal text-spa-charcoal rounded-full font-medium hover:bg-spa-charcoal hover:text-white transition-colors">
+            <a href="/ambassadors" className="inline-flex items-center gap-2 px-7 py-3.5 border-2 border-spa-charcoal text-spa-charcoal rounded-full font-medium hover:bg-spa-charcoal hover:text-white transition-colors">
               Become a Suite Sister
             </a>
           </div>
