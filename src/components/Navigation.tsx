@@ -27,13 +27,18 @@ export default function Navigation() {
           <div className="flex items-center justify-between h-16 lg:h-20">
 
             {/* Logo */}
-            <Link to="/" className="inline-flex items-center flex-shrink-0">
+            <Link to="/" className="inline-flex items-center gap-2 flex-shrink-0">
               <img
-                src="/images/spa-pregio-logo.png"
-                alt="Spa-Pregio™ — The Celebration Suite Movement"
-                className="h-10 lg:h-14 w-auto"
-                style={{ mixBlendMode: 'multiply' }}
+                src="/images/spa-pregio-icon-512.png"
+                alt="Spa-Pregio™"
+                className="h-8 lg:h-10 w-auto"
               />
+              <span className="font-serif text-xl lg:text-2xl font-semibold tracking-tight">
+                <span className="text-spa-purple">Spa</span>
+                <span className="text-spa-charcoal">-</span>
+                <span className="text-spa-pink">Pregio</span>
+                <span className="text-spa-purple text-sm align-super">™</span>
+              </span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -112,12 +117,19 @@ export default function Navigation() {
         }`}
       >
         <div className="flex flex-col items-center justify-center h-full gap-6 pt-20">
-          <img
-            src="/images/spa-pregio-logo.png"
-            alt="Spa-Pregio™"
-            className="h-12 w-auto mb-2"
-            style={{ mixBlendMode: 'multiply' }}
-          />
+          <div className="flex items-center gap-2 mb-2">
+            <img
+              src="/images/spa-pregio-icon-512.png"
+              alt="Spa-Pregio™"
+              className="h-10 w-auto"
+            />
+            <span className="font-serif text-2xl font-semibold tracking-tight">
+              <span className="text-spa-purple">Spa</span>
+              <span className="text-spa-charcoal">-</span>
+              <span className="text-spa-pink">Pregio</span>
+              <span className="text-spa-purple text-sm align-super">™</span>
+            </span>
+          </div>
           {navLinks.map((link) => (
             <Link
               key={link.name}

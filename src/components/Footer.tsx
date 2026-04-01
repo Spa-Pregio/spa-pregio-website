@@ -23,13 +23,23 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-20">
         <div className="grid lg:grid-cols-5 gap-12 lg:gap-8">
           <div className="lg:col-span-2">
-            <Link to="/" className="inline-flex mb-6">
+            <Link to="/" className="inline-flex items-center gap-2 mb-6">
               <img
-                src="/images/spa-pregio-logo.png"
-                alt="Spa-Pregio™ — The Celebration Suite Movement"
-                className="h-14 w-auto"
-                style={{ mixBlendMode: 'multiply' }}
+                src="/images/spa-pregio-icon-512.png"
+                alt="Spa-Pregio™"
+                className="h-12 w-auto"
               />
+              <div className="flex flex-col">
+                <span className="font-serif text-2xl font-semibold tracking-tight">
+                  <span className="text-spa-purple">Spa</span>
+                  <span className="text-spa-charcoal">-</span>
+                  <span className="text-spa-pink">Pregio</span>
+                  <span className="text-spa-purple text-sm align-super">™</span>
+                </span>
+                <span className="text-xs text-spa-purple/70 uppercase tracking-[0.12em]">
+                  The Celebration Suite Movement
+                </span>
+              </div>
             </Link>
 
             <p className="text-spa-gray leading-relaxed max-w-sm mb-6">
