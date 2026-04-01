@@ -6,10 +6,29 @@ const WEB3FORMS_URL = 'https://api.web3forms.com/submit';
 const ACCESS_KEY = '8a7fd579-fb85-441e-a3e8-40a96c2ca782';
 
 const values = [
-  { icon: Heart, title: 'Celebration is Sacred', desc: 'Every pregnancy — first or fifth — deserves to be honored. We believe the world needs more joy, more gathering, and more intentional celebration of the women bringing life into it.' },
-  { icon: Sparkles, title: 'Elevated & Intimate', desc: 'After 25 years in the beauty industry, we know what it feels like to be truly pampered. Spa-Pregio brings that elevated, personal touch to every mama\'s journey.' },
-  { icon: Users, title: 'Community at the Core', desc: 'Raising a child takes a village. We\'re building that village — locally, intentionally, and with heart — so no mama has to figure it out alone.' },
+  {
+    icon: Heart,
+    title: 'Celebration is Sacred',
+    desc: 'Every pregnancy — first or fifth — deserves to be honored. We believe the world needs more joy, more gathering, and more intentional celebration of the women bringing life into it.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Elevated & Intimate',
+    desc: "After 25 years in the beauty industry, we know what it feels like to be truly pampered. Spa-Pregio brings that elevated, personal touch to every mama's journey.",
+  },
+  {
+    icon: Users,
+    title: 'Community at the Core',
+    desc: "Raising a child takes a village. We're building that village — locally, intentionally, and with heart — so no mama has to figure it out alone.",
+  },
 ];
+
+const BrandTM = () => (
+  <>
+    Spa-Pregio
+    <span className="align-super text-[10px] ml-0.5">TM</span>
+  </>
+);
 
 export default function About() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
@@ -47,7 +66,6 @@ export default function About() {
 
   return (
     <div className="w-full pt-20">
-
       {/* Hero */}
       <section className="w-full py-16 lg:py-24 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -70,14 +88,14 @@ export default function About() {
             <div>
               <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">The "Uh Oh" Moment</span>
               <h2 className="section-title mt-4">
-                "Uh Oh, <span className="text-spa-purple">Spa-Pregio."</span>
+                "Uh Oh, <span className="text-spa-purple"><BrandTM /></span>"
               </h2>
               <div className="mt-6 space-y-5 text-spa-gray leading-relaxed">
                 <p>
                   It was 11pm when my daughter sent her husband out for a shrimp ring. You know — one of those late-night pregnancy cravings that sends everyone scrambling. And right then, something popped into my head. The old SpaghettiOs jingle. Except the words that came out were:
                 </p>
                 <p className="font-serif text-xl text-spa-charcoal italic pl-4 border-l-4 border-spa-purple">
-                  "Uh Oh, Spa-Pregio."
+                  "Uh Oh, <BrandTM />."
                 </p>
                 <p>
                   I was teasing her — her husband had just had a vasectomy, and here she was craving shrimp rings at midnight. We laughed. But that name? It stuck. And somewhere between the laughter and the shrimp ring, a brand was born.
@@ -124,7 +142,7 @@ export default function About() {
                   What they deserve — especially when they're pregnant — is to be <em>seen</em>. To be <em>celebrated</em>. Not just at a shower, not just once, but throughout the entire journey of bringing a life into this world.
                 </p>
                 <p className="font-medium text-spa-charcoal">
-                  That's an underserved market. And Spa-Pregio® exists to change that.
+                  That's an underserved market. And <BrandTM /> exists to change that.
                 </p>
               </div>
             </div>
@@ -138,7 +156,11 @@ export default function About() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="relative">
               <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-elegant">
-                <img src="/images/angie_founder.jpeg" alt="Angie, Founder of Spa-Pregio®" className="w-full h-full object-cover object-top" />
+                <img
+                  src="/images/angie_founder.jpeg"
+                  alt="Angie, Founder of Spa-PregioTM"
+                  className="w-full h-full object-cover object-top"
+                />
               </div>
               <div className="absolute -bottom-4 -right-4 bg-white border border-spa-light rounded-2xl shadow-elegant px-6 py-4 max-w-[220px]">
                 <p className="font-serif text-sm text-spa-charcoal italic">"Every gift deserves to be wrapped with love."</p>
@@ -161,11 +183,11 @@ export default function About() {
                   She deserves a shrimp ring at 11pm. She deserves a spa day. She deserves a community of women who get it, who show up, who celebrate her — whether it's her first pregnancy or her fifth.
                 </p>
                 <p className="font-serif text-xl text-spa-charcoal italic">
-                  Spa-Pregio® is my love letter to every mama bringing something beautiful into this hard world.
+                  <BrandTM /> is my love letter to every mama bringing something beautiful into this hard world.
                 </p>
               </div>
               <div className="mt-8">
-                <p className="text-spa-purple font-medium">— Angie, Founder of Spa-Pregio®</p>
+                <p className="text-spa-purple font-medium">— Angie, Founder of <BrandTM /></p>
                 <p className="text-spa-gray text-sm mt-1">Beauty industry veteran. Grandmother. Advocate for maternal celebration.</p>
               </div>
             </div>
@@ -289,17 +311,22 @@ export default function About() {
             Free membership. A community of mamas who celebrate each other. Local vendors who show up for you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <Link to="/join" className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center justify-center gap-2">
+            <Link
+              to="/join"
+              className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center justify-center gap-2"
+            >
               Become a Member — Free
               <ArrowRight size={18} />
             </Link>
-            <Link to="/events" className="px-6 py-3 border-2 border-white/30 text-white rounded-full font-medium hover:bg-white/10 transition-colors">
+            <Link
+              to="/events"
+              className="px-6 py-3 border-2 border-white/30 text-white rounded-full font-medium hover:bg-white/10 transition-colors"
+            >
               Explore Events
             </Link>
           </div>
         </div>
       </section>
-
     </div>
   );
 }
