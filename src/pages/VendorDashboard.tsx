@@ -146,17 +146,24 @@ export default function VendorDashboard() {
   const checkUser = async () => {
     setLoading(true);
 
-    const {
-      data: { user: currentUser },
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
 
-    setUser(currentUser);
+      setUser(currentUser);
 
-    if (currentUser) {
-      await Promise.all([loadProfile(currentUser.id), loadMyEvents(currentUser.id)]);
+      if (currentUser) {
+        await Promise.all([
+          loadProfile(currentUser.id),
+          loadMyEvents(currentUser.id, currentUser.email || ''),
+        ]);
+      }
+    } catch (err) {
+      console.error('Dashboard load error:', err);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const loadProfile = async (userId: string) => {
@@ -197,7 +204,7 @@ export default function VendorDashboard() {
     }
   };
 
-  const loadMyEvents = async (userId: string) => {
+  const loadMyEvents = async (userId: string, userEmail: string) => {
     const { data: createdData, error: createdError } = await supabase
       .from('events')
       .select('*')
@@ -220,7 +227,7 @@ export default function VendorDashboard() {
         events (*)
       `
       )
-      .eq('user_email', user.email ?? '')
+      .eq('user_email', userEmail)
       .order('created_at', { ascending: false });
 
     if (rsvpError) {
