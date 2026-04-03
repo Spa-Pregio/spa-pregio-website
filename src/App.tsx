@@ -1,11 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import './App.css';
+
 // Layout
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
+
 // Pages
 import Home from './pages/Home';
+import Start from './pages/Start';
 import CelebrationSuites from './pages/CelebrationSuites';
 import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
@@ -25,15 +28,18 @@ import AdminAffiliates from './pages/AdminAffiliates';
 import Community from './pages/Community';
 import SpoilList from './pages/SpoilList';
 import WhatAboutDad from './pages/WhatAboutDad';
+
 // Funnel Pages
 import ExpectingMom from './pages/ExpectingMom';
 import Vendors from './pages/Vendors';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [pathname]);
+
   return null;
 }
 
@@ -46,6 +52,7 @@ function App() {
         <main className="relative">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/start" element={<Start />} />
             <Route path="/suites" element={<CelebrationSuites />} />
             <Route path="/events" element={<Events />} />
             <Route path="/events/success" element={<EventSuccess />} />
