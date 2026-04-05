@@ -1,3 +1,16 @@
+// Define Suite type at the top of the file
+type Suite = {
+  id: string;
+  type: string;
+  title: string;
+  italic: string;
+  tagline: string;
+  summary: string;
+  description: string;
+  includes: string[];
+  payhip: string;
+  image: string;
+};
 import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
