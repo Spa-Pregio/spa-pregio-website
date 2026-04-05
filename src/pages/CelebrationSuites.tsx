@@ -1,128 +1,91 @@
-import { Link, useSearchParams } from "react-router-dom";
+import React from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 
-interface Suite {
-  id: string;
-  type: string;
-  title: string;
-  italic: string;
-  tagline: string;
-  summary: string;
-  description: string;
-  includes: string[];
-  payhip: string;
-  image?: string;
-}
-
-const SUITES: Suite[] = [
+const SUITES = [
   {
-    id: "baby_shower",
-    type: "baby-shower",
-    title: "Baby",
-    italic: "Shower",
-    tagline: "A spa-inspired celebration for the mama-to-be.",
+    id: 'baby_shower',
+    type: 'baby-shower',
+    title: 'Baby',
+    italic: 'Shower',
+    tagline: 'A spa-inspired celebration for the mama-to-be.',
     summary:
-      "Designed for hosts who want a beautiful, intentional baby shower that feels elevated, nurturing, and meaningful.",
+      'Designed for hosts who want a beautiful, intentional baby shower that feels elevated, nurturing, and meaningful.',
     description:
-      "The Baby Shower Suite helps you create a warm, beautiful gathering centered on celebrating motherhood with softness, detail, and connection.",
-    includes: [
-      "Planning guidance",
-      "Decor inspiration",
-      "Host support tools",
-      "Celebration ideas",
-    ],
-    payhip: "https://payhip.com/b/lZ6WG",
-    image: "/images/baby-shower.jpg",
+      'The Baby Shower Suite helps you create a warm, beautiful gathering centered on celebrating motherhood with softness, detail, and connection.',
+    includes: ['Planning guidance', 'Decor inspiration', 'Host support tools', 'Celebration ideas'],
+    payhip: 'https://payhip.com/b/lZ6WG',
+    image: '/images/baby-shower.jpg',
   },
   {
-    id: "gender_reveal",
-    type: "gender-reveal",
-    title: "Gender",
-    italic: "Reveal",
-    tagline: "A memorable reveal experience, designed with intention.",
+    id: 'gender_reveal',
+    type: 'gender-reveal',
+    title: 'Gender',
+    italic: 'Reveal',
+    tagline: 'A memorable reveal experience, designed with intention.',
     summary:
-      "Created for families who want a reveal that feels beautiful, polished, and emotionally meaningful.",
+      'Created for families who want a reveal that feels beautiful, polished, and emotionally meaningful.',
     description:
-      "The Gender Reveal Suite helps you build a moment that feels joyful, elevated, and worthy of the memory you’re creating.",
-    includes: [
-      "Reveal planning ideas",
-      "Styling inspiration",
-      "Host guidance",
-      "Celebration details",
-    ],
-    payhip: "https://payhip.com/b/jLSWB",
-    image: "/images/suites/gender-reveal.jpg",
+      'The Gender Reveal Suite helps you build a moment that feels joyful, elevated, and worthy of the memory you’re creating.',
+    includes: ['Reveal planning ideas', 'Styling inspiration', 'Host guidance', 'Celebration details'],
+    payhip: 'https://payhip.com/b/jLSWB',
+    image: '/images/gender-reveal.jpg',
   },
   {
-    id: "sip_and_see",
-    type: "sip-and-see",
-    title: "Sip",
-    italic: "& See",
-    tagline: "Welcome baby with warmth, beauty, and connection.",
+    id: 'sip_and_see',
+    type: 'sip-and-see',
+    title: 'Sip',
+    italic: '& See',
+    tagline: 'Welcome baby with warmth, beauty, and connection.',
     summary:
-      "Perfect for a softer, more intimate gathering where loved ones come together to meet and celebrate baby.",
+      'Perfect for a softer, more intimate gathering where loved ones come together to meet and celebrate baby.',
     description:
-      "The Sip & See Suite is designed to help you host a beautiful welcome gathering that feels calm, thoughtful, and genuinely special.",
-    includes: [
-      "Gathering guidance",
-      "Hosting ideas",
-      "Decor inspiration",
-      "Planning support",
-    ],
-    payhip: "https://payhip.com/b/WbdBP",
-    image: "/images/suites/sip-and-see.jpg",
+      'The Sip & See Suite is designed to help you host a beautiful welcome gathering that feels calm, thoughtful, and genuinely special.',
+    includes: ['Gathering guidance', 'Hosting ideas', 'Decor inspiration', 'Planning support'],
+    payhip: 'https://payhip.com/b/WbdBP',
+    image: '/images/sip-and-see.jpg',
   },
   {
-    id: "pregnancy_announcement",
-    type: "pregnancy-announcement",
-    title: "Pregnancy",
-    italic: "Announcement",
-    tagline: "Share your news beautifully.",
+    id: 'pregnancy_announcement',
+    type: 'pregnancy-announcement',
+    title: 'Pregnancy',
+    italic: 'Announcement',
+    tagline: 'Share your news beautifully.',
     summary:
-      "For mamas and families who want to announce a pregnancy in a way that feels elevated, memorable, and heartfelt.",
+      'For mamas and families who want to announce a pregnancy in a way that feels elevated, memorable, and heartfelt.',
     description:
-      "The Pregnancy Announcement Suite helps turn your announcement into a beautiful experience rather than just a quick share.",
-    includes: [
-      "Announcement inspiration",
-      "Creative ideas",
-      "Planning guidance",
-      "Meaningful presentation tools",
-    ],
-    payhip: "https://payhip.com/b/j6hfL",
-    image: "/images/suites/pregnancy-announcement.jpg",
+      'The Pregnancy Announcement Suite helps turn your announcement into a beautiful experience rather than just a quick share.',
+    includes: ['Announcement inspiration', 'Creative ideas', 'Planning guidance', 'Meaningful presentation tools'],
+    payhip: 'https://payhip.com/b/j6hfL',
+    image: '/images/pregnancy-announcement.jpg',
   },
   {
-    id: "push_present_pampering",
-    type: "push-present-pampering",
-    title: "Push Present",
-    italic: "& Pampering",
-    tagline: "Honor motherhood with softness, rest, and love.",
+    id: 'push_present_pampering',
+    type: 'push-present-pampering',
+    title: 'Push Present',
+    italic: '& Pampering',
+    tagline: 'Honor motherhood with softness, rest, and love.',
     summary:
-      "Made for celebrating the mother herself with appreciation, beauty, and nurturing energy.",
+      'Made for celebrating the mother herself with appreciation, beauty, and nurturing energy.',
     description:
-      "The Push Present & Pampering Suite centers the mama and creates a celebration around care, gratitude, and intentional pampering.",
-    includes: [
-      "Pampering inspiration",
-      "Gift ideas",
-      "Planning support",
-      "Experience guidance",
-    ],
-    payhip: "https://payhip.com/b/Ldkxz",
-    image: "/images/suites/push-present-pampering.jpg",
+      'The Push Present & Pampering Suite centers the mama and creates a celebration around care, gratitude, and intentional pampering.',
+    includes: ['Pampering inspiration', 'Gift ideas', 'Planning support', 'Experience guidance'],
+    payhip: 'https://payhip.com/b/Ldkxz',
+    image: '/images/push-present-pampering.jpg',
   },
 ];
 
 const TYPE_LABELS: Record<string, string> = {
-  "baby-shower": "Baby Shower",
-  "gender-reveal": "Gender Reveal",
-  "sip-and-see": "Sip & See",
-  "pregnancy-announcement": "Pregnancy Announcement",
-  "push-present-pampering": "Push Present & Pampering",
+  'baby-shower': 'Baby Shower',
+  'gender-reveal': 'Gender Reveal',
+  'sip-and-see': 'Sip & See',
+  'pregnancy-announcement': 'Pregnancy Announcement',
+  'push-present-pampering': 'Push Present & Pampering',
 };
 
 function BackgroundImage({
   image,
   alt,
-  className = "",
+  className = '',
 }: {
   image?: string;
   alt: string;
@@ -183,13 +146,6 @@ function SuiteHero({ suite }: { suite: Suite }) {
               >
                 Purchase Suite
               </a>
-
-              <Link
-                to="/start"
-                className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/10 backdrop-blur-sm text-white px-8 py-4 text-sm font-semibold hover:bg-white/20 transition"
-              >
-                Purchase + Create Event
-              </Link>
             </div>
           </div>
         </div>
@@ -267,7 +223,7 @@ function SuiteDetails({ suite }: { suite: Suite }) {
 
 export default function CelebrationSuites() {
   const [searchParams] = useSearchParams();
-  const selectedType = searchParams.get("type");
+  const selectedType = searchParams.get('type');
 
   const filteredSuites = selectedType
     ? SUITES.filter((suite) => suite.type === selectedType)
