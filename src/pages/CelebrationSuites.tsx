@@ -31,7 +31,7 @@ const SUITES: Suite[] = [
       "Celebration ideas",
     ],
     payhip: "https://payhip.com/b/lZ6WG",
-    image: "/images/suites/baby-shower.jpg",
+    image: "/images/baby-shower.jpg",
   },
   {
     id: "gender_reveal",
