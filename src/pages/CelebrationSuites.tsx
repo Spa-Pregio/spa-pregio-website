@@ -122,13 +122,17 @@ const TYPE_LABELS: Record<string, string> = {
 function BackgroundImage({
   image,
   alt,
+  className = "",
 }: {
   image?: string;
   alt: string;
+  className?: string;
 }) {
   if (!image) {
     return (
-      <div className="absolute inset-0 bg-gradient-to-br from-spa-lavender via-spa-cream to-spa-blush" />
+      <div
+        className={`absolute inset-0 bg-gradient-to-br from-spa-lavender via-spa-cream to-spa-blush ${className}`}
+      />
     );
   }
 
@@ -136,8 +140,128 @@ function BackgroundImage({
     <img
       src={image}
       alt={alt}
-      className="absolute inset-0 w-full h-full object-cover"
+      className={`absolute inset-0 w-full h-full object-cover ${className}`}
     />
+  );
+}
+
+function SuiteHero({ suite }: { suite: Suite }) {
+  return (
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      <BackgroundImage
+        image={suite.image}
+        alt={`${suite.title} ${suite.italic}`}
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(22,18,26,0.72)_0%,rgba(22,18,26,0.46)_35%,rgba(22,18,26,0.18)_65%,rgba(22,18,26,0.18)_100%)]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-white/10" />
+
+      <div className="relative z-10 w-full px-6 py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="max-w-2xl text-white">
+            <span className="inline-flex items-center rounded-full bg-white/15 backdrop-blur-md px-4 py-2 text-xs font-semibold tracking-[0.22em] uppercase border border-white/20 mb-6">
+              {TYPE_LABELS[suite.type]}
+            </span>
+
+            <h1 className="text-5xl md:text-7xl leading-[0.95] font-serif font-bold mb-5">
+              {suite.title} <span className="italic">{suite.italic}</span>
+            </h1>
+
+            <p className="text-lg md:text-xl text-white/95 mb-4 leading-relaxed">
+              {suite.tagline}
+            </p>
+
+            <p className="text-base md:text-lg text-white/85 leading-relaxed mb-8">
+              {suite.summary}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <a
+                href={suite.payhip}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-full bg-white text-spa-charcoal px-8 py-4 text-sm font-semibold shadow-elegant hover:scale-[1.01] transition"
+              >
+                Purchase Suite
+              </a>
+
+              <Link
+                to="/start"
+                className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/10 backdrop-blur-sm text-white px-8 py-4 text-sm font-semibold hover:bg-white/20 transition"
+              >
+                Purchase + Create Event
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SuiteDetails({ suite }: { suite: Suite }) {
+  return (
+    <section className="bg-white py-16 px-6">
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.05fr_0.95fr] gap-10 items-start">
+        <div className="rounded-[2rem] overflow-hidden shadow-elegant border border-spa-light bg-spa-cream">
+          <div className="relative h-[420px]">
+            <BackgroundImage
+              image={suite.image}
+              alt={`${suite.title} ${suite.italic}`}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10" />
+          </div>
+        </div>
+
+        <div className="lg:pt-4">
+          <span className="text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
+            Suite Overview
+          </span>
+
+          <h2 className="text-4xl md:text-5xl font-bold text-spa-charcoal mt-3 mb-5 font-serif leading-tight">
+            A polished, ready-to-use celebration experience
+          </h2>
+
+          <p className="text-spa-gray text-lg leading-relaxed mb-6">
+            {suite.description}
+          </p>
+
+          <div className="rounded-[2rem] bg-spa-cream border border-spa-light p-6 mb-8">
+            <h3 className="text-xl font-semibold text-spa-charcoal mb-4 font-serif">
+              What’s Included
+            </h3>
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              {suite.includes.map((item) => (
+                <div
+                  key={item}
+                  className="rounded-2xl bg-white border border-spa-light px-4 py-3 text-spa-charcoal"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <a
+              href={suite.payhip}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-full bg-spa-purple text-white px-8 py-4 text-sm font-semibold hover:bg-[#7d5fa0] transition-colors"
+            >
+              Buy on Payhip
+            </a>
+
+            <Link
+              to="/suites"
+              className="inline-flex items-center justify-center rounded-full border border-spa-purple text-spa-purple px-8 py-4 text-sm font-semibold hover:bg-spa-purple hover:text-white transition-colors"
+            >
+              View All Suites
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -155,92 +279,8 @@ export default function CelebrationSuites() {
   if (selectedSuite) {
     return (
       <div className="min-h-screen bg-spa-cream font-sans">
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          <BackgroundImage
-            image={selectedSuite.image}
-            alt={`${selectedSuite.title} ${selectedSuite.italic}`}
-          />
-
-          <div className="absolute inset-0 bg-black/35" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/60" />
-
-          <div className="relative z-10 max-w-3xl mx-auto px-6 text-center text-white">
-            <span className="inline-block mb-4 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-xs tracking-[0.25em] uppercase font-semibold">
-              {TYPE_LABELS[selectedSuite.type]}
-            </span>
-
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-4 font-serif">
-              {selectedSuite.title}{" "}
-              <span className="italic">{selectedSuite.italic}</span>
-            </h1>
-
-            <p className="text-lg md:text-xl max-w-2xl mx-auto mb-4 text-white/95">
-              {selectedSuite.tagline}
-            </p>
-
-            <p className="text-base md:text-lg max-w-2xl mx-auto mb-8 text-white/85 leading-relaxed">
-              {selectedSuite.summary}
-            </p>
-
-            <div className="max-w-2xl mx-auto mb-10">
-              <p className="text-sm md:text-base text-white/85 leading-relaxed">
-                {selectedSuite.description}
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href={selectedSuite.payhip}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-white text-spa-charcoal text-sm font-semibold shadow-elegant hover:opacity-95 transition"
-              >
-                Purchase This Suite
-              </a>
-
-              <Link
-                to="/suites"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-full border border-white text-white text-sm font-semibold hover:bg-white/10 transition"
-              >
-                View All Suites
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 px-6 bg-white">
-          <div className="max-w-4xl mx-auto text-center">
-            <span className="text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
-              What This Suite Includes
-            </span>
-
-            <h2 className="text-4xl font-bold text-spa-charcoal mt-3 mb-10 font-serif">
-              Everything You Need to Plan Beautifully
-            </h2>
-
-            <div className="grid sm:grid-cols-2 gap-4 text-left">
-              {selectedSuite.includes.map((item) => (
-                <div
-                  key={item}
-                  className="rounded-2xl border border-spa-light bg-spa-cream px-5 py-4 text-spa-charcoal font-medium"
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-10">
-              <a
-                href={selectedSuite.payhip}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold hover:bg-[#7d5fa0] transition-colors"
-              >
-                Get This Suite
-              </a>
-            </div>
-          </div>
-        </section>
+        <SuiteHero suite={selectedSuite} />
+        <SuiteDetails suite={selectedSuite} />
       </div>
     );
   }
@@ -292,7 +332,7 @@ export default function CelebrationSuites() {
               key={suite.id}
               className="rounded-3xl overflow-hidden bg-white shadow-elegant border border-spa-light flex flex-col"
             >
-              <div className="relative h-56">
+              <div className="relative h-64">
                 <BackgroundImage
                   image={suite.image}
                   alt={`${suite.title} ${suite.italic}`}
