@@ -38,7 +38,7 @@ const SUITES = [
     summary:
       'Created for families who want a reveal that feels beautiful, polished, and emotionally meaningful.',
     description:
-      'The Gender Reveal Suite helps you build a moment that feels joyful, elevated, and worthy of the memory you're creating.',
+      `The Gender Reveal Suite helps you build a moment that feels joyful, elevated, and worthy of the memory you're creating.`,
     includes: ['Reveal planning ideas', 'Styling inspiration', 'Host guidance', 'Celebration details'],
     payhip: 'https://payhip.com/b/jLSWB',
     image: '/images/Gender-reveal.jpg',
