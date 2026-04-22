@@ -16,7 +16,7 @@ const suiteShowcases = [
     id: 'suite-baby-shower',
     title: 'Baby Shower Suite',
     emoji: '🍼',
-    description: 'Celebrate the mama-to-be with a curated baby shower experience. Local vendors, beautiful décor, and community all in one place.',
+    description: 'Celebrate the mama-to-be with a curated baby shower experience. Local vendors, beautiful decor, and community all in one place.',
     image: '/images/suite_baby_shower.png',
     badge: 'Baby Shower',
   },
@@ -80,7 +80,6 @@ export default function Events() {
   const [showStripeInfo, setShowStripeInfo] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
 
-  // Photo upload state
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoUploading, setPhotoUploading] = useState(false);
@@ -249,7 +248,7 @@ export default function Events() {
             Local <span className="text-spa-purple">celebrations.</span>
           </h1>
           <p className="mt-6 text-lg text-spa-gray leading-relaxed">
-            Choose a Celebration Suite™ below and create your own event — or browse community events already happening near you.
+            Choose a Celebration Suite below and create your own event — or browse community events already happening near you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <button
@@ -263,11 +262,41 @@ export default function Events() {
         </div>
       </section>
 
+      {/* Host Your Own CTA Banner — moved here between hero and suites */}
+      <section className="w-full py-16 lg:py-20 bg-spa-purple">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="font-serif text-3xl lg:text-4xl text-white">
+                Host your own <span className="text-spa-pink">celebration.</span>
+              </h2>
+              <p className="mt-4 text-white/70 leading-relaxed">
+                Free or ticketed — create your event and we will handle the rest.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
+                className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors flex items-center justify-center gap-2"
+              >
+                <Users size={18} /> Create Member Event
+              </button>
+              <button
+                onClick={() => { setCreateType('vendor'); setShowCreateModal(true); }}
+                className="px-6 py-3 border-2 border-white/30 text-white rounded-full font-medium hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
+              >
+                <Store size={18} /> Create Vendor Event
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Suite Showcase Cards */}
       <section className="w-full py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-12">
-            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Celebration Suites™</span>
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Celebration Suites</span>
             <h2 className="section-title mt-4">
               Choose your <span className="text-spa-purple">suite.</span>
             </h2>
@@ -349,7 +378,7 @@ export default function Events() {
               <span className="text-5xl mb-4 block">🎉</span>
               <h3 className="font-serif text-2xl text-spa-charcoal mb-2">No events yet — be the first!</h3>
               <p className="text-spa-gray mb-6 max-w-sm mx-auto">
-                Choose a Celebration Suite™ above and create the first event in your area.
+                Choose a Celebration Suite above and create the first event in your area.
               </p>
               <button
                 onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
@@ -410,37 +439,7 @@ export default function Events() {
         </div>
       </section>
 
-      {/* Create Event CTA Banner */}
-      <section className="w-full py-16 lg:py-20 bg-spa-purple">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="font-serif text-3xl lg:text-4xl text-white">
-                Host your own <span className="text-spa-pink">celebration.</span>
-              </h2>
-              <p className="mt-4 text-white/70 leading-relaxed">
-                Free or ticketed — create your event and we'll handle the rest.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
-                className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors flex items-center justify-center gap-2"
-              >
-                <Users size={18} /> Create Member Event
-              </button>
-              <button
-                onClick={() => { setCreateType('vendor'); setShowCreateModal(true); }}
-                className="px-6 py-3 border-2 border-white/30 text-white rounded-full font-medium hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
-              >
-                <Store size={18} /> Create Vendor Event
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Create Event Modal ── */}
+      {/* Create Event Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -462,18 +461,16 @@ export default function Events() {
                   <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4">
                     <Check size={28} className="text-spa-purple" />
                   </div>
-                  <h4 className="font-serif text-xl text-spa-charcoal mb-2">Event Created! 🎉</h4>
+                  <h4 className="font-serif text-xl text-spa-charcoal mb-2">Event Created!</h4>
                   <p className="text-spa-gray">Your event is now live on the events page.</p>
                 </div>
               ) : (
                 <form onSubmit={handleCreateSubmit} className="space-y-4">
-                  {/* Event Name */}
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Name</label>
                     <input type="text" name="title" required value={formData.title} onChange={handleChange} placeholder="e.g., Baby Shower Suite" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                   </div>
 
-                  {/* Photo Upload */}
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Photo</label>
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
@@ -488,7 +485,7 @@ export default function Events() {
                           <X size={14} />
                         </button>
                         <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/40 rounded-lg">
-                          <p className="text-white text-xs">Custom photo selected ✓</p>
+                          <p className="text-white text-xs">Custom photo selected</p>
                         </div>
                       </div>
                     ) : (
@@ -512,7 +509,6 @@ export default function Events() {
                     )}
                   </div>
 
-                  {/* Date & Time */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-spa-charcoal mb-1">Date</label>
@@ -524,13 +520,11 @@ export default function Events() {
                     </div>
                   </div>
 
-                  {/* Location */}
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Location</label>
                     <input type="text" name="location" required value={formData.location} onChange={handleChange} placeholder="e.g., High Point, NC or Virtual" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                   </div>
 
-                  {/* Event Type */}
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Type</label>
                     <select name="type" value={formData.type} onChange={handleChange} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30">
@@ -543,19 +537,16 @@ export default function Events() {
                     </select>
                   </div>
 
-                  {/* Description */}
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Description</label>
                     <textarea rows={3} name="description" value={formData.description} onChange={handleChange} placeholder="Tell us about your event..." className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none" />
                   </div>
 
-                  {/* Max Attendees */}
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Max Attendees</label>
                     <input type="number" name="max_attendees" value={formData.max_attendees} onChange={handleChange} placeholder="50" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                   </div>
 
-                  {/* Free / Ticketed toggle */}
                   <div className="flex items-center justify-between p-4 bg-spa-lavender rounded-xl">
                     <div>
                       <p className="font-medium text-spa-charcoal">Free Event</p>
@@ -570,7 +561,6 @@ export default function Events() {
                     </button>
                   </div>
 
-                  {/* Ticketed section */}
                   {!formData.is_free && (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -600,7 +590,6 @@ export default function Events() {
                         </div>
                       ))}
 
-                      {/* ── Stripe Account ID with info button ── */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
                           <label className="block text-sm font-medium text-spa-charcoal">
@@ -629,7 +618,6 @@ export default function Events() {
                     </div>
                   )}
 
-                  {/* Vendor tables */}
                   {createType === 'vendor' && (
                     <div>
                       <label className="block text-sm font-medium text-spa-charcoal mb-1">Number of Vendor Tables</label>
@@ -645,7 +633,7 @@ export default function Events() {
                     <Plus size={18} /> {photoUploading ? 'Uploading photo...' : submitStatus === 'loading' ? 'Creating...' : 'Create Event'}
                   </button>
                   <p className="text-xs text-spa-gray text-center">
-                    Spa-Pregio™ takes a 10% platform fee on all paid ticket sales.
+                    Spa-Pregio takes a 10% platform fee on all paid ticket sales.
                   </p>
                 </form>
               )}
@@ -654,7 +642,7 @@ export default function Events() {
         </div>
       )}
 
-      {/* ── Stripe Info Modal ── */}
+      {/* Stripe Info Modal */}
       {showStripeInfo && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-sm w-full shadow-xl">
@@ -669,7 +657,7 @@ export default function Events() {
             </div>
             <div className="p-5 space-y-4">
               {[
-                { step: '1', text: "Go to dashboard.stripe.com and make sure you're in Live mode — the toggle is in the top left corner." },
+                { step: '1', text: 'Go to dashboard.stripe.com and make sure you are in Live mode — the toggle is in the top left corner.' },
                 { step: '2', text: 'Click Settings (gear icon, top right), then Account details.' },
                 { step: '3', text: 'Your Account ID is listed there. It starts with acct_ followed by letters and numbers.' },
                 { step: '4', text: 'Copy the full ID — including the acct_ part — and paste it into the field.' },
@@ -691,7 +679,7 @@ export default function Events() {
               <div className="flex gap-2 bg-amber-50 rounded-xl p-3">
                 <AlertCircle size={15} className="text-amber-500 flex-shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-700 leading-relaxed">
-                  This is <strong>your</strong> Stripe account ID — not Spa-Pregio's. Stripe uses it to route ticket revenue directly to you.
+                  This is your Stripe account ID — not Spa-Pregio's. Stripe uses it to route ticket revenue directly to you.
                 </p>
               </div>
 
