@@ -151,7 +151,7 @@ function SuiteHero({ suite }: { suite: Suite }) {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              
+              <a
                 href={suite.payhip}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -212,7 +212,7 @@ function SuiteDetails({ suite }: { suite: Suite }) {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            
+            <a
               href={suite.payhip}
               target="_blank"
               rel="noopener noreferrer"
@@ -327,7 +327,7 @@ export default function CelebrationSuites() {
                     View Suite
                   </Link>
 
-                  
+                  <a
                     href={suite.payhip}
                     target="_blank"
                     rel="noopener noreferrer"
