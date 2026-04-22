@@ -1,4 +1,3 @@
-// Define Suite type at the top of the file
 type Suite = {
   id: string;
   type: string;
@@ -11,6 +10,7 @@ type Suite = {
   payhip: string;
   image: string;
 };
+
 import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
@@ -38,7 +38,7 @@ const SUITES = [
     summary:
       'Created for families who want a reveal that feels beautiful, polished, and emotionally meaningful.',
     description:
-      `The Gender Reveal Suite helps you build a moment that feels joyful, elevated, and worthy of the memory you're creating.`,
+      'The Gender Reveal Suite helps you build a moment that feels joyful, elevated, and worthy of the memory you are creating.',
     includes: ['Reveal planning ideas', 'Styling inspiration', 'Host guidance', 'Celebration details'],
     payhip: 'https://payhip.com/b/jLSWB',
     image: '/images/Gender-reveal.jpg',
@@ -196,7 +196,7 @@ function SuiteDetails({ suite }: { suite: Suite }) {
 
           <div className="rounded-[2rem] bg-spa-cream border border-spa-light p-6 mb-8">
             <h3 className="text-xl font-semibold text-spa-charcoal mb-4 font-serif">
-              What's Included
+              What is Included
             </h3>
 
             <div className="grid sm:grid-cols-2 gap-3">
@@ -272,8 +272,8 @@ export default function CelebrationSuites() {
           </h1>
 
           <p className="text-lg text-spa-gray max-w-2xl mx-auto mb-10 leading-relaxed">
-            Browse the full Spa-Pregio™ suite collection and choose the experience
-            that best fits the celebration you're planning.
+            Browse the full Spa-Pregio collection and choose the experience
+            that best fits the celebration you are planning.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
