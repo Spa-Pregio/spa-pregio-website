@@ -170,7 +170,7 @@ function AdminDashboard() {
     if (refs) setReferrals(refs);
     const { data: suites } = await supabase.from('affiliate_suite_commissions').select('*').order('created_at', { ascending: false });
     if (suites) setSuiteCommissions(suites);
-    const { data: vends } = await supabase.from('vendor_profiles').select('*').order('created_at', { ascending: false });
+    const { data: vends } = await supabase.from('vendors').select('*').order('created_at', { ascending: false });
     if (vends) setVendors(vends);
     setLoading(false);
   }
