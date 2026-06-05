@@ -21,6 +21,7 @@ import Terms from './pages/Terms';
 import Contact from './pages/Contact';
 import AffiliateDashboard from './pages/AffiliateDashboard';
 import AdminAffiliates from './pages/AdminAffiliates';
+import ResetPassword from './pages/ResetPassword';
 import SpoilList from './pages/SpoilList';
 import WhatAboutDad from './pages/WhatAboutDad';
 
@@ -55,6 +56,7 @@ function AppLayout() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/sister-dashboard" element={<AffiliateDashboard />} />
           <Route path="/admin-affiliates" element={<AdminAffiliates />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Legacy routes — redirect to merged locations */}
           <Route path="/spoil-list" element={<SpoilList />} />
@@ -81,9 +83,3 @@ export default function App() {
     </Router>
   );
 }
-
-
-
-
-
-
