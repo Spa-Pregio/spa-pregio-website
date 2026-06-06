@@ -68,6 +68,7 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [locationDenied, setLocationDenied] = useState(false);
 
   const [claimPlace, setClaimPlace] = useState<PlaceResult | null>(null);
   const [claimStatus, setClaimStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'noauth'>('idle');
@@ -193,15 +194,26 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
         doSearch(city, state, selectedCategory);
         return;
       }
+      // Check if browser supports geolocation
+      if (!navigator.geolocation) {
+        // No geolocation — just focus the city field
+        return;
+      }
       setLocating(true);
       try {
         const { city: detectedCity, state: detectedState } = await getLocation();
-        setCity(detectedCity);
-        setState(detectedState);
-        setLocating(false);
-        doSearch(detectedCity, detectedState, selectedCategory);
+        if (detectedCity && detectedState) {
+          setCity(detectedCity);
+          setState(detectedState);
+          setLocating(false);
+          doSearch(detectedCity, detectedState, selectedCategory);
+        } else {
+          setLocating(false);
+        }
       } catch {
+        // User denied location or it failed — let them type manually
         setLocating(false);
+        setLocationDenied(true);
       }
     }
   }));
@@ -292,6 +304,14 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
           </div>
         </div>
       </div>
+
+      {locationDenied && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6 flex items-center gap-3">
+          <MapPin size={16} className="text-amber-500 flex-shrink-0" />
+          <p className="text-sm text-amber-700">Location access was denied — enter your city and state above to search.</p>
+          <button onClick={() => setLocationDenied(false)} className="ml-auto text-amber-400 hover:text-amber-600"><X size={16} /></button>
+        </div>
+      )}
 
       {(loading || locating) && (
         <div className="text-center py-16">
