@@ -31,18 +31,14 @@ const SERVICE_CATEGORIES = [
   'Gift Shop', 'Doula / Midwife', 'Other',
 ];
 
-declare global {
-  interface Window { google: any; }
-}
-
 interface PlaceResult {
   place_id: string;
   name: string;
   vicinity: string;
   rating?: number;
   user_ratings_total?: number;
-  photos?: any[];
-  opening_hours?: { open_now: boolean };
+  photo_url?: string;
+  open_now?: boolean;
   website?: string;
   formatted_phone_number?: string;
 }
@@ -71,10 +67,8 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
   const [spaResults, setSpaResults] = useState<SupabaseVendor[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [mapsLoaded, setMapsLoaded] = useState(false);
   const [locating, setLocating] = useState(false);
 
-  // Claim modal state
   const [claimPlace, setClaimPlace] = useState<PlaceResult | null>(null);
   const [claimStatus, setClaimStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'noauth'>('idle');
   const [claimError, setClaimError] = useState('');
@@ -88,32 +82,20 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
     service_categories: [] as string[],
   });
 
-  const mapRef = useRef<HTMLDivElement>(null);
-  const serviceRef = useRef<any>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   const apiKey = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY || '';
 
+  // Load Google Maps script (for Geocoding only — Places uses fetch now)
   useEffect(() => {
-    if (!apiKey || window.google) {
-      if (window.google) setMapsLoaded(true);
-      return;
-    }
+    if (!apiKey) return;
+    if (document.querySelector('script[data-google-maps]')) return;
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
     script.async = true;
-    script.onload = () => setMapsLoaded(true);
+    script.defer = true;
+    script.setAttribute('data-google-maps', 'true');
     document.head.appendChild(script);
   }, [apiKey]);
-
-  useEffect(() => {
-    if (mapsLoaded && mapRef.current && !serviceRef.current) {
-      const map = new window.google.maps.Map(mapRef.current, {
-        center: { lat: 37.0902, lng: -95.7129 },
-        zoom: 4,
-      });
-      serviceRef.current = new window.google.maps.places.PlacesService(map);
-    }
-  }, [mapsLoaded]);
 
   const searchSupabaseVendors = async (searchCity: string, searchState: string, searchCategory: string) => {
     const { data } = await supabase
@@ -126,45 +108,59 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
     setSpaResults(data || []);
   };
 
-  const doSearch = (searchCity: string, searchState: string, searchCategory: string) => {
+  // New Places API (Text Search) via fetch
+  const searchGooglePlaces = async (searchCity: string, searchState: string, searchCategory: string): Promise<PlaceResult[]> => {
+    if (!apiKey) return [];
+    const query = `${CATEGORY_SEARCHES[searchCategory] || searchCategory} in ${searchCity} ${searchState}`;
+    try {
+      const res = await fetch(
+        `https://places.googleapis.com/v1/places:searchText`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': apiKey,
+            'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.photos,places.currentOpeningHours,places.websiteUri,places.nationalPhoneNumber',
+          },
+          body: JSON.stringify({ textQuery: query, maxResultCount: 9 }),
+        }
+      );
+      const data = await res.json();
+      if (!data.places) return [];
+      return data.places.map((p: any) => ({
+        place_id: p.id,
+        name: p.displayName?.text || '',
+        vicinity: p.formattedAddress || '',
+        rating: p.rating,
+        user_ratings_total: p.userRatingCount,
+        photo_url: p.photos?.[0]
+          ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxWidthPx=400&key=${apiKey}`
+          : undefined,
+        open_now: p.currentOpeningHours?.openNow,
+        website: p.websiteUri,
+        formatted_phone_number: p.nationalPhoneNumber,
+      }));
+    } catch (e) {
+      console.warn('Places search failed:', e);
+      return [];
+    }
+  };
+
+  const doSearch = async (searchCity: string, searchState: string, searchCategory: string) => {
     if (!searchCity || !searchState) return;
     setLoading(true);
     setSearched(false);
     setResults([]);
     setSpaResults([]);
 
-    // Always search Supabase vendors
-    searchSupabaseVendors(searchCity, searchState, searchCategory);
+    const [googleResults] = await Promise.all([
+      searchGooglePlaces(searchCity, searchState, searchCategory),
+      searchSupabaseVendors(searchCity, searchState, searchCategory),
+    ]);
 
-    // Search Google Places if available
-    if (!serviceRef.current) {
-      setLoading(false);
-      setSearched(true);
-      return;
-    }
-
-    const query = `${CATEGORY_SEARCHES[searchCategory] || searchCategory} in ${searchCity} ${searchState}`;
-    serviceRef.current.textSearch({ query }, (places: any[], status: string) => {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK && places) {
-        const detailPromises = places.slice(0, 9).map((place: any) =>
-          new Promise<PlaceResult>((resolve) => {
-            serviceRef.current.getDetails(
-              { placeId: place.place_id, fields: ['name', 'vicinity', 'rating', 'user_ratings_total', 'photos', 'opening_hours', 'website', 'formatted_phone_number', 'place_id'] },
-              (detail: any, s: string) => resolve(s === window.google.maps.places.PlacesServiceStatus.OK ? detail : place)
-            );
-          })
-        );
-        Promise.all(detailPromises).then((detailed) => {
-          setResults(detailed);
-          setLoading(false);
-          setSearched(true);
-        });
-      } else {
-        setResults([]);
-        setLoading(false);
-        setSearched(true);
-      }
-    });
+    setResults(googleResults);
+    setLoading(false);
+    setSearched(true);
   };
 
   const getLocation = (): Promise<{ city: string; state: string }> => {
@@ -212,21 +208,9 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
 
   const openClaimModal = async (place: PlaceResult) => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      setClaimPlace(place);
-      setClaimStatus('noauth');
-      return;
-    }
+    if (!session) { setClaimPlace(place); setClaimStatus('noauth'); return; }
     setClaimPlace(place);
-    setClaimForm({
-      business_description: '',
-      phone: place.formatted_phone_number || '',
-      website: place.website || '',
-      instagram: '',
-      facebook: '',
-      tiktok: '',
-      service_categories: [],
-    });
+    setClaimForm({ business_description: '', phone: place.formatted_phone_number || '', website: place.website || '', instagram: '', facebook: '', tiktok: '', service_categories: [] });
     setClaimStatus('idle');
     setClaimError('');
   };
@@ -245,10 +229,8 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
     if (!claimPlace) return;
     setClaimStatus('loading');
     setClaimError('');
-
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { setClaimStatus('noauth'); return; }
-
     const { error } = await supabase.from('vendor_profiles').upsert({
       user_id: session.user.id,
       google_place_id: claimPlace.place_id,
@@ -266,44 +248,28 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
       approved: false,
       submitted_at: new Date().toISOString(),
     });
-
-    if (error) {
-      setClaimError(error.message);
-      setClaimStatus('error');
-    } else {
-      setClaimStatus('success');
-    }
+    if (error) { setClaimError(error.message); setClaimStatus('error'); }
+    else setClaimStatus('success');
   };
 
   const hasAnyResults = spaResults.length > 0 || results.length > 0;
 
   return (
     <div className="w-full" ref={sectionRef}>
-      <div ref={mapRef} style={{ display: 'none' }} />
-
       {/* Search Bar */}
       <div className="bg-white rounded-2xl shadow-elegant p-6 mb-8">
         <h3 className="font-serif text-2xl text-spa-charcoal mb-2 text-center">
           Find Local <span className="text-spa-purple">Mama-Friendly Vendors</span>
         </h3>
         <p className="text-center text-sm text-spa-gray mb-6">Search by city or click any category above to auto-detect your location</p>
-
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-xs font-medium text-spa-charcoal mb-1 uppercase tracking-wide">City</label>
             <div className="relative">
               <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-spa-purple" />
-              <input
-                type="text"
-                placeholder="e.g. Charlotte"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && doSearch(city, state, category)}
-                className="w-full pl-9 pr-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
-              />
+              <input type="text" placeholder="e.g. Charlotte" value={city} onChange={(e) => setCity(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && doSearch(city, state, category)} className="w-full pl-9 pr-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
             </div>
           </div>
-
           <div>
             <label className="block text-xs font-medium text-spa-charcoal mb-1 uppercase tracking-wide">State</label>
             <select value={state} onChange={(e) => setState(e.target.value)} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30">
@@ -313,14 +279,12 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
               ))}
             </select>
           </div>
-
           <div>
             <label className="block text-xs font-medium text-spa-charcoal mb-1 uppercase tracking-wide">Category</label>
             <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30">
               {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
           </div>
-
           <div className="flex items-end">
             <button onClick={() => doSearch(city, state, category)} disabled={loading || locating || !city || !state} className="w-full btn-primary justify-center disabled:opacity-60">
               {loading || locating ? <><Loader size={16} className="animate-spin" />{locating ? 'Locating...' : 'Searching...'}</> : <><Search size={16} /> Search</>}
@@ -329,7 +293,6 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
         </div>
       </div>
 
-      {/* Loading */}
       {(loading || locating) && (
         <div className="text-center py-16">
           <Loader size={32} className="animate-spin text-spa-purple mx-auto mb-4" />
@@ -337,7 +300,6 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
         </div>
       )}
 
-      {/* No results */}
       {searched && !loading && !hasAnyResults && (
         <div className="text-center py-16 bg-white rounded-2xl">
           <MapPin size={40} className="text-spa-purple/30 mx-auto mb-4" />
@@ -346,7 +308,6 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
         </div>
       )}
 
-      {/* ── SPA-PREGIO MEMBERS FIRST ── */}
       {searched && !loading && spaResults.length > 0 && (
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-5">
@@ -357,26 +318,14 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
             </div>
             <div className="h-px flex-1 bg-spa-purple/20" />
           </div>
-
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {spaResults.map((vendor) => (
               <div key={vendor.id} className="bg-white rounded-2xl overflow-hidden border-2 border-spa-purple/20 shadow-elegant relative">
-                {/* Member badge */}
                 <div className="absolute top-3 left-3 z-10">
                   <span className="flex items-center gap-1 px-3 py-1 bg-spa-purple text-white text-xs rounded-full font-medium">
-                    <Star size={10} className="fill-spa-pink text-spa-pink" />
-                    Spa-Pregio Member
+                    <Star size={10} className="fill-spa-pink text-spa-pink" /> Spa-Pregio Member
                   </span>
                 </div>
-                {vendor.plan !== 'free' && (
-                  <div className="absolute top-3 right-3 z-10">
-                    <span className="px-3 py-1 bg-amber-400 text-white text-xs rounded-full font-medium capitalize">
-                      {vendor.plan}
-                    </span>
-                  </div>
-                )}
-
-                {/* Placeholder image area */}
                 <div className="aspect-[4/3] bg-gradient-to-br from-spa-lavender to-spa-blush flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-2">
@@ -385,7 +334,6 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
                     <p className="text-xs text-spa-purple font-medium">{vendor.category}</p>
                   </div>
                 </div>
-
                 <div className="p-5">
                   <h3 className="font-serif text-lg text-spa-charcoal leading-tight">{vendor.business_name}</h3>
                   <div className="flex items-center gap-1 mt-1">
@@ -394,13 +342,9 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
                   </div>
                   <div className="flex gap-3 mt-3">
                     {vendor.contact_type === 'phone' ? (
-                      <a href={`tel:${vendor.contact_value}`} className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors">
-                        <Phone size={12} /> {vendor.contact_value}
-                      </a>
+                      <a href={`tel:${vendor.contact_value}`} className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"><Phone size={12} /> {vendor.contact_value}</a>
                     ) : (
-                      <a href={vendor.contact_value} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors">
-                        <Globe size={12} /> Visit Website
-                      </a>
+                      <a href={vendor.contact_value} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"><Globe size={12} /> Visit Website</a>
                     )}
                   </div>
                 </div>
@@ -410,7 +354,6 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
         </div>
       )}
 
-      {/* ── GOOGLE RESULTS BELOW ── */}
       {searched && !loading && results.length > 0 && (
         <div>
           <div className="flex items-center gap-3 mb-5">
@@ -418,23 +361,22 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
             <span className="text-xs text-spa-gray bg-spa-cream px-4 py-1.5 rounded-full">More local results from Google</span>
             <div className="h-px flex-1 bg-spa-gray/20" />
           </div>
-
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {results.map((place) => (
               <div key={place.place_id} className="elegant-card group overflow-hidden">
                 <div className="relative aspect-[4/3] overflow-hidden bg-spa-lavender">
-                  {place.photos?.[0] ? (
-                    <img src={place.photos[0].getUrl({ maxWidth: 400 })} alt={place.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {place.photo_url ? (
+                    <img src={place.photo_url} alt={place.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center"><MapPin size={40} className="text-spa-purple/30" /></div>
                   )}
                   <div className="absolute top-3 left-3">
                     <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-spa-gray text-xs rounded-full font-medium">Unclaimed</span>
                   </div>
-                  {place.opening_hours && (
+                  {place.open_now !== undefined && (
                     <div className="absolute top-3 right-3">
-                      <span className={`px-3 py-1 text-xs rounded-full font-medium ${place.opening_hours.open_now ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {place.opening_hours.open_now ? 'Open Now' : 'Closed'}
+                      <span className={`px-3 py-1 text-xs rounded-full font-medium ${place.open_now ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {place.open_now ? 'Open Now' : 'Closed'}
                       </span>
                     </div>
                   )}
@@ -460,10 +402,7 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
                       <a href={place.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"><Globe size={12} /> Website</a>
                     )}
                   </div>
-                  <button
-                    onClick={() => openClaimModal(place)}
-                    className="w-full mt-4 px-4 py-2 bg-amber-50 border border-amber-300 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors flex items-center justify-center gap-2"
-                  >
+                  <button onClick={() => openClaimModal(place)} className="w-full mt-4 px-4 py-2 bg-amber-50 border border-amber-300 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors flex items-center justify-center gap-2">
                     Claim This Listing <ArrowRight size={14} />
                   </button>
                 </div>
@@ -487,43 +426,33 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
                   <X size={18} />
                 </button>
               </div>
-
               {claimStatus === 'noauth' && (
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4">
-                    <Globe size={28} className="text-spa-purple" />
-                  </div>
+                  <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4"><Globe size={28} className="text-spa-purple" /></div>
                   <h4 className="font-serif text-xl text-spa-charcoal mb-2">Account Required</h4>
                   <p className="text-spa-gray text-sm leading-relaxed mb-6">You need a free Spa-Pregio account to claim your listing.</p>
-                  <a href="/join" className="btn-primary inline-flex justify-center">Create Free Account <ArrowRight size={16} /></a>
-                  <p className="text-xs text-spa-gray mt-4">Already have an account? <a href="/join" className="text-spa-purple underline">Sign in</a></p>
+                  <a href="/my-account" className="btn-primary inline-flex justify-center">Create Free Account <ArrowRight size={16} /></a>
                 </div>
               )}
-
               {claimStatus === 'success' && (
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4">
-                    <Check size={28} className="text-spa-purple" />
-                  </div>
+                  <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4"><Check size={28} className="text-spa-purple" /></div>
                   <h4 className="font-serif text-xl text-spa-charcoal mb-2">Claim Submitted!</h4>
                   <p className="text-spa-gray text-sm leading-relaxed">We'll review your listing and approve it within 1–2 business days.</p>
                 </div>
               )}
-
               {(claimStatus === 'idle' || claimStatus === 'loading' || claimStatus === 'error') && (
                 <form onSubmit={handleClaimSubmit} className="space-y-5">
-                  <div className="bg-spa-lavender rounded-xl p-4 space-y-1">
+                  <div className="bg-spa-lavender rounded-xl p-4">
                     <p className="text-xs uppercase tracking-wider text-spa-purple font-medium mb-2">From Google Places</p>
                     <p className="text-sm text-spa-charcoal font-medium">{claimPlace.name}</p>
                     <p className="text-xs text-spa-gray">{claimPlace.vicinity}</p>
                     {claimPlace.rating && <p className="text-xs text-spa-gray">{claimPlace.rating} stars ({claimPlace.user_ratings_total?.toLocaleString()} reviews)</p>}
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Business Description <span className="text-red-400">*</span></label>
                     <textarea rows={3} required placeholder="Tell expectant mothers about your business..." value={claimForm.business_description} onChange={(e) => setClaimForm({ ...claimForm, business_description: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none" />
                   </div>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-spa-charcoal mb-1">Phone</label>
@@ -534,7 +463,6 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
                       <input type="url" placeholder="https://" value={claimForm.website} onChange={(e) => setClaimForm({ ...claimForm, website: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-2">Social Media</label>
                     <div className="space-y-3">
@@ -548,7 +476,6 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
                       </div>
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-2">Service Categories <span className="text-red-400">*</span></label>
                     <div className="flex flex-wrap gap-2">
@@ -559,9 +486,7 @@ const LocalVendorSearch = forwardRef<VendorSearchHandle>((_, ref) => {
                       ))}
                     </div>
                   </div>
-
                   {claimError && <p className="text-red-500 text-sm">{claimError}</p>}
-
                   <div className="pt-2">
                     <button type="submit" disabled={claimStatus === 'loading' || claimForm.service_categories.length === 0} className="btn-primary w-full justify-center disabled:opacity-50">
                       {claimStatus === 'loading' ? <><Loader size={16} className="animate-spin" /> Submitting...</> : <>Submit Claim <ArrowRight size={16} /></>}
