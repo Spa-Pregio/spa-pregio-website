@@ -174,22 +174,24 @@ export default function WhatAboutDad() {
       fontFamily: "'Jost',sans-serif",
     }}>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet" />
-      <div style={{ textAlign: "center", padding: "88px 24px 72px" }}>
+
+      {/* Hero image */}
+      <div style={{ position: "relative", width: "100%", height: "clamp(300px, 55vw, 560px)", overflow: "hidden" }}>
+        <img src="/images/father_with_newborn.jpg" alt="Father holding newborn" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 20%" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(45,31,61,0.1) 0%, rgba(45,31,61,0.65) 100%)" }} />
+        <div style={{ position: "absolute", bottom: "clamp(24px,5vw,48px)", left: 0, right: 0, textAlign: "center" }}>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(48px,8vw,88px)", color: "white", lineHeight: 0.95, letterSpacing: "-0.02em", margin: 0, textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
+            What about <em style={{ color: "#C9A96E" }}>Dad?</em>
+          </h1>
+        </div>
+      </div>
+
+      <div style={{ textAlign: "center", padding: "48px 24px 40px" }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: "14px", marginBottom: "28px" }}>
           <div style={{ width: "36px", height: "1px", background: "#C9A96E", opacity: 0.5 }} />
           <span style={{ color: "#9B7CB6", fontFamily: "'Jost',sans-serif", fontWeight: 300, fontSize: "9.5px", letterSpacing: "0.45em", textTransform: "uppercase" }}>Spa-Pregio™ Picks</span>
           <div style={{ width: "36px", height: "1px", background: "#C9A96E", opacity: 0.5 }} />
         </div>
-        <h1 style={{
-          fontFamily: "'Cormorant Garamond',serif", fontWeight: 300,
-          fontSize: "clamp(52px,8vw,88px)", color: "#2D1F3D",
-          lineHeight: 0.95, letterSpacing: "-0.02em", margin: "0 0 12px",
-        }}>What about</h1>
-        <h1 style={{
-          fontFamily: "'Cormorant Garamond',serif", fontWeight: 300,
-          fontSize: "clamp(52px,8vw,88px)", color: "#2D1F3D",
-          lineHeight: 0.95, letterSpacing: "-0.02em", margin: "0 0 28px",
-        }}><em style={{ color: "#C9A96E" }}>Dad?</em></h1>
         <p style={{
           fontFamily: "'Jost',sans-serif", fontWeight: 300,
           fontSize: "clamp(14px,2vw,17px)", lineHeight: 1.8,

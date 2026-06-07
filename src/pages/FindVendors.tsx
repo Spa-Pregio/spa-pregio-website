@@ -1,56 +1,37 @@
-import { useRef } from 'react';
+import { useEffect } from 'react';
+import LocalVendorSearch from '../sections/LocalVendorSearch';
 import { ArrowRight } from 'lucide-react';
-import LocalVendorSearch, { VendorSearchHandle } from '../sections/LocalVendorSearch';
-const categories = [
-  { name: 'Spas & Wellness', emoji: '💆‍♀️' },
-  { name: 'Photographers', emoji: '📸' },
-  { name: 'Caterers & Bakers', emoji: '🎂' },
-  { name: 'Event Venues', emoji: '🏡' },
-  { name: 'Maternity Boutiques', emoji: '👗' },
-  { name: 'Florists', emoji: '💐' },
-  { name: 'Doulas & Midwives', emoji: '🤱' },
-  { name: 'Party Planners', emoji: '🎉' },
-];
+
 export default function FindVendors() {
-  const vendorSearchRef = useRef<VendorSearchHandle>(null);
+  // Pass any ?category= URL param into the search component via a custom event
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get('category');
+    if (cat) {
+      // Small delay to let the component mount
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('spa-pregio-preset-category', { detail: cat }));
+      }, 100);
+    }
+  }, []);
+
   return (
     <div className="w-full pt-20">
-      {/* Hero */}
-      <section className="w-full py-16 lg:py-24 bg-spa-cream">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center">
-          <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Local Vendor Directory</span>
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-spa-charcoal leading-tight mt-4">
-            Find mama-friendly vendors <span className="text-spa-purple">near you.</span>
-          </h1>
-          <p className="mt-6 text-lg text-spa-gray leading-relaxed max-w-2xl mx-auto">
-            Spas, photographers, bakers, florists, doulas and more — all searched and surfaced for you by city. Click a category or search below.
-          </p>
-        </div>
-      </section>
-      {/* Quick Category Clicks */}
-      <section className="w-full py-10 bg-white border-b border-spa-light">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex flex-wrap gap-3 justify-center">
-            {categories.map((cat) => (
-              <button
-                key={cat.name}
-                onClick={() => vendorSearchRef.current?.searchCategory(cat.name)}
-                className="flex items-center gap-2 px-5 py-3 bg-spa-lavender hover:bg-spa-purple hover:text-white text-spa-charcoal rounded-full text-sm font-medium transition-all"
-              >
-                <span>{cat.emoji}</span>
-                {cat.name}
-              </button>
-            ))}
+      <section className="w-full min-h-[80vh] bg-spa-cream py-16 lg:py-24">
+        <div className="max-w-3xl mx-auto px-6 lg:px-12">
+          <div className="text-center mb-12">
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Local Vendor Directory</span>
+            <h1 className="font-serif text-4xl sm:text-5xl text-spa-charcoal leading-tight mt-4">
+              Find mama-friendly vendors <span className="text-spa-purple">near you.</span>
+            </h1>
+            <p className="mt-4 text-spa-gray leading-relaxed">
+              Answer three quick questions and we'll surface the best local vendors for your celebration.
+            </p>
           </div>
+          <LocalVendorSearch />
         </div>
       </section>
-      {/* Search */}
-      <section className="w-full py-16 lg:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <LocalVendorSearch ref={vendorSearchRef} />
-        </div>
-      </section>
-      {/* Are you a vendor CTA */}
+
       <section className="w-full py-12 bg-spa-purple">
         <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
           <p className="text-white/80 text-lg">Are you a vendor who serves expectant mamas?</p>

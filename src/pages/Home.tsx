@@ -6,42 +6,41 @@ export default function Home() {
     <div className="min-h-screen bg-spa-cream font-sans">
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-spa-lavender via-spa-cream to-spa-blush py-24 px-6 text-center">
-        <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-spa-pink opacity-20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 -right-16 w-80 h-80 rounded-full bg-spa-purple opacity-10 blur-3xl" />
+      <section className="relative overflow-hidden py-24 px-6 text-center min-h-[85vh] flex items-center">
+        {/* Background photo */}
+        <div className="absolute inset-0">
+          <img src="/images/baby_shower_celebration.jpg" alt="Baby shower celebration" className="w-full h-full object-cover object-center" />
+          <div className="absolute inset-0 bg-spa-charcoal/50" />
+        </div>
 
-        <div className="relative max-w-3xl mx-auto">
-          <span className="inline-block mb-4 text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
+        <div className="relative w-full max-w-3xl mx-auto">
+          <span className="inline-block mb-4 text-xs tracking-[0.25em] uppercase text-spa-pink font-semibold">
             The Celebration Suite Movement
           </span>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-spa-charcoal leading-tight mb-6 font-serif">
+          <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight mb-6 font-serif">
             Elevated Pregnancy Celebrations,
             <br />
-            <span className="italic text-spa-purple">Designed With Intention</span>
+            <span className="italic text-spa-pink">Designed With Intention</span>
           </h1>
 
-          <p className="text-lg text-spa-gray max-w-xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg text-white/80 max-w-xl mx-auto mb-10 leading-relaxed">
             Create your event, invite your guests, and bring your vision to life — all in one place.
           </p>
 
-          {/* 🔥 NEW BUTTONS */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-
-            <Link
-              to="/start"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold tracking-wide shadow-elegant hover:bg-[#7d5fa0] transition-colors"
-            >
-              Start My Celebration
-            </Link>
-
             <Link
               to="/suites"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full border-2 border-spa-purple text-spa-purple text-sm font-semibold tracking-wide hover:bg-spa-purple hover:text-white transition-colors"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold tracking-wide shadow-elegant hover:bg-[#7d5fa0] transition-colors"
             >
-              Browse Celebration Suites
+              Shop Celebration Suites
             </Link>
-
+            <Link
+              to="/find-vendors"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-white/20 backdrop-blur-sm border border-white/40 text-white text-sm font-semibold tracking-wide hover:bg-white/30 transition-colors"
+            >
+              Find Local Vendors
+            </Link>
           </div>
         </div>
       </section>
@@ -61,11 +60,11 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col gap-3">
-              <Link to="/start" className="text-center px-6 py-3 rounded-full bg-spa-purple text-white text-sm font-semibold hover:bg-[#7d5fa0] transition-colors">
-                Start My Celebration
+              <Link to="/suites" className="text-center px-6 py-3 rounded-full bg-spa-purple text-white text-sm font-semibold hover:bg-[#7d5fa0] transition-colors">
+                Shop Celebration Suites
               </Link>
-              <Link to="/community" className="text-center px-6 py-3 rounded-full border border-spa-purple text-spa-purple text-sm font-semibold hover:bg-spa-blush transition-colors">
-                Join the Community
+              <Link to="/about" className="text-center px-6 py-3 rounded-full border border-spa-purple text-spa-purple text-sm font-semibold hover:bg-spa-blush transition-colors">
+                Meet the Movement
               </Link>
             </div>
           </div>
@@ -135,7 +134,7 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-12">
-            <Link to="/start" className="inline-block px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold shadow-elegant hover:bg-[#7d5fa0] transition-colors">
+            <Link to="/suites" className="inline-block px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold shadow-elegant hover:bg-[#7d5fa0] transition-colors">
               Start Your Celebration
             </Link>
           </div>

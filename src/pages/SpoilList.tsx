@@ -182,17 +182,24 @@ export default function SpoilList() {
       fontFamily: "'Jost',sans-serif",
     }}>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet" />
-      <div style={{ textAlign: "center", padding: "88px 24px 72px" }}>
+
+      {/* Hero image */}
+      <div style={{ position: "relative", width: "100%", height: "clamp(280px, 50vw, 520px)", overflow: "hidden" }}>
+        <img src="/images/pregnant_woman_spa.jpg" alt="Mama being pampered" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 30%" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(45,31,61,0.2) 0%, rgba(45,31,61,0.5) 100%)" }} />
+        <div style={{ position: "absolute", bottom: "clamp(20px,4vw,40px)", left: 0, right: 0, textAlign: "center" }}>
+          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(42px,8vw,88px)", color: "white", lineHeight: 0.95, letterSpacing: "-0.02em", margin: 0, textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}>
+            The <em style={{ color: "#C9A96E" }}>Spoil List</em>
+          </h1>
+        </div>
+      </div>
+
+      <div style={{ textAlign: "center", padding: "48px 24px 40px" }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: "14px", marginBottom: "28px" }}>
           <div style={{ width: "36px", height: "1px", background: "#C9A96E", opacity: 0.5 }} />
           <span style={{ color: "#9B7CB6", fontFamily: "'Jost',sans-serif", fontWeight: 300, fontSize: "9.5px", letterSpacing: "0.45em", textTransform: "uppercase" }}>Spa-Pregio™ Picks</span>
           <div style={{ width: "36px", height: "1px", background: "#C9A96E", opacity: 0.5 }} />
         </div>
-        <h1 style={{
-          fontFamily: "'Cormorant Garamond',serif", fontWeight: 300,
-          fontSize: "clamp(52px,8vw,88px)", color: "#2D1F3D",
-          lineHeight: 0.95, letterSpacing: "-0.02em", margin: "0 0 24px",
-        }}>The<br /><em style={{ color: "#C9A96E" }}>Spoil List</em></h1>
         <p style={{
           fontFamily: "'Jost',sans-serif", fontWeight: 300,
           fontSize: "clamp(14px,2vw,17px)", lineHeight: 1.8,

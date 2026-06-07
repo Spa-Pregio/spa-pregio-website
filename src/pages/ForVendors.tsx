@@ -4,7 +4,7 @@ import {
   Image, Type, Palette, Eye, Download, Search, X, Zap, Clock, CheckCircle, Upload, Save
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import LocalVendorSearch, { VendorSearchHandle } from '../sections/LocalVendorSearch';
+
 
 const vendorCategories = [
   { name: 'Maternity Boutiques', description: 'Clothing, accessories, and essentials for expectant mothers', icon: Store, examples: ['Dresses', 'Nursing wear', 'Jewelry', 'Bags'] },
@@ -77,7 +77,6 @@ export default function ForVendors() {
   const [submitError, setSubmitError] = useState('');
   const [adSaving, setAdSaving] = useState(false);
   const [adSaveStatus, setAdSaveStatus] = useState<'idle' | 'saved' | 'error'>('idle');
-  const vendorSearchRef = useRef<VendorSearchHandle>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -239,21 +238,17 @@ export default function ForVendors() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {vendorCategories.map((category, index) => (
-              <div key={index} onClick={() => vendorSearchRef.current?.searchCategory(category.name)} className="bg-white rounded-2xl p-6 shadow-elegant hover:shadow-elegant-hover transition-all cursor-pointer group border-2 border-transparent hover:border-spa-purple/20">
+              <a key={index} href={`/find-vendors?category=${encodeURIComponent(category.name)}`}
+                className="elegant-card p-6 group cursor-pointer hover:border-spa-purple/30 transition-all block">
                 <div className="w-12 h-12 rounded-full bg-spa-purple/10 flex items-center justify-center mb-4 group-hover:bg-spa-purple transition-colors"><category.icon size={22} className="text-spa-purple group-hover:text-white transition-colors" /></div>
                 <h3 className="font-serif text-lg text-spa-charcoal mb-2">{category.name}</h3>
                 <p className="text-spa-gray text-sm mb-4">{category.description}</p>
-                <div className="flex flex-wrap gap-1">{category.examples.map((e, i) => <span key={i} className="text-xs px-2 py-1 bg-spa-lavender rounded-full text-spa-gray">{e}</span>)}</div>
-                <p className="text-xs text-spa-purple font-medium mt-4 flex items-center gap-1"><Search size={11} /> Find local vendors →</p>
-              </div>
+                <div className="flex flex-wrap gap-1 mb-4">{category.examples.map((e, i) => <span key={i} className="text-xs px-2 py-1 bg-spa-lavender rounded-full text-spa-gray">{e}</span>)}</div>
+                <p className="text-xs text-spa-purple font-medium flex items-center gap-1 group-hover:gap-2 transition-all">Find local vendors →</p>
+              </a>
             ))}
           </div>
         </div>
-      </section>
-
-      {/* Live Vendor Search */}
-      <section className="w-full py-16 lg:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12"><LocalVendorSearch ref={vendorSearchRef} /></div>
       </section>
 
       {/* Monthly Pricing */}

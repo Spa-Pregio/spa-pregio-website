@@ -121,20 +121,24 @@ export default function Ambassadors() {
     <div className="w-full pt-20">
 
       {/* Hero */}
-      <section className="w-full py-16 lg:py-24 bg-spa-cream">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+      <section className="w-full relative min-h-[70vh] flex items-center py-16 lg:py-24">
+        <div className="absolute inset-0">
+          <img src="/images/women_friends_celebrating.jpg" alt="Suite Sisters celebrating" className="w-full h-full object-cover object-center" />
+          <div className="absolute inset-0 bg-spa-charcoal/60" />
+        </div>
+        <div className="relative w-full max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center max-w-3xl mx-auto">
-            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Affiliate Program</span>
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-spa-charcoal leading-tight mt-4">
-              Become a <span className="text-spa-purple">Suite Sister</span>
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-pink">Affiliate Program</span>
+            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-white leading-tight mt-4">
+              Become a <span className="text-spa-pink">Suite Sister</span>
             </h1>
-            <p className="mt-6 text-lg text-spa-gray leading-relaxed">
+            <p className="mt-6 text-lg text-white/80 leading-relaxed">
               Two ways to earn. Share digital suites with mamas and earn 30% per sale.
               Refer vendors to the platform and earn recurring monthly commission — forever.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="/join"
+                href="/my-account"
                 className="btn-primary justify-center"
               >
                 Join the Suite Sisters — Free
@@ -142,13 +146,13 @@ export default function Ambassadors() {
               </a>
               <a
                 href="/sister-dashboard"
-                className="inline-flex items-center gap-2 justify-center border-2 border-spa-purple text-spa-purple px-6 py-3 rounded-full font-semibold hover:bg-spa-purple hover:text-white transition-colors"
+                className="inline-flex items-center gap-2 justify-center border-2 border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-spa-charcoal transition-colors"
               >
                 Login
                 <ArrowRight size={18} />
               </a>
             </div>
-            <p className="text-xs text-spa-gray mt-3">Free to join. Two commission streams. No experience needed.</p>
+            <p className="text-xs text-white/60 mt-3">Free to join. Two commission streams. No experience needed.</p>
           </div>
         </div>
       </section>

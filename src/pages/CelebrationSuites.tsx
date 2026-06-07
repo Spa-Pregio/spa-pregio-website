@@ -256,32 +256,34 @@ export default function CelebrationSuites() {
 
   return (
     <div className="min-h-screen bg-spa-cream font-sans">
-      <section className="relative overflow-hidden bg-gradient-to-br from-spa-lavender via-spa-cream to-spa-blush py-24 px-6 text-center">
-        <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-spa-pink opacity-20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 -right-16 w-80 h-80 rounded-full bg-spa-purple opacity-10 blur-3xl" />
+      <section className="relative overflow-hidden py-24 px-6 text-center min-h-[75vh] flex items-center">
+        <div className="absolute inset-0">
+          <img src="/images/baby_shower_celebration.jpg" alt="Celebration" className="w-full h-full object-cover object-top" />
+          <div className="absolute inset-0 bg-spa-charcoal/55" />
+        </div>
 
-        <div className="relative max-w-4xl mx-auto">
-          <span className="inline-block mb-4 text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
+        <div className="relative w-full max-w-4xl mx-auto">
+          <span className="inline-block mb-4 text-xs tracking-[0.25em] uppercase text-spa-pink font-semibold">
             Celebration Suites
           </span>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-spa-charcoal leading-tight mb-6 font-serif">
+          <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight mb-6 font-serif">
             Choose the Suite
             <br />
-            <span className="italic text-spa-purple">That Fits Your Moment</span>
+            <span className="italic text-spa-pink">That Fits Your Moment</span>
           </h1>
 
-          <p className="text-lg text-spa-gray max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg text-white/80 max-w-2xl mx-auto mb-10 leading-relaxed">
             Browse the full Spa-Pregio collection and choose the experience
             that best fits the celebration you are planning.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/start"
+              to="/suites"
               className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold tracking-wide shadow-elegant hover:bg-[#7d5fa0] transition-colors"
             >
-              Start My Celebration
+              Shop All Suites
             </Link>
 
             <Link
