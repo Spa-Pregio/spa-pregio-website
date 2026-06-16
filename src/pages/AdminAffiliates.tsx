@@ -258,19 +258,19 @@ function AdminDashboard() {
   }
 
   async function approveVendor(id: string) {
-    await supabase.from('vendor_profiles').update({ status: 'active' }).eq('id', id);
+    await supabase.from('vendors').update({ status: 'active' }).eq('id', id);
     loadAll();
   }
 
   async function denyVendor(id: string) {
-    await supabase.from('vendor_profiles').update({ status: 'denied' }).eq('id', id);
+    await supabase.from('vendors').update({ status: 'denied' }).eq('id', id);
     setDenyModal(null);
     setDenyReason('');
     loadAll();
   }
 
   async function removeVendor(id: string) {
-    await supabase.from('vendor_profiles').update({ status: 'removed' }).eq('id', id);
+    await supabase.from('vendors').update({ status: 'removed' }).eq('id', id);
     loadAll();
   }
 
