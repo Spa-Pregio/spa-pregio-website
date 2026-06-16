@@ -7,11 +7,9 @@ export default function Home() {
 
       {/* HERO */}
       <section className="relative overflow-hidden py-24 px-6 text-center min-h-[85vh] flex items-center">
-        {/* Background photo */}
-        <div className="absolute inset-0">
-          <img src="/images/baby_shower_celebration.jpg" alt="Baby shower celebration" className="w-full h-full object-cover object-center" />
-          <div className="absolute inset-0 bg-spa-charcoal/50" />
-        </div>
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-spa-purple via-[#8a6aa8] to-spa-pink" />
+        <div className="absolute inset-0 bg-spa-charcoal/20" />
 
         <div className="relative w-full max-w-3xl mx-auto">
           <span className="inline-block mb-4 text-xs tracking-[0.25em] uppercase text-spa-pink font-semibold">

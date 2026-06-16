@@ -122,10 +122,9 @@ export default function Ambassadors() {
 
       {/* Hero */}
       <section className="w-full relative min-h-[70vh] flex items-center py-16 lg:py-24">
-        <div className="absolute inset-0">
-          <img src="/images/women_friends_celebrating.jpg" alt="Suite Sisters celebrating" className="w-full h-full object-cover object-center" />
-          <div className="absolute inset-0 bg-spa-charcoal/60" />
-        </div>
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-spa-purple via-[#8a6aa8] to-spa-pink" />
+        <div className="absolute inset-0 bg-spa-charcoal/20" />
         <div className="relative w-full max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center max-w-3xl mx-auto">
             <span className="text-sm uppercase tracking-[0.15em] text-spa-pink">Affiliate Program</span>
