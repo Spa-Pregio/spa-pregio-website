@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import {
   Copy, Check, TrendingUp, MousePointer, Users, DollarSign,
   Clock, CheckCircle, ArrowRight, ExternalLink, AlertCircle,
-  Gift, Store, Zap, BarChart2
+  Gift, Store, Zap, BarChart2, LogIn
 } from 'lucide-react';
 
 type AffiliateStats = {
@@ -70,6 +71,7 @@ export default function AffiliateDashboard() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [notAffiliate, setNotAffiliate] = useState(false);
+  const [noUser, setNoUser] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [applyForm, setApplyForm] = useState({ full_name: '', paypal_email: '', venmo_handle: '', zelle_info: '' });
   const [applying, setApplying] = useState(false);
@@ -80,7 +82,7 @@ export default function AffiliateDashboard() {
   async function loadDashboard() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
+    if (!user) { setNoUser(true); setLoading(false); return; }
 
     const { data: aff } = await supabase
       .from('affiliates')
@@ -187,6 +189,32 @@ export default function AffiliateDashboard() {
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-spa-purple/30 border-t-spa-purple rounded-full animate-spin mx-auto mb-4" />
           <p className="text-spa-gray">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not logged in at all — show sign-in prompt instead of falling through to the dashboard
+  if (noUser) {
+    return (
+      <div className="w-full pt-20 min-h-screen bg-spa-cream flex items-center justify-center">
+        <div className="max-w-md mx-auto px-6 py-16 text-center">
+          <div className="w-16 h-16 bg-spa-purple/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <LogIn size={28} className="text-spa-purple" />
+          </div>
+          <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Suite Sisters™</span>
+          <h1 className="font-serif text-3xl text-spa-charcoal mt-4 mb-3">Sign in to view your dashboard</h1>
+          <p className="text-spa-gray leading-relaxed mb-8">
+            You'll need to sign in or create an account to access your Suite Sisters™ portal, track referrals, and view your earnings.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link to="/my-account" className="btn-primary justify-center">
+              <LogIn size={18} /> Sign In
+            </Link>
+            <Link to="/ambassadors" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border-2 border-spa-purple text-spa-purple font-medium hover:bg-spa-purple hover:text-white transition-colors">
+              Learn About Suite Sisters™
+            </Link>
+          </div>
         </div>
       </div>
     );
