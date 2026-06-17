@@ -318,10 +318,11 @@ export default function EventDetail() {
           event_id: event.id,
           event_title: event.title,
           tickets: ticketsPayload,
-          connected_account_id: event.connected_account_id || '',
           customer_email: rsvpEmail,
           customer_name: rsvpName,
           is_vendor: false,
+          host_user_id: event.created_by || '',
+          host_name: event.title,
         }),
       });
 
@@ -362,10 +363,11 @@ export default function EventDetail() {
               quantity: 1,
             },
           ],
-          connected_account_id: event.connected_account_id || '',
           customer_email: rsvpEmail,
           customer_name: rsvpName,
           is_vendor: true,
+          host_user_id: event.created_by || '',
+          host_name: event.title,
         }),
       });
 
@@ -691,7 +693,7 @@ export default function EventDetail() {
                       </div>
 
                       <p className="text-xs text-spa-gray mt-1">
-                        Includes 10% Spa-PregioTM platform fee
+                        Secure checkout via Spa-PregioTM
                       </p>
                     </div>
                   )}
