@@ -10,6 +10,7 @@ import CelebrationSuites from './pages/CelebrationSuites';
 import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
 import EventSuccess from './pages/EventSuccess';
+import CreateEvent from './pages/CreateEvent';
 import ForVendors from './pages/ForVendors';
 import About from './pages/About';
 import FindVendors from './pages/FindVendors';
@@ -44,6 +45,7 @@ function AppLayout() {
           <Route path="/suites" element={<CelebrationSuites />} />
           <Route path="/events" element={<Events />} />
           <Route path="/events/success" element={<EventSuccess />} />
+          <Route path="/create-event" element={<CreateEvent />} />
           <Route path="/events/:id" element={<EventDetail />} />
           <Route path="/vendors" element={<ForVendors />} />
           <Route path="/find-vendors" element={<FindVendors />} />
