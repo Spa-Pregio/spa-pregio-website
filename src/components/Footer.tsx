@@ -56,8 +56,6 @@ export default function Footer() {
             <ul className="space-y-3">
               {[
                 { name: 'Celebration Suites', href: '/suites' },
-                { name: 'The Spoil List', href: '/suites#spoil-list' },
-                { name: 'What About Dad?', href: '/suites#what-about-dad' },
                 { name: 'Events', href: '/events' },
                 { name: 'Find Vendors', href: '/find-vendors' },
                 { name: 'About', href: '/about' },
@@ -75,7 +73,6 @@ export default function Footer() {
             <ul className="space-y-3">
               {[
                 { name: 'Become a Suite Sister™', href: '/ambassadors', external: false },
-                { name: 'Join Affiliate Program', href: 'https://payhip.com/auth/register/af699c7e55b3f58', external: true },
                 { name: 'Sister Dashboard', href: '/sister-dashboard', external: false },
               ].map((link) => (
                 <li key={link.name}>
