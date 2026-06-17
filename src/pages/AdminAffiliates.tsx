@@ -92,6 +92,9 @@ type EventPayout = {
   paid_at: string | null;
   payment_method: string | null;
   stripe_session_id: string | null;
+  host_paypal_email: string | null;
+  host_venmo_handle: string | null;
+  host_zelle_info: string | null;
 };
 
 type AdminTab = 'sisters' | 'vendors' | 'events';
@@ -172,7 +175,7 @@ function AdminDashboard() {
   const [eventPayouts, setEventPayouts] = useState<EventPayout[]>([]);
   const [eventHostTab, setEventHostTab] = useState<EventHostTab>('pending');
   const [eventHostExpanded, setEventHostExpanded] = useState<string | null>(null);
-  const [eventPayoutModal, setEventPayoutModal] = useState<{ hostUserId: string; hostName: string; amount: number } | null>(null);
+  const [eventPayoutModal, setEventPayoutModal] = useState<{ hostUserId: string; hostName: string; amount: number; paypalEmail: string | null; venmoHandle: string | null; zelleInfo: string | null } | null>(null);
   const [eventPayoutForm, setEventPayoutForm] = useState({ method: 'venmo', reference: '', notes: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -748,10 +751,34 @@ function AdminDashboard() {
                         </div>
                         {isExpanded && (
                           <div className="bg-spa-cream/50 px-8 py-6 border-t border-spa-light space-y-6">
+                            {(() => {
+                              const samplePayout = group.payouts[0];
+                              const paypal = samplePayout?.host_paypal_email;
+                              const venmo = samplePayout?.host_venmo_handle;
+                              const zelle = samplePayout?.host_zelle_info;
+                              return (paypal || venmo || zelle) ? (
+                                <div className="grid sm:grid-cols-3 gap-3 text-sm">
+                                  {paypal && <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">PayPal</p><p className="text-spa-charcoal">{paypal}</p></div>}
+                                  {venmo && <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Venmo</p><p className="text-spa-charcoal">{venmo}</p></div>}
+                                  {zelle && <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Zelle</p><p className="text-spa-charcoal">{zelle}</p></div>}
+                                </div>
+                              ) : (
+                                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
+                                  No payout info on file for this host yet.
+                                </div>
+                              );
+                            })()}
                             {confirmedTotal > 0 && (
                               <div className="flex flex-wrap gap-3">
                                 <button
-                                  onClick={() => setEventPayoutModal({ hostUserId: group.hostUserId, hostName: group.hostName, amount: confirmedTotal })}
+                                  onClick={() => setEventPayoutModal({
+                                    hostUserId: group.hostUserId,
+                                    hostName: group.hostName,
+                                    amount: confirmedTotal,
+                                    paypalEmail: group.payouts[0]?.host_paypal_email || null,
+                                    venmoHandle: group.payouts[0]?.host_venmo_handle || null,
+                                    zelleInfo: group.payouts[0]?.host_zelle_info || null,
+                                  })}
                                   className="flex items-center gap-2 px-4 py-2 bg-spa-charcoal text-white rounded-full text-sm font-medium hover:bg-spa-charcoal/90 transition-colors"
                                 >
                                   <DollarSign size={14} /> Record Payout ({formatCurrency(confirmedTotal)})
@@ -865,6 +892,17 @@ function AdminDashboard() {
           <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
             <div className="flex items-center justify-between mb-2"><h3 className="font-serif text-2xl text-spa-charcoal">Record Event Payout</h3><button onClick={() => setEventPayoutModal(null)} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal"><X size={18} /></button></div>
             <p className="text-sm text-spa-gray mb-6">For <strong>{eventPayoutModal.hostName}</strong> · {formatCurrency(eventPayoutModal.amount)} confirmed</p>
+            {(eventPayoutModal.paypalEmail || eventPayoutModal.venmoHandle || eventPayoutModal.zelleInfo) ? (
+              <div className="grid grid-cols-1 gap-2 mb-4 text-sm">
+                {eventPayoutModal.paypalEmail && <div className="bg-spa-lavender rounded-xl p-3"><p className="text-spa-gray text-xs mb-0.5">PayPal</p><p className="text-spa-charcoal">{eventPayoutModal.paypalEmail}</p></div>}
+                {eventPayoutModal.venmoHandle && <div className="bg-spa-lavender rounded-xl p-3"><p className="text-spa-gray text-xs mb-0.5">Venmo</p><p className="text-spa-charcoal">{eventPayoutModal.venmoHandle}</p></div>}
+                {eventPayoutModal.zelleInfo && <div className="bg-spa-lavender rounded-xl p-3"><p className="text-spa-gray text-xs mb-0.5">Zelle</p><p className="text-spa-charcoal">{eventPayoutModal.zelleInfo}</p></div>}
+              </div>
+            ) : (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-sm text-amber-700">
+                No payout info on file — you'll need to contact the host directly.
+              </div>
+            )}
             <div className="space-y-4">
               <div><label className="block text-sm font-medium text-spa-charcoal mb-2">Payment Method</label><select value={eventPayoutForm.method} onChange={e => setEventPayoutForm({ ...eventPayoutForm, method: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"><option value="venmo">Venmo</option><option value="paypal">PayPal</option><option value="zelle">Zelle</option></select></div>
               <div><label className="block text-sm font-medium text-spa-charcoal mb-2">Reference / Confirmation #</label><input type="text" placeholder="Optional" value={eventPayoutForm.reference} onChange={e => setEventPayoutForm({ ...eventPayoutForm, reference: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" /></div>

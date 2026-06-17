@@ -23,7 +23,7 @@ const stockImages = [
 const eventTypes = ['Vendor Market', 'Brunch', 'Virtual', 'Workshop', 'Tea', 'Wellness', 'Gathering'];
 const ticketTypeOptions = ['General Admission', 'VIP Table', 'Vendor Table', 'Buffet Add-on', 'Plated Dinner Add-on'];
 
-type Step = 'auth' | 'basics' | 'image' | 'visibility' | 'vendor' | 'review' | 'success';
+type Step = 'auth' | 'basics' | 'image' | 'visibility' | 'payout' | 'vendor' | 'review' | 'success';
 
 const emptyEventForm = {
   title: '',
@@ -38,6 +38,9 @@ const emptyEventForm = {
   is_private: false,
   host_website: '',
   host_phone: '',
+  host_paypal_email: '',
+  host_venmo_handle: '',
+  host_zelle_info: '',
 };
 
 export default function CreateEvent() {
@@ -173,15 +176,17 @@ export default function CreateEvent() {
   const goNext = () => {
     if (step === 'basics') setStep('image');
     else if (step === 'image') setStep('visibility');
-    else if (step === 'visibility') setStep(isVendor ? 'vendor' : 'review');
+    else if (step === 'visibility') setStep(!form.is_free ? 'payout' : (isVendor ? 'vendor' : 'review'));
+    else if (step === 'payout') setStep(isVendor ? 'vendor' : 'review');
     else if (step === 'vendor') setStep('review');
   };
 
   const goBack = () => {
     if (step === 'image') setStep('basics');
     else if (step === 'visibility') setStep('image');
-    else if (step === 'vendor') setStep('visibility');
-    else if (step === 'review') setStep(isVendor ? 'vendor' : 'visibility');
+    else if (step === 'payout') setStep('visibility');
+    else if (step === 'vendor') setStep(!form.is_free ? 'payout' : 'visibility');
+    else if (step === 'review') setStep(isVendor ? 'vendor' : (!form.is_free ? 'payout' : 'visibility'));
   };
 
   const basicsValid = form.title && form.date && form.time && form.location;
@@ -217,6 +222,9 @@ export default function CreateEvent() {
       is_private: form.is_private,
       host_website: isVendor ? (form.host_website || null) : null,
       host_phone: isVendor ? (form.host_phone || null) : null,
+      host_paypal_email: !form.is_free ? (form.host_paypal_email || null) : null,
+      host_venmo_handle: !form.is_free ? (form.host_venmo_handle || null) : null,
+      host_zelle_info: !form.is_free ? (form.host_zelle_info || null) : null,
       created_by: user.id,
     }]).select().single();
 
@@ -248,9 +256,14 @@ export default function CreateEvent() {
     setTimeout(() => setShareCopied(false), 2000);
   };
 
-  const stepOrder: Step[] = isVendor
-    ? ['basics', 'image', 'visibility', 'vendor', 'review']
-    : ['basics', 'image', 'visibility', 'review'];
+  const stepOrder: Step[] = [
+    'basics',
+    'image',
+    'visibility',
+    ...(!form.is_free ? ['payout'] as Step[] : []),
+    ...(isVendor ? ['vendor'] as Step[] : []),
+    'review',
+  ];
   const currentStepIndex = stepOrder.indexOf(step);
 
   if (checkingAuth) {
@@ -566,6 +579,39 @@ export default function CreateEvent() {
                   </p>
                 </div>
               )}
+            </div>
+
+            <div className="flex justify-between mt-6">
+              <button onClick={goBack} className="btn-outline"><ArrowLeft size={16} /> Back</button>
+              <button onClick={goNext} className="btn-primary">
+                {!form.is_free ? 'Next: Payout Info' : (isVendor ? 'Next: Business Details' : 'Next: Review')} <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── PAYOUT INFO (paid events only) ── */}
+        {step === 'payout' && (
+          <div>
+            <h1 className="font-serif text-3xl text-spa-charcoal mb-2">How should we pay you?</h1>
+            <p className="text-spa-gray mb-8">
+              Spa-Pregio collects ticket payments and pays you out after the event. Add at least one way to send your earnings.
+            </p>
+
+            <div className="bg-white rounded-2xl p-8 shadow-elegant space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-spa-charcoal mb-1">PayPal Email</label>
+                <input type="email" name="host_paypal_email" value={form.host_paypal_email} onChange={handleChange} placeholder="you@email.com" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-spa-charcoal mb-1">Venmo Handle</label>
+                <input type="text" name="host_venmo_handle" value={form.host_venmo_handle} onChange={handleChange} placeholder="@your-venmo" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-spa-charcoal mb-1">Zelle Info</label>
+                <input type="text" name="host_zelle_info" value={form.host_zelle_info} onChange={handleChange} placeholder="Email or phone linked to Zelle" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
+              </div>
+              <p className="text-xs text-spa-gray">You can fill in one, two, or all three — whichever you prefer to use.</p>
             </div>
 
             <div className="flex justify-between mt-6">

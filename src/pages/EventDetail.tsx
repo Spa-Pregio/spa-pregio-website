@@ -323,6 +323,9 @@ export default function EventDetail() {
           is_vendor: false,
           host_user_id: event.created_by || '',
           host_name: event.title,
+          host_paypal_email: event.host_paypal_email || '',
+          host_venmo_handle: event.host_venmo_handle || '',
+          host_zelle_info: event.host_zelle_info || '',
         }),
       });
 
@@ -368,6 +371,9 @@ export default function EventDetail() {
           is_vendor: true,
           host_user_id: event.created_by || '',
           host_name: event.title,
+          host_paypal_email: event.host_paypal_email || '',
+          host_venmo_handle: event.host_venmo_handle || '',
+          host_zelle_info: event.host_zelle_info || '',
         }),
       });
 
