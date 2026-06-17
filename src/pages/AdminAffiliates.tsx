@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import {
   Users, DollarSign, CheckCircle, Clock, X, Check,
-  ChevronDown, ChevronUp, ArrowRight, Gift, Store, Plus, MapPin, Phone, Globe, Lock
+  ChevronDown, ChevronUp, ArrowRight, Gift, Store, Plus, MapPin, Phone, Globe, Lock, Calendar
 } from 'lucide-react';
 
 type Affiliate = {
@@ -77,9 +77,27 @@ type VendorListing = {
   created_at: string;
 };
 
-type AdminTab = 'sisters' | 'vendors';
+type EventPayout = {
+  id: string;
+  event_id: string;
+  host_user_id: string;
+  host_name: string;
+  ticket_type: string;
+  sale_amount: number;
+  platform_fee: number;
+  payout_amount: number;
+  status: string;
+  created_at: string;
+  confirmed_at: string | null;
+  paid_at: string | null;
+  payment_method: string | null;
+  stripe_session_id: string | null;
+};
+
+type AdminTab = 'sisters' | 'vendors' | 'events';
 type SisterTab = 'pending' | 'active' | 'all';
 type VendorTab = 'pending' | 'active' | 'all';
+type EventHostTab = 'pending' | 'confirmed' | 'all';
 
 const ADMIN_PASSWORD = (import.meta as any).env?.VITE_ADMIN_PASSWORD || 'spa-admin-2024';
 
@@ -151,6 +169,11 @@ function AdminDashboard() {
   const [vendorExpanded, setVendorExpanded] = useState<string | null>(null);
   const [denyModal, setDenyModal] = useState<VendorListing | null>(null);
   const [denyReason, setDenyReason] = useState('');
+  const [eventPayouts, setEventPayouts] = useState<EventPayout[]>([]);
+  const [eventHostTab, setEventHostTab] = useState<EventHostTab>('pending');
+  const [eventHostExpanded, setEventHostExpanded] = useState<string | null>(null);
+  const [eventPayoutModal, setEventPayoutModal] = useState<{ hostUserId: string; hostName: string; amount: number } | null>(null);
+  const [eventPayoutForm, setEventPayoutForm] = useState({ method: 'venmo', reference: '', notes: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -172,6 +195,8 @@ function AdminDashboard() {
     if (suites) setSuiteCommissions(suites);
     const { data: vends } = await supabase.from('vendors').select('*').order('created_at', { ascending: false });
     if (vends) setVendors(vends);
+    const { data: payouts } = await supabase.from('event_payouts').select('*').order('created_at', { ascending: false });
+    if (payouts) setEventPayouts(payouts);
     setLoading(false);
   }
 
@@ -187,6 +212,26 @@ function AdminDashboard() {
 
   async function confirmSuiteCommission(id: string) {
     await supabase.from('affiliate_suite_commissions').update({ status: 'confirmed', confirmed_at: new Date().toISOString() }).eq('id', id);
+    loadAll();
+  }
+
+  async function confirmEventPayout(id: string) {
+    await supabase.from('event_payouts').update({ status: 'confirmed', confirmed_at: new Date().toISOString() }).eq('id', id);
+    loadAll();
+  }
+
+  async function handleEventPayoutPaid() {
+    if (!eventPayoutModal) return;
+    setSaving(true);
+    const confirmedForHost = eventPayouts.filter(p => p.host_user_id === eventPayoutModal.hostUserId && p.status === 'confirmed');
+    await supabase.from('event_payouts').update({
+      status: 'paid',
+      paid_at: new Date().toISOString(),
+      payment_method: eventPayoutForm.method,
+    }).in('id', confirmedForHost.map(p => p.id));
+    setSaving(false);
+    setEventPayoutModal(null);
+    setEventPayoutForm({ method: 'venmo', reference: '', notes: '' });
     loadAll();
   }
 
@@ -334,6 +379,38 @@ function AdminDashboard() {
   const suitePendingTotal = suiteCommissions.filter(s => s.status === 'pending').reduce((sum, s) => sum + s.commission_amount, 0);
   const suiteConfirmedTotal = suiteCommissions.filter(s => s.status === 'confirmed').reduce((sum, s) => sum + s.commission_amount, 0);
 
+  // ── Event payouts grouped by host ──
+  const eventHostGroups = (() => {
+    const map: Record<string, { hostUserId: string; hostName: string; payouts: EventPayout[] }> = {};
+    eventPayouts.forEach(p => {
+      const key = p.host_user_id || 'unknown';
+      if (!map[key]) map[key] = { hostUserId: key, hostName: p.host_name || 'Unknown Host', payouts: [] };
+      map[key].payouts.push(p);
+    });
+    return Object.values(map);
+  })();
+
+  function hostPendingTotal(payouts: EventPayout[]) {
+    return payouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + Number(p.payout_amount), 0);
+  }
+  function hostConfirmedTotal(payouts: EventPayout[]) {
+    return payouts.filter(p => p.status === 'confirmed').reduce((sum, p) => sum + Number(p.payout_amount), 0);
+  }
+  function hostPaidTotal(payouts: EventPayout[]) {
+    return payouts.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.payout_amount), 0);
+  }
+
+  const filteredEventHostGroups = eventHostGroups.filter(g => {
+    if (eventHostTab === 'pending') return g.payouts.some(p => p.status === 'pending');
+    if (eventHostTab === 'confirmed') return g.payouts.some(p => p.status === 'confirmed');
+    return true;
+  });
+
+  const eventPendingTotal = eventPayouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + Number(p.payout_amount), 0);
+  const eventConfirmedTotal = eventPayouts.filter(p => p.status === 'confirmed').reduce((sum, p) => sum + Number(p.payout_amount), 0);
+  const eventPaidTotal = eventPayouts.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.payout_amount), 0);
+  const hostsAwaitingPayout = eventHostGroups.filter(g => g.payouts.some(p => p.status === 'pending')).length;
+
   if (loading) {
     return (
       <div className="w-full pt-20 min-h-screen bg-spa-cream flex items-center justify-center">
@@ -355,12 +432,13 @@ function AdminDashboard() {
       <div className="w-full bg-white border-b border-spa-light sticky top-16 z-30">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="flex gap-1">
-            {([['sisters', `Suite Sisters (${affiliates.length})`], ['vendors', `Vendor Applications (${vendors.length})`]] as [AdminTab, string][]).map(([id, label]) => (
+            {([['sisters', `Suite Sisters (${affiliates.length})`], ['vendors', `Vendor Applications (${vendors.length})`], ['events', `Event Payouts (${eventPayouts.length})`]] as [AdminTab, string][]).map(([id, label]) => (
               <button key={id} onClick={() => setAdminTab(id)}
                 className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${adminTab === id ? 'border-spa-purple text-spa-purple' : 'border-transparent text-spa-gray hover:text-spa-charcoal'}`}>
                 {label}
                 {id === 'sisters' && pendingSisters.length > 0 && <span className="ml-2 px-1.5 py-0.5 bg-amber-400 text-white text-xs rounded-full">{pendingSisters.length}</span>}
                 {id === 'vendors' && pendingVendors.length > 0 && <span className="ml-2 px-1.5 py-0.5 bg-amber-400 text-white text-xs rounded-full">{pendingVendors.length}</span>}
+                {id === 'events' && hostsAwaitingPayout > 0 && <span className="ml-2 px-1.5 py-0.5 bg-amber-400 text-white text-xs rounded-full">{hostsAwaitingPayout}</span>}
               </button>
             ))}
           </div>
@@ -602,6 +680,112 @@ function AdminDashboard() {
             </div>
           </>
         )}
+
+        {adminTab === 'events' && (
+          <>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { icon: Calendar, label: 'Total Ticket Sales', value: eventPayouts.length, sub: 'All time' },
+                { icon: Clock, label: 'Pending Earnings', value: formatCurrency(eventPendingTotal), sub: 'Awaiting confirmation' },
+                { icon: CheckCircle, label: 'Confirmed Owed', value: formatCurrency(eventConfirmedTotal), sub: 'Ready to pay out' },
+                { icon: DollarSign, label: 'Total Paid Out', value: formatCurrency(eventPaidTotal), sub: 'All time' },
+              ].map((s, i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 shadow-elegant">
+                  <div className="w-10 h-10 rounded-full bg-spa-purple/10 flex items-center justify-center mb-4"><s.icon size={20} className="text-spa-purple" /></div>
+                  <p className="text-spa-gray text-sm">{s.label}</p>
+                  <p className="font-serif text-3xl text-spa-charcoal mt-1">{s.value}</p>
+                  <p className="text-xs text-spa-gray mt-1">{s.sub}</p>
+                </div>
+              ))}
+            </div>
+
+            {hostsAwaitingPayout > 0 && (
+              <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0"><Clock size={20} className="text-amber-600" /></div>
+                <div className="flex-1">
+                  <p className="font-medium text-spa-charcoal">{hostsAwaitingPayout} host{hostsAwaitingPayout > 1 ? 's' : ''} with ticket sales awaiting confirmation</p>
+                  <p className="text-sm text-spa-gray">{eventHostGroups.filter(g => g.payouts.some(p => p.status === 'pending')).map(g => g.hostName).join(', ')}</p>
+                </div>
+                <button onClick={() => setEventHostTab('pending')} className="flex-shrink-0 flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-amber-700 transition-colors">Review Now <ArrowRight size={14} /></button>
+              </div>
+            )}
+
+            <div className="bg-white rounded-2xl shadow-elegant overflow-hidden">
+              <div className="px-8 py-5 border-b border-spa-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h2 className="font-serif text-2xl text-spa-charcoal">Event Hosts</h2>
+                <div className="flex gap-1 bg-spa-cream rounded-full p-1">
+                  {([['pending', 'Pending'], ['confirmed', 'Confirmed'], ['all', 'All']] as [EventHostTab, string][]).map(([id, label]) => (
+                    <button key={id} onClick={() => setEventHostTab(id)}
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${eventHostTab === id ? 'bg-spa-purple text-white' : 'text-spa-gray hover:text-spa-charcoal'}`}>{label}</button>
+                  ))}
+                </div>
+              </div>
+              {filteredEventHostGroups.length === 0 ? (
+                <div className="px-8 py-16 text-center"><Calendar size={40} className="text-spa-purple/30 mx-auto mb-4" /><p className="text-spa-gray">{eventHostTab === 'pending' ? 'No pending ticket sales right now.' : 'No event ticket sales yet.'}</p></div>
+              ) : (
+                <div className="divide-y divide-spa-light">
+                  {filteredEventHostGroups.map((group) => {
+                    const pendingTotal = hostPendingTotal(group.payouts);
+                    const confirmedTotal = hostConfirmedTotal(group.payouts);
+                    const paidTotal = hostPaidTotal(group.payouts);
+                    const isExpanded = eventHostExpanded === group.hostUserId;
+                    return (
+                      <div key={group.hostUserId}>
+                        <div className="px-8 py-5 flex flex-col sm:flex-row sm:items-center gap-4 cursor-pointer hover:bg-spa-cream/50 transition-colors" onClick={() => setEventHostExpanded(isExpanded ? null : group.hostUserId)}>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <p className="font-medium text-spa-charcoal">{group.hostName}</p>
+                              {pendingTotal > 0 && <span className="text-xs text-amber-600 font-medium animate-pulse">Needs confirmation</span>}
+                            </div>
+                            <p className="text-sm text-spa-gray mt-0.5">{group.payouts.length} ticket sale{group.payouts.length > 1 ? 's' : ''}</p>
+                          </div>
+                          <div className="flex items-center gap-6 text-sm">
+                            <div className="text-center"><p className="text-spa-gray text-xs">Pending</p><p className="font-medium text-amber-600">{formatCurrency(pendingTotal)}</p></div>
+                            <div className="text-center"><p className="text-spa-gray text-xs">Owed</p><p className="font-medium text-spa-purple">{formatCurrency(confirmedTotal)}</p></div>
+                            <div className="text-center"><p className="text-spa-gray text-xs">Paid</p><p className="font-medium text-green-600">{formatCurrency(paidTotal)}</p></div>
+                          </div>
+                          {isExpanded ? <ChevronUp size={18} className="text-spa-gray" /> : <ChevronDown size={18} className="text-spa-gray" />}
+                        </div>
+                        {isExpanded && (
+                          <div className="bg-spa-cream/50 px-8 py-6 border-t border-spa-light space-y-6">
+                            {confirmedTotal > 0 && (
+                              <div className="flex flex-wrap gap-3">
+                                <button
+                                  onClick={() => setEventPayoutModal({ hostUserId: group.hostUserId, hostName: group.hostName, amount: confirmedTotal })}
+                                  className="flex items-center gap-2 px-4 py-2 bg-spa-charcoal text-white rounded-full text-sm font-medium hover:bg-spa-charcoal/90 transition-colors"
+                                >
+                                  <DollarSign size={14} /> Record Payout ({formatCurrency(confirmedTotal)})
+                                </button>
+                              </div>
+                            )}
+                            <div className="bg-white rounded-xl overflow-hidden">
+                              <table className="w-full text-sm">
+                                <thead className="bg-spa-cream"><tr>{['Ticket Type', 'Sale', 'Fee', 'Owed', 'Status', 'Date', ''].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-medium text-spa-gray uppercase tracking-wider">{h}</th>)}</tr></thead>
+                                <tbody className="divide-y divide-spa-light">
+                                  {group.payouts.map(p => (
+                                    <tr key={p.id} className="hover:bg-spa-cream/50 transition-colors">
+                                      <td className="px-4 py-3 font-medium text-spa-charcoal">{p.ticket_type}</td>
+                                      <td className="px-4 py-3 text-spa-charcoal">{formatCurrency(Number(p.sale_amount))}</td>
+                                      <td className="px-4 py-3 text-spa-gray">{formatCurrency(Number(p.platform_fee))}</td>
+                                      <td className="px-4 py-3 font-medium text-spa-purple">{formatCurrency(Number(p.payout_amount))}</td>
+                                      <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadge(p.status)}`}>{p.status}</span></td>
+                                      <td className="px-4 py-3 text-spa-gray">{formatDate(p.created_at)}</td>
+                                      <td className="px-4 py-3">{p.status === 'pending' && <button onClick={() => confirmEventPayout(p.id)} className="text-xs text-blue-600 hover:underline font-medium">Confirm</button>}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {denyModal && (
@@ -671,6 +855,24 @@ function AdminDashboard() {
             <div className="flex gap-3 mt-6">
               <button onClick={() => setPayoutModal(null)} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">Cancel</button>
               <button onClick={handlePayout} disabled={!payoutForm.amount || saving} className="flex-1 btn-primary justify-center disabled:opacity-50">{saving ? 'Saving...' : 'Record Payout'} <ArrowRight size={16} /></button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {eventPayoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+            <div className="flex items-center justify-between mb-2"><h3 className="font-serif text-2xl text-spa-charcoal">Record Event Payout</h3><button onClick={() => setEventPayoutModal(null)} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal"><X size={18} /></button></div>
+            <p className="text-sm text-spa-gray mb-6">For <strong>{eventPayoutModal.hostName}</strong> · {formatCurrency(eventPayoutModal.amount)} confirmed</p>
+            <div className="space-y-4">
+              <div><label className="block text-sm font-medium text-spa-charcoal mb-2">Payment Method</label><select value={eventPayoutForm.method} onChange={e => setEventPayoutForm({ ...eventPayoutForm, method: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"><option value="venmo">Venmo</option><option value="paypal">PayPal</option><option value="zelle">Zelle</option></select></div>
+              <div><label className="block text-sm font-medium text-spa-charcoal mb-2">Reference / Confirmation #</label><input type="text" placeholder="Optional" value={eventPayoutForm.reference} onChange={e => setEventPayoutForm({ ...eventPayoutForm, reference: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" /></div>
+              <p className="text-xs text-spa-gray">This will mark all confirmed ticket sales for this host as paid.</p>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setEventPayoutModal(null)} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">Cancel</button>
+              <button onClick={handleEventPayoutPaid} disabled={saving} className="flex-1 btn-primary justify-center disabled:opacity-50">{saving ? 'Saving...' : 'Record Payout'} <ArrowRight size={16} /></button>
             </div>
           </div>
         </div>
