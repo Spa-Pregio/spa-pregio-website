@@ -1,15 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import {
   MapPin, Calendar, Users, Plus, Search, Filter,
-  ChevronDown, ArrowRight, Store, X, Check,
-  Ticket, Utensils, DollarSign, AlertCircle, Sparkles,
-  Upload, ImageIcon, Link2
+  ChevronDown, ArrowRight, Store, Sparkles,
 } from 'lucide-react';
-
-const SUPABASE_FUNCTIONS_URL = 'https://reompjeeiurwnbpbfhyj.supabase.co/functions/v1';
-const SUPABASE_STORAGE_URL = 'https://reompjeeiurwnbpbfhyj.supabase.co/storage/v1/object/public/event-images';
 
 const suiteShowcases = [
   {
@@ -54,183 +49,30 @@ const suiteShowcases = [
   },
 ];
 
-const eventTypes = ['All', 'Vendor Market', 'Brunch', 'Virtual', 'Workshop', 'Tea', 'Wellness'];
-const ticketTypeOptions = ['General Admission', 'VIP Table', 'Vendor Table', 'Buffet Add-on', 'Plated Dinner Add-on'];
-const emptyForm = {
-  title: '', date: '', time: '', location: '', type: 'Vendor Market',
-  description: '', max_attendees: '', vendor_tables: '', special_offer: '',
-  is_free: true, tickets: [] as any[], connected_account_id: '',
-};
+const eventTypes = ['All', 'Vendor Market', 'Brunch', 'Virtual', 'Workshop', 'Tea', 'Wellness', 'Gathering'];
 
 export default function Events() {
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('All');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createType, setCreateType] = useState<'member' | 'vendor' | null>(null);
-  const [formData, setFormData] = useState(emptyForm);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [userEvents, setUserEvents] = useState<any[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [rsvpName, setRsvpName] = useState('');
-  const [rsvpEmail, setRsvpEmail] = useState('');
-  const [rsvpStatus, setRsvpStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [attendeeCounts, setAttendeeCounts] = useState<Record<string, number>>({});
-  const [selectedTickets, setSelectedTickets] = useState<Record<number, number>>({});
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [showStripeInfo, setShowStripeInfo] = useState(false);
-  const [shareCopied, setShareCopied] = useState(false);
 
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [photoUploading, setPhotoUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => { loadEvents(); checkUser(); }, []);
-
-  const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setCurrentUser(user);
-    if (user) {
-      setRsvpEmail(user.email || '');
-      setRsvpName(user.user_metadata?.first_name || '');
-    }
-  };
+  useEffect(() => { loadEvents(); }, []);
 
   const loadEvents = async () => {
-    const { data } = await supabase.from('events').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase
+      .from('events')
+      .select('*')
+      .eq('is_private', false)
+      .order('created_at', { ascending: false });
     if (data) setUserEvents(data);
+
     const { data: rsvps } = await supabase.from('event_rsvps').select('event_id');
     if (rsvps) {
       const counts: Record<string, number> = {};
       rsvps.forEach((r: any) => { counts[r.event_id] = (counts[r.event_id] || 0) + 1; });
       setAttendeeCounts(counts);
     }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setPhotoFile(file);
-    setPhotoPreview(URL.createObjectURL(file));
-  };
-
-  const clearPhoto = () => {
-    setPhotoFile(null);
-    setPhotoPreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const uploadPhoto = async (): Promise<string | null> => {
-    if (!photoFile) return null;
-    setPhotoUploading(true);
-    const ext = photoFile.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error } = await supabase.storage.from('event-images').upload(fileName, photoFile, {
-      cacheControl: '3600',
-      upsert: false,
-    });
-    setPhotoUploading(false);
-    if (error) { console.error('Upload error:', error); return null; }
-    return `${SUPABASE_STORAGE_URL}/${fileName}`;
-  };
-
-  const addTicket = () => setFormData({ ...formData, tickets: [...formData.tickets, { type: 'General Admission', price: '', description: '' }] });
-  const updateTicket = (i: number, field: string, value: string) => {
-    const t = [...formData.tickets]; t[i] = { ...t[i], [field]: value }; setFormData({ ...formData, tickets: t });
-  };
-  const removeTicket = (i: number) => setFormData({ ...formData, tickets: formData.tickets.filter((_, idx) => idx !== i) });
-
-  const handleCreateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitStatus('loading');
-    let imageUrl: string | null = null;
-    if (photoFile) imageUrl = await uploadPhoto();
-    const { error } = await supabase.from('events').insert([{
-      title: formData.title, date: formData.date, time: formData.time,
-      location: formData.location, type: formData.type, description: formData.description,
-      max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
-      vendor_tables: formData.vendor_tables ? parseInt(formData.vendor_tables) : null,
-      special_offer: formData.special_offer, event_kind: createType,
-      is_free: formData.is_free, tickets: formData.is_free ? [] : formData.tickets,
-      connected_account_id: formData.connected_account_id || null,
-      image: imageUrl,
-    }]);
-    if (error) setSubmitStatus('error');
-    else {
-      setSubmitStatus('success');
-      setFormData(emptyForm);
-      clearPhoto();
-      loadEvents();
-      setTimeout(() => { setShowCreateModal(false); setSubmitStatus('idle'); }, 2000);
-    }
-  };
-
-  const handleFreeRsvp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedEvent) return;
-    setRsvpStatus('loading');
-    const { error } = await supabase.from('event_rsvps').insert([{
-      event_id: String(selectedEvent.id), user_email: rsvpEmail, user_name: rsvpName,
-    }]);
-    if (error) setRsvpStatus('error');
-    else { setRsvpStatus('success'); loadEvents(); }
-  };
-
-  const getTotalPrice = () => {
-    if (!selectedEvent?.tickets) return 0;
-    return selectedEvent.tickets.reduce((total: number, ticket: any, index: number) => {
-      return total + (Number(ticket.price) * (selectedTickets[index] || 0));
-    }, 0);
-  };
-
-  const handlePaidCheckout = async () => {
-    const total = getTotalPrice();
-    if (total === 0 || !rsvpEmail || !rsvpName) return;
-    setPaymentStatus('loading');
-    try {
-      const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/create-payment-intent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: total * 100,
-          currency: 'usd',
-          connected_account_id: selectedEvent.connected_account_id || '',
-          event_title: selectedEvent.title,
-        }),
-      });
-      const data = await response.json();
-      if (data.id || data.client_secret) {
-        await supabase.from('event_rsvps').insert([{
-          event_id: String(selectedEvent.id), user_email: rsvpEmail, user_name: rsvpName,
-        }]);
-        setPaymentStatus('success');
-        loadEvents();
-      } else {
-        setPaymentStatus('error');
-      }
-    } catch {
-      setPaymentStatus('error');
-    }
-  };
-
-  const handleCopyShareLink = async (eventId: string | number) => {
-    const url = `https://spa-pregio.com/events/${eventId}`;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      const el = document.createElement('textarea');
-      el.value = url;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-    }
-    setShareCopied(true);
-    setTimeout(() => setShareCopied(false), 2000);
   };
 
   const filteredEvents = activeFilter === 'All'
@@ -251,10 +93,7 @@ export default function Events() {
             Choose a Celebration Suite below and create your own event — or browse community events already happening near you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <button
-              onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
-              className="btn-primary"
-            >
+            <button onClick={() => navigate('/create-event')} className="btn-primary">
               <Plus size={18} /> Create an Event
             </button>
             <Link to="/join" className="btn-outline">Become a Member</Link>
@@ -262,7 +101,7 @@ export default function Events() {
         </div>
       </section>
 
-      {/* Host Your Own CTA Banner — moved here between hero and suites */}
+      {/* Host Your Own CTA Banner */}
       <section className="w-full py-16 lg:py-20 bg-spa-purple">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -271,22 +110,22 @@ export default function Events() {
                 Host your own <span className="text-spa-pink">celebration.</span>
               </h2>
               <p className="mt-4 text-white/70 leading-relaxed">
-                Free or ticketed — create your event and we will handle the rest.
+                Free or ticketed, public or private — create your event and we will handle the rest.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <button
-                onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
+                onClick={() => navigate('/create-event')}
                 className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors flex items-center justify-center gap-2"
               >
-                <Users size={18} /> Create Member Event
+                <Users size={18} /> Create an Event
               </button>
-              <button
-                onClick={() => { setCreateType('vendor'); setShowCreateModal(true); }}
+              <Link
+                to="/vendors"
                 className="px-6 py-3 border-2 border-white/30 text-white rounded-full font-medium hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
               >
-                <Store size={18} /> Create Vendor Event
-              </button>
+                <Store size={18} /> List Your Business
+              </Link>
             </div>
           </div>
         </div>
@@ -301,7 +140,7 @@ export default function Events() {
               Choose your <span className="text-spa-purple">suite.</span>
             </h2>
             <p className="mt-4 text-spa-gray max-w-xl mx-auto">
-              Each suite is designed for a specific milestone in your pregnancy journey. Pick one and create your event — you can add your own photo or use our default.
+              Each suite is designed for a specific milestone in your pregnancy journey. Pick one and create your event — you can add your own photo or use a stock image.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -322,14 +161,7 @@ export default function Events() {
                 <div className="p-6 lg:p-8">
                   <h3 className="font-serif text-xl lg:text-2xl text-spa-charcoal mb-2">{suite.title}</h3>
                   <p className="text-spa-gray text-sm leading-relaxed mb-6">{suite.description}</p>
-                  <button
-                    onClick={() => {
-                      setFormData({ ...emptyForm, title: suite.title });
-                      setCreateType('member');
-                      setShowCreateModal(true);
-                    }}
-                    className="btn-primary w-full justify-center"
-                  >
+                  <button onClick={() => navigate('/create-event')} className="btn-primary w-full justify-center">
                     <Sparkles size={16} /> Create This Event
                   </button>
                 </div>
@@ -380,10 +212,7 @@ export default function Events() {
               <p className="text-spa-gray mb-6 max-w-sm mx-auto">
                 Choose a Celebration Suite above and create the first event in your area.
               </p>
-              <button
-                onClick={() => { setCreateType('member'); setShowCreateModal(true); }}
-                className="btn-primary"
-              >
+              <button onClick={() => navigate('/create-event')} className="btn-primary">
                 <Plus size={18} /> Create an Event
               </button>
             </div>
@@ -438,264 +267,6 @@ export default function Events() {
           )}
         </div>
       </section>
-
-      {/* Create Event Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 lg:p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-serif text-2xl text-spa-charcoal">
-                  Create {createType === 'vendor' ? 'Vendor' : 'Member'} Event
-                </h3>
-                <button
-                  onClick={() => { setShowCreateModal(false); setSubmitStatus('idle'); clearPhoto(); }}
-                  className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {submitStatus === 'success' ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4">
-                    <Check size={28} className="text-spa-purple" />
-                  </div>
-                  <h4 className="font-serif text-xl text-spa-charcoal mb-2">Event Created!</h4>
-                  <p className="text-spa-gray">Your event is now live on the events page.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleCreateSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Name</label>
-                    <input type="text" name="title" required value={formData.title} onChange={handleChange} placeholder="e.g., Baby Shower Suite" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Photo</label>
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
-                    {photoPreview ? (
-                      <div className="relative rounded-xl overflow-hidden aspect-[16/7]">
-                        <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={clearPhoto}
-                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center text-spa-charcoal hover:text-red-500 transition-colors"
-                        >
-                          <X size={14} />
-                        </button>
-                        <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/40 rounded-lg">
-                          <p className="text-white text-xs">Custom photo selected</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full p-6 border-2 border-dashed border-spa-purple/20 rounded-xl bg-spa-lavender hover:border-spa-purple/40 transition-colors flex flex-col items-center gap-2 text-center"
-                      >
-                        <div className="w-10 h-10 rounded-full bg-spa-purple/10 flex items-center justify-center">
-                          <ImageIcon size={20} className="text-spa-purple" />
-                        </div>
-                        <p className="text-sm font-medium text-spa-charcoal">Upload a photo</p>
-                        <p className="text-xs text-spa-gray">JPG, PNG or WEBP · Max 50MB</p>
-                        <span className="mt-1 inline-flex items-center gap-1 text-xs text-spa-purple font-medium">
-                          <Upload size={12} /> Choose file
-                        </span>
-                      </button>
-                    )}
-                    {!photoPreview && (
-                      <p className="text-xs text-spa-gray mt-1">No photo? A default suite photo will be used automatically.</p>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-spa-charcoal mb-1">Date</label>
-                      <input type="date" name="date" required value={formData.date} onChange={handleChange} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-spa-charcoal mb-1">Time</label>
-                      <input type="time" name="time" required value={formData.time} onChange={handleChange} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Location</label>
-                    <input type="text" name="location" required value={formData.location} onChange={handleChange} placeholder="e.g., High Point, NC or Virtual" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Type</label>
-                    <select name="type" value={formData.type} onChange={handleChange} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30">
-                      <option>Vendor Market</option>
-                      <option>Brunch</option>
-                      <option>Virtual</option>
-                      <option>Workshop</option>
-                      <option>Tea</option>
-                      <option>Wellness</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Description</label>
-                    <textarea rows={3} name="description" value={formData.description} onChange={handleChange} placeholder="Tell us about your event..." className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none" />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">Max Attendees</label>
-                    <input type="number" name="max_attendees" value={formData.max_attendees} onChange={handleChange} placeholder="50" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-spa-lavender rounded-xl">
-                    <div>
-                      <p className="font-medium text-spa-charcoal">Free Event</p>
-                      <p className="text-xs text-spa-gray">Toggle off to add ticket pricing</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, is_free: !formData.is_free })}
-                      className={`relative w-12 h-6 rounded-full transition-colors ${formData.is_free ? 'bg-spa-purple' : 'bg-spa-charcoal/20'}`}
-                    >
-                      <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${formData.is_free ? 'translate-x-7' : 'translate-x-1'}`} />
-                    </button>
-                  </div>
-
-                  {!formData.is_free && (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <label className="text-sm font-medium text-spa-charcoal">Ticket Types</label>
-                        <button type="button" onClick={addTicket} className="text-xs text-spa-purple font-medium flex items-center gap-1">
-                          <Plus size={14} /> Add ticket type
-                        </button>
-                      </div>
-                      {formData.tickets.length === 0 && (
-                        <p className="text-sm text-spa-gray text-center py-4 bg-spa-lavender rounded-xl">
-                          No ticket types yet — click "Add ticket type" above
-                        </p>
-                      )}
-                      {formData.tickets.map((ticket, index) => (
-                        <div key={index} className="bg-spa-lavender rounded-xl p-4 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-spa-charcoal">Ticket {index + 1}</span>
-                            <button type="button" onClick={() => removeTicket(index)} className="text-spa-gray hover:text-red-500 transition-colors"><X size={16} /></button>
-                          </div>
-                          <select value={ticket.type} onChange={e => updateTicket(index, 'type', e.target.value)} className="w-full px-3 py-2 bg-white rounded-lg text-spa-charcoal text-sm focus:outline-none focus:ring-2 focus:ring-spa-purple/30">
-                            {ticketTypeOptions.map(t => <option key={t}>{t}</option>)}
-                          </select>
-                          <div className="grid grid-cols-2 gap-2">
-                            <input type="number" placeholder="Price ($)" value={ticket.price} onChange={e => updateTicket(index, 'price', e.target.value)} className="px-3 py-2 bg-white rounded-lg text-spa-charcoal text-sm focus:outline-none" />
-                            <input type="text" placeholder="Description" value={ticket.description} onChange={e => updateTicket(index, 'description', e.target.value)} className="px-3 py-2 bg-white rounded-lg text-spa-charcoal text-sm focus:outline-none" />
-                          </div>
-                        </div>
-                      ))}
-
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="block text-sm font-medium text-spa-charcoal">
-                            Your Stripe Account ID
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => setShowStripeInfo(true)}
-                            className="flex items-center gap-1 text-xs text-spa-purple font-medium hover:underline"
-                          >
-                            <AlertCircle size={13} /> How do I find this?
-                          </button>
-                        </div>
-                        <input
-                          type="text"
-                          name="connected_account_id"
-                          value={formData.connected_account_id}
-                          onChange={handleChange}
-                          placeholder="acct_1ABC234xyz"
-                          className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 text-sm font-mono"
-                        />
-                        <p className="text-xs text-spa-gray mt-1">
-                          Include the full ID — starting with <span className="font-mono text-spa-purple">acct_</span>
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {createType === 'vendor' && (
-                    <div>
-                      <label className="block text-sm font-medium text-spa-charcoal mb-1">Number of Vendor Tables</label>
-                      <input type="number" name="vendor_tables" value={formData.vendor_tables} onChange={handleChange} placeholder="5" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
-                    </div>
-                  )}
-
-                  {submitStatus === 'error' && (
-                    <p className="text-red-500 text-sm">Something went wrong. Please try again.</p>
-                  )}
-
-                  <button type="submit" disabled={submitStatus === 'loading' || photoUploading} className="btn-primary w-full justify-center mt-6 disabled:opacity-50">
-                    <Plus size={18} /> {photoUploading ? 'Uploading photo...' : submitStatus === 'loading' ? 'Creating...' : 'Create Event'}
-                  </button>
-                  <p className="text-xs text-spa-gray text-center">
-                    Spa-Pregio takes a 10% platform fee on all paid ticket sales.
-                  </p>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Stripe Info Modal */}
-      {showStripeInfo && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl max-w-sm w-full shadow-xl">
-            <div className="flex items-center justify-between p-5 border-b border-spa-charcoal/5">
-              <h4 className="font-serif text-lg text-spa-charcoal">Finding your Stripe Account ID</h4>
-              <button
-                onClick={() => setShowStripeInfo(false)}
-                className="w-7 h-7 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors"
-              >
-                <X size={15} />
-              </button>
-            </div>
-            <div className="p-5 space-y-4">
-              {[
-                { step: '1', text: 'Go to dashboard.stripe.com and make sure you are in Live mode — the toggle is in the top left corner.' },
-                { step: '2', text: 'Click Settings (gear icon, top right), then Account details.' },
-                { step: '3', text: 'Your Account ID is listed there. It starts with acct_ followed by letters and numbers.' },
-                { step: '4', text: 'Copy the full ID — including the acct_ part — and paste it into the field.' },
-              ].map(({ step, text }) => (
-                <div key={step} className="flex gap-3">
-                  <div className="w-6 h-6 rounded-full bg-spa-purple flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-white text-xs font-medium">{step}</span>
-                  </div>
-                  <p className="text-sm text-spa-gray leading-relaxed">{text}</p>
-                </div>
-              ))}
-
-              <div className="bg-spa-lavender rounded-xl p-3">
-                <p className="text-xs text-spa-gray mb-1 font-medium uppercase tracking-wide">Example</p>
-                <p className="font-mono text-sm text-spa-purple">acct_1ABC234xyz</p>
-                <p className="text-xs text-spa-gray mt-1">Always include the full ID — acct_ and the number together.</p>
-              </div>
-
-              <div className="flex gap-2 bg-amber-50 rounded-xl p-3">
-                <AlertCircle size={15} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-700 leading-relaxed">
-                  This is your Stripe account ID — not Spa-Pregio's. Stripe uses it to route ticket revenue directly to you.
-                </p>
-              </div>
-
-              <a
-                href="https://dashboard.stripe.com/settings/account"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-2.5 bg-spa-purple text-white text-sm font-medium rounded-xl hover:bg-spa-purple/90 transition-colors"
-              >
-                Open Stripe Dashboard
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
