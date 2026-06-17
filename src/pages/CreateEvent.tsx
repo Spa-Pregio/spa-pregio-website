@@ -35,7 +35,6 @@ const emptyEventForm = {
   max_attendees: '',
   is_free: true,
   tickets: [] as { type: string; price: string; description: string }[],
-  connected_account_id: '',
   is_private: false,
   host_website: '',
   host_phone: '',
@@ -67,7 +66,6 @@ export default function CreateEvent() {
   const [photoUploading, setPhotoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [showStripeInfo, setShowStripeInfo] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => { checkAuth(); }, []);
@@ -215,7 +213,6 @@ export default function CreateEvent() {
       event_kind: isVendor ? 'vendor' : 'member',
       is_free: form.is_free,
       tickets: form.is_free ? [] : form.tickets,
-      connected_account_id: form.connected_account_id || null,
       image: imageUrl,
       is_private: form.is_private,
       host_website: isVendor ? (form.host_website || null) : null,
@@ -564,22 +561,9 @@ export default function CreateEvent() {
                     </div>
                   ))}
 
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-sm font-medium text-spa-charcoal">Your Stripe Account ID</label>
-                      <button type="button" onClick={() => setShowStripeInfo(true)} className="flex items-center gap-1 text-xs text-spa-purple font-medium hover:underline">
-                        <AlertCircle size={13} /> How do I find this?
-                      </button>
-                    </div>
-                    <input
-                      type="text" name="connected_account_id" value={form.connected_account_id} onChange={handleChange}
-                      placeholder="acct_1ABC234xyz"
-                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 text-sm font-mono"
-                    />
-                    <p className="text-xs text-spa-gray mt-1">
-                      Include the full ID — starting with <span className="font-mono text-spa-purple">acct_</span>. Spa-Pregio takes a 10% platform fee on paid ticket sales.
-                    </p>
-                  </div>
+                  <p className="text-xs text-spa-gray text-center">
+                    Spa-Pregio collects ticket payments securely and pays out your earnings after the event — no setup needed on your end.
+                  </p>
                 </div>
               )}
             </div>
@@ -709,42 +693,5 @@ export default function CreateEvent() {
           </div>
         )}
       </div>
-
-      {/* Stripe Info Modal */}
-      {showStripeInfo && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl max-w-sm w-full shadow-xl">
-            <div className="flex items-center justify-between p-5 border-b border-spa-charcoal/5">
-              <h4 className="font-serif text-lg text-spa-charcoal">Finding your Stripe Account ID</h4>
-              <button onClick={() => setShowStripeInfo(false)} className="w-7 h-7 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors">
-                <X size={15} />
-              </button>
-            </div>
-            <div className="p-5 space-y-4">
-              {[
-                { step: '1', text: 'Go to dashboard.stripe.com and make sure you are in Live mode — the toggle is in the top left corner.' },
-                { step: '2', text: 'Click Settings (gear icon, top right), then Account details.' },
-                { step: '3', text: 'Your Account ID is listed there. It starts with acct_ followed by letters and numbers.' },
-                { step: '4', text: 'Copy the full ID — including the acct_ part — and paste it into the field.' },
-              ].map(({ step, text }) => (
-                <div key={step} className="flex gap-3">
-                  <div className="w-6 h-6 rounded-full bg-spa-purple flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-white text-xs font-medium">{step}</span>
-                  </div>
-                  <p className="text-sm text-spa-gray leading-relaxed">{text}</p>
-                </div>
-              ))}
-              <div className="bg-spa-lavender rounded-xl p-3">
-                <p className="text-xs text-spa-gray mb-1 font-medium uppercase tracking-wide">Example</p>
-                <p className="font-mono text-sm text-spa-purple">acct_1ABC234xyz</p>
-              </div>
-              <a href="https://dashboard.stripe.com/settings/account" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full py-2.5 bg-spa-purple text-white text-sm font-medium rounded-xl hover:bg-spa-purple/90 transition-colors">
-                Open Stripe Dashboard
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
   );
 }
