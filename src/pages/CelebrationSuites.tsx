@@ -287,7 +287,7 @@ export default function CelebrationSuites() {
 
             <Link
               to="/events"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full border-2 border-spa-purple text-spa-purple text-sm font-semibold tracking-wide hover:bg-spa-purple hover:text-white transition-colors"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold tracking-wide shadow-elegant hover:bg-[#7d5fa0] transition-colors"
             >
               Explore Events
             </Link>
