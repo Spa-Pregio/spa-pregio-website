@@ -234,6 +234,32 @@ export default function CreateEvent() {
       return;
     }
 
+    // Send host confirmation email (non-blocking)
+    try {
+      await fetch('https://reompjeeiurwnbpbfhyj.supabase.co/functions/v1/send-transactional-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlb21wamVlaXVyd25icGJmaHlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MjkxMjcsImV4cCI6MjA1NTQwNTEyN30.oanFsHGxJnXLOIJmLHYQKBMFgkCBenabPTsORNbdkwA`,
+        },
+        body: JSON.stringify({
+          type: 'event_created',
+          to: user.email,
+          hostName: user.user_metadata?.first_name || user.email,
+          eventTitle: form.title,
+          eventDate: form.date,
+          eventTime: form.time,
+          eventLocation: form.location,
+          eventType: form.type,
+          isPrivate: form.is_private,
+          isFree: form.is_free,
+          eventId: data.id,
+        }),
+      });
+    } catch (emailErr) {
+      console.error('Event creation email error:', emailErr);
+    }
+
     setCreatedEventId(data.id);
     setStep('success');
     setSubmitStatus('idle');

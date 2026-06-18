@@ -205,6 +205,32 @@ function AdminDashboard() {
 
   async function updateSisterStatus(id: string, status: string) {
     await supabase.from('affiliates').update({ status }).eq('id', id);
+
+    // Send welcome email only on first approval (pending -> active)
+    if (status === 'active') {
+      const aff = affiliates.find(a => a.id === id);
+      if (aff && aff.status === 'pending') {
+        try {
+          await fetch('https://reompjeeiurwnbpbfhyj.supabase.co/functions/v1/send-transactional-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlb21wamVlaXVyd25icGJmaHlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MjkxMjcsImV4cCI6MjA1NTQwNTEyN30.oanFsHGxJnXLOIJmLHYQKBMFgkCBenabPTsORNbdkwA`,
+            },
+            body: JSON.stringify({
+              type: 'suite_sister_welcome',
+              to: aff.email,
+              name: aff.full_name,
+              referralCode: aff.referral_code,
+              referralLink: `https://spa-pregio.com/ambassadors?ref=${aff.referral_code}`,
+            }),
+          });
+        } catch (emailErr) {
+          console.error('Suite Sister welcome email error:', emailErr);
+        }
+      }
+    }
+
     loadAll();
   }
 
