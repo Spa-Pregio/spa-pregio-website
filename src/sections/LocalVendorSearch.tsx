@@ -327,7 +327,7 @@ export default function LocalVendorSearch() {
                         <img
                           src={vendor.logo_url}
                           alt={vendor.business_name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain p-4"
                         />
                       ) : (
                         <div className="text-center">
