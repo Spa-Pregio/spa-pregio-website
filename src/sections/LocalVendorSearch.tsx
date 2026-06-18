@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Star, Phone, Globe, ArrowRight, Loader, X, Check, ChevronRight, Instagram, Facebook } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -80,7 +80,6 @@ export default function LocalVendorSearch() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [selectedPin, setSelectedPin] = useState<string | null>(null);
-  const [mapReady, setMapReady] = useState(false);
 
   const [claimPlace, setClaimPlace] = useState<PlaceResult | null>(null);
   const [claimStatus, setClaimStatus] = useState<'idle'|'loading'|'success'|'error'|'noauth'>('idle');
@@ -89,137 +88,7 @@ export default function LocalVendorSearch() {
     business_description: '', phone: '', website: '', instagram: '', facebook: '', tiktok: '', service_categories: [] as string[],
   });
 
-  const mapRef = useRef<HTMLDivElement>(null);
-  const googleMapRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
-  const centerMarkerRef = useRef<any>(null);
-
   const apiKey = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY || '';
-
-  // Load Google Maps JS API once
-  useEffect(() => {
-    if (!apiKey) return;
-    if ((window as any).google?.maps) { setMapReady(true); return; }
-    if (document.getElementById('gmap-script')) {
-      const existing = document.getElementById('gmap-script');
-      if (existing) existing.addEventListener('load', () => setMapReady(true));
-      return;
-    }
-    const script = document.createElement('script');
-    script.id = 'gmap-script';
-    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey;
-    script.async = true;
-    script.onload = () => setMapReady(true);
-    document.head.appendChild(script);
-  }, [apiKey]);
-
-  // Render/update map whenever center or nearby vendors change
-  useEffect(() => {
-    if (!mapReady || !searchCenter) return;
-
-    const tryMount = (attempts: number) => {
-      if (!mapRef.current) {
-        if (attempts < 20) setTimeout(() => tryMount(attempts + 1), 150);
-        return;
-      }
-      const google = (window as any).google;
-      if (!google?.maps) return;
-
-      // Create or reuse map
-      if (!googleMapRef.current) {
-        googleMapRef.current = new google.maps.Map(mapRef.current, {
-          center: searchCenter,
-          zoom: 11,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: true,
-          styles: [
-            { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-            { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-          ],
-        });
-
-        // Draw 25-mile radius circle
-        new google.maps.Circle({
-          map: googleMapRef.current,
-          center: searchCenter,
-          radius: RADIUS_MILES * 1609.34,
-          fillColor: '#9B7CB6',
-          fillOpacity: 0.06,
-          strokeColor: '#9B7CB6',
-          strokeOpacity: 0.3,
-          strokeWeight: 1.5,
-        });
-
-        // Center pin
-        centerMarkerRef.current = new google.maps.Marker({
-          position: searchCenter,
-          map: googleMapRef.current,
-          title: city + ', ' + state,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: '#D09AC6',
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 2,
-          },
-          zIndex: 1,
-        });
-      } else {
-        googleMapRef.current.setCenter(searchCenter);
-      }
-
-      // Clear old vendor markers
-      markersRef.current.forEach(m => m.setMap(null));
-      markersRef.current = [];
-
-      const infoWindow = new google.maps.InfoWindow();
-
-      nearbyVendors.forEach(vendor => {
-        const marker = new google.maps.Marker({
-          position: { lat: vendor.lat, lng: vendor.lng },
-          map: googleMapRef.current,
-          title: vendor.business_name,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 11,
-            fillColor: '#9B7CB6',
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 2,
-          },
-          zIndex: 10,
-        });
-
-        const dist = vendor.distanceMiles < 1
-          ? 'Less than 1 mile away'
-          : Math.round(vendor.distanceMiles) + ' miles away';
-
-        const contactLine = vendor.contact_type === 'phone'
-          ? '<a href="tel:' + vendor.contact_value + '" style="color:#9B7CB6;text-decoration:none;">📞 ' + vendor.contact_value + '</a>'
-          : '<a href="' + vendor.contact_value + '" target="_blank" style="color:#9B7CB6;text-decoration:none;">🌐 Visit Website</a>';
-
-        marker.addListener('click', () => {
-          infoWindow.setContent(
-            '<div style="font-family:Helvetica Neue,sans-serif;padding:6px 2px;max-width:220px;">' +
-            '<div style="font-size:10px;color:#9B7CB6;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;font-weight:600;">Spa-Pregio Member</div>' +
-            '<div style="font-size:15px;font-weight:700;color:#2C2C2C;margin-bottom:2px;">' + vendor.business_name + '</div>' +
-            '<div style="font-size:11px;color:#9B7CB6;margin-bottom:2px;">' + vendor.category + '</div>' +
-            '<div style="font-size:11px;color:#888;margin-bottom:6px;">' + vendor.city + ', ' + vendor.state + ' · ' + dist + '</div>' +
-            '<div style="font-size:12px;">' + contactLine + '</div>' +
-            '</div>'
-          );
-          infoWindow.open(googleMapRef.current, marker);
-          setSelectedPin(vendor.id);
-        });
-
-        markersRef.current.push(marker);
-      });
-    };
-
-    tryMount(0);
-  }, [mapReady, searchCenter, nearbyVendors]);
 
   const geocode = async (address: string): Promise<{ lat: number; lng: number } | null> => {
     if (!apiKey) return null;
@@ -252,9 +121,6 @@ export default function LocalVendorSearch() {
     setNearbyVendors([]);
     setSearchCenter(null);
     setSelectedPin(null);
-    googleMapRef.current = null;
-    markersRef.current.forEach(m => m.setMap && m.setMap(null));
-    markersRef.current = [];
 
     // Geocode the searcher's city/state
     const center = await geocode(city + ', ' + state);
@@ -352,7 +218,6 @@ export default function LocalVendorSearch() {
     setSearchCenter(null);
     setSearched(false);
     setSelectedPin(null);
-    googleMapRef.current = null;
   };
 
   const openClaimModal = async (place: PlaceResult) => {
@@ -504,30 +369,28 @@ export default function LocalVendorSearch() {
                 <div className="flex items-center gap-2">
                   <MapPin size={14} className="text-spa-purple" />
                   <span className="text-xs font-medium text-spa-purple uppercase tracking-wider">
-                    {nearbyVendors.length > 0 ? nearbyVendors.length + ' Spa-Pregio member' + (nearbyVendors.length !== 1 ? 's' : '') + ' within ' + RADIUS_MILES + ' miles' : 'Searching within ' + RADIUS_MILES + ' miles of ' + city}
+                    {selectedCategory} near {city}, {state}
                   </span>
                 </div>
-                <span className="text-xs text-spa-gray">Pan &amp; zoom to explore</span>
+                <span className="text-xs text-spa-gray">Pan &amp; zoom to explore · Click any pin for details</span>
               </div>
-              <div ref={mapRef} style={{ height: '380px', width: '100%' }} />
+              <iframe
+                width="100%"
+                height="400"
+                style={{ border: 0, display: 'block' }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={'https://www.google.com/maps/embed/v1/search?key=' + apiKey + '&q=' + encodeURIComponent(selectedCategory + ' near ' + city + ' ' + state) + '&zoom=11'}
+              />
               {nearbyVendors.length > 0 && (
                 <div className="bg-white px-4 py-3 flex flex-wrap gap-2 border-t border-spa-purple/10">
+                  <span className="text-xs text-spa-gray self-center mr-1">Spa-Pregio members nearby:</span>
                   {nearbyVendors.map(v => (
-                    <button
-                      key={v.id}
-                      onClick={() => {
-                        const google = (window as any).google;
-                        if (!google?.maps || !googleMapRef.current) return;
-                        googleMapRef.current.panTo({ lat: v.lat, lng: v.lng });
-                        googleMapRef.current.setZoom(14);
-                        setSelectedPin(v.id);
-                      }}
-                      className={'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ' + (selectedPin === v.id ? 'bg-spa-purple text-white' : 'bg-spa-purple/10 text-spa-purple hover:bg-spa-purple/20')}
-                    >
-                      <div className="w-2 h-2 rounded-full bg-current flex-shrink-0" />
-                      {v.business_name}
-                      <span className="opacity-60">{Math.round(v.distanceMiles)}mi</span>
-                    </button>
+                    <div key={v.id} className="flex items-center gap-1.5 px-3 py-1 bg-spa-purple/10 rounded-full text-xs text-spa-purple font-medium">
+                      <div className="w-2 h-2 rounded-full bg-spa-purple flex-shrink-0" />
+                      {v.business_name} <span className="opacity-60">{Math.round(v.distanceMiles)}mi</span>
+                    </div>
                   ))}
                 </div>
               )}
