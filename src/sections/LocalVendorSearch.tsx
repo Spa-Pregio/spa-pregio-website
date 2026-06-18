@@ -47,6 +47,7 @@ interface SupabaseVendor {
   contact_type: string;
   contact_value: string;
   plan: string;
+  logo_url?: string | null;
 }
 
 export default function LocalVendorSearch() {
@@ -68,7 +69,6 @@ export default function LocalVendorSearch() {
 
   const apiKey = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY || '';
 
-  // Listen for preset category from URL param (when coming from /vendors page)
   useEffect(() => {
     const handler = (e: Event) => {
       const cat = (e as CustomEvent).detail;
@@ -90,11 +90,9 @@ export default function LocalVendorSearch() {
     const categoryData = CATEGORIES.find(c => c.label === cat);
     const query = `${categoryData?.query || cat} in ${city} ${state}`;
 
-    // Supabase vendors
     const { data } = await supabase.from('vendors').select('*').eq('status', 'active').ilike('city', city).ilike('state', state).ilike('category', `%${cat}%`);
     setSpaResults(data || []);
 
-    // Google Places (New API)
     if (apiKey) {
       try {
         const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
@@ -176,7 +174,6 @@ export default function LocalVendorSearch() {
   return (
     <div className="w-full">
 
-      {/* ── STEP INDICATOR ── */}
       {step < 4 && (
         <div className="flex items-center justify-center gap-3 mb-10">
           {[1, 2, 3].map((s) => (
@@ -191,7 +188,6 @@ export default function LocalVendorSearch() {
         </div>
       )}
 
-      {/* ── STEP 1: CITY ── */}
       {step === 1 && (
         <div className="bg-white rounded-2xl shadow-elegant p-8 lg:p-10">
           <div className="text-center mb-8">
@@ -220,7 +216,6 @@ export default function LocalVendorSearch() {
         </div>
       )}
 
-      {/* ── STEP 2: STATE ── */}
       {step === 2 && (
         <div className="bg-white rounded-2xl shadow-elegant p-8 lg:p-10">
           <div className="text-center mb-8">
@@ -249,7 +244,6 @@ export default function LocalVendorSearch() {
         </div>
       )}
 
-      {/* ── STEP 3: CATEGORY ── */}
       {step === 3 && (
         <div className="bg-white rounded-2xl shadow-elegant p-8 lg:p-10">
           <div className="text-center mb-8">
@@ -279,10 +273,8 @@ export default function LocalVendorSearch() {
         </div>
       )}
 
-      {/* ── STEP 4: RESULTS ── */}
       {step === 4 && (
         <div>
-          {/* Results header */}
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="font-serif text-2xl text-spa-charcoal">
@@ -294,15 +286,11 @@ export default function LocalVendorSearch() {
                 </p>
               )}
             </div>
-            <button
-              onClick={resetSearch}
-              className="text-sm text-spa-purple hover:underline flex items-center gap-1"
-            >
+            <button onClick={resetSearch} className="text-sm text-spa-purple hover:underline flex items-center gap-1">
               ← New search
             </button>
           </div>
 
-          {/* Loading */}
           {loading && (
             <div className="text-center py-20">
               <Loader size={36} className="animate-spin text-spa-purple mx-auto mb-4" />
@@ -310,7 +298,6 @@ export default function LocalVendorSearch() {
             </div>
           )}
 
-          {/* No results */}
           {searched && !loading && !hasResults && (
             <div className="text-center py-20 bg-white rounded-2xl">
               <MapPin size={40} className="text-spa-purple/30 mx-auto mb-4" />
@@ -322,7 +309,6 @@ export default function LocalVendorSearch() {
             </div>
           )}
 
-          {/* Spa-Pregio Members */}
           {searched && !loading && spaResults.length > 0 && (
             <div className="mb-10">
               <div className="flex items-center gap-3 mb-5">
@@ -336,13 +322,21 @@ export default function LocalVendorSearch() {
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {spaResults.map((vendor) => (
                   <div key={vendor.id} className="bg-white rounded-2xl overflow-hidden border-2 border-spa-purple/20 shadow-elegant">
-                    <div className="aspect-[4/3] bg-gradient-to-br from-spa-lavender to-spa-blush flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-2">
-                          <MapPin size={28} className="text-spa-purple" />
+                    <div className="aspect-[4/3] bg-gradient-to-br from-spa-lavender to-spa-blush flex items-center justify-center overflow-hidden">
+                      {vendor.logo_url ? (
+                        <img
+                          src={vendor.logo_url}
+                          alt={vendor.business_name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-center">
+                          <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-2">
+                            <MapPin size={28} className="text-spa-purple" />
+                          </div>
+                          <p className="text-xs text-spa-purple font-medium">{vendor.category}</p>
                         </div>
-                        <p className="text-xs text-spa-purple font-medium">{vendor.category}</p>
-                      </div>
+                      )}
                     </div>
                     <div className="p-5">
                       <div className="flex items-center gap-2 mb-1">
@@ -365,7 +359,6 @@ export default function LocalVendorSearch() {
             </div>
           )}
 
-          {/* Google Results */}
           {searched && !loading && results.length > 0 && (
             <div>
               {spaResults.length > 0 && (
@@ -425,7 +418,6 @@ export default function LocalVendorSearch() {
         </div>
       )}
 
-      {/* Claim Modal */}
       {claimPlace && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-xl w-full my-8">
