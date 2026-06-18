@@ -59,6 +59,8 @@ export default function LocalVendorSearch() {
   const [spaResults, setSpaResults] = useState<SupabaseVendor[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [vendorCoords, setVendorCoords] = useState<Record<string, { lat: number; lng: number }>>({});
+  const [selectedPin, setSelectedPin] = useState<string | null>(null);
 
   const [claimPlace, setClaimPlace] = useState<PlaceResult | null>(null);
   const [claimStatus, setClaimStatus] = useState<'idle'|'loading'|'success'|'error'|'noauth'>('idle');
@@ -67,33 +69,30 @@ export default function LocalVendorSearch() {
     business_description: '', phone: '', website: '', instagram: '', facebook: '', tiktok: '', service_categories: [] as string[],
   });
 
-  const apiKey = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY || '';
-
-  const [vendorCoords, setVendorCoords] = useState<Record<string, { lat: number; lng: number }>>({});
-  const [selectedPin, setSelectedPin] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
 
-  // Load Google Maps script once
+  const apiKey = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY || '';
+
+  // Load Google Maps JS API script once
   useEffect(() => {
     if (!apiKey || (window as any).google?.maps) return;
-    const existing = document.getElementById('gmap-script');
-    if (existing) return;
+    if (document.getElementById('gmap-script')) return;
     const script = document.createElement('script');
     script.id = 'gmap-script';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
     script.async = true;
     document.head.appendChild(script);
   }, [apiKey]);
 
-  // Build/update map whenever coords are ready
+  // Build map whenever vendorCoords updates
   useEffect(() => {
     if (!mapRef.current || Object.keys(vendorCoords).length === 0) return;
 
     const initMap = () => {
       const google = (window as any).google;
-      if (!google?.maps) return;
+      if (!google?.maps || !mapRef.current) return;
 
       const coordValues = Object.values(vendorCoords);
       const center = {
@@ -114,7 +113,6 @@ export default function LocalVendorSearch() {
       });
       googleMapRef.current = map;
 
-      // Clear old markers
       markersRef.current.forEach(m => m.setMap(null));
       markersRef.current = [];
 
@@ -138,19 +136,19 @@ export default function LocalVendorSearch() {
           },
         });
 
-        const contactHtml = vendor.contact_type === 'phone'
-          ? `<a href="tel:${vendor.contact_value}" style="color:#9B7CB6;text-decoration:none;">📞 ${vendor.contact_value}</a>`
-          : `<a href="${vendor.contact_value}" target="_blank" style="color:#9B7CB6;text-decoration:none;">🌐 Visit Website</a>`;
+        const contactLine = vendor.contact_type === 'phone'
+          ? '<a href="tel:' + vendor.contact_value + '" style="color:#9B7CB6;text-decoration:none;">📞 ' + vendor.contact_value + '</a>'
+          : '<a href="' + vendor.contact_value + '" target="_blank" style="color:#9B7CB6;text-decoration:none;">🌐 Visit Website</a>';
 
         marker.addListener('click', () => {
-          infoWindow.setContent(`
-            <div style="font-family:'Helvetica Neue',sans-serif;padding:4px;max-width:200px;">
-              <div style="font-size:11px;color:#9B7CB6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Spa-Pregio Member</div>
-              <div style="font-size:15px;font-weight:600;color:#2C2C2C;margin-bottom:4px;">${vendor.business_name}</div>
-              <div style="font-size:12px;color:#888;margin-bottom:6px;">${vendor.city}, ${vendor.state}</div>
-              <div style="font-size:12px;">${contactHtml}</div>
-            </div>
-          `);
+          infoWindow.setContent(
+            '<div style="font-family:Helvetica Neue,sans-serif;padding:4px;max-width:200px;">' +
+            '<div style="font-size:11px;color:#9B7CB6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Spa-Pregio Member</div>' +
+            '<div style="font-size:15px;font-weight:600;color:#2C2C2C;margin-bottom:4px;">' + vendor.business_name + '</div>' +
+            '<div style="font-size:12px;color:#888;margin-bottom:6px;">' + vendor.city + ', ' + vendor.state + '</div>' +
+            '<div style="font-size:12px;">' + contactLine + '</div>' +
+            '</div>'
+          );
           infoWindow.open(map, marker);
           setSelectedPin(vendor.id);
         });
@@ -158,7 +156,6 @@ export default function LocalVendorSearch() {
         markersRef.current.push(marker);
       });
 
-      // Auto-fit bounds if multiple vendors
       if (spaResults.length > 1) {
         const bounds = new google.maps.LatLngBounds();
         spaResults.forEach(v => {
@@ -176,10 +173,11 @@ export default function LocalVendorSearch() {
     }
   }, [vendorCoords, spaResults]);
 
+  const geocodeCity = async (cityState: string): Promise<{ lat: number; lng: number } | null> => {
     if (!apiKey) return null;
     try {
       const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cityState)}&key=${apiKey}`
+        'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(cityState) + '&key=' + apiKey
       );
       const data = await res.json();
       if (data.results?.[0]?.geometry?.location) {
@@ -194,7 +192,7 @@ export default function LocalVendorSearch() {
   const geocodeVendors = async (vendors: SupabaseVendor[]) => {
     const coords: Record<string, { lat: number; lng: number }> = {};
     await Promise.all(vendors.map(async (v) => {
-      const locationStr = v.city && v.state ? `${v.city}, ${v.state}` : '';
+      const locationStr = v.city && v.state ? v.city + ', ' + v.state : '';
       if (locationStr) {
         const result = await geocodeCity(locationStr);
         if (result) coords[v.id] = result;
@@ -220,11 +218,13 @@ export default function LocalVendorSearch() {
     setSearched(false);
     setResults([]);
     setSpaResults([]);
+    setVendorCoords({});
+    setSelectedPin(null);
 
     const categoryData = CATEGORIES.find(c => c.label === cat);
-    const query = `${categoryData?.query || cat} in ${city} ${state}`;
+    const query = (categoryData?.query || cat) + ' in ' + city + ' ' + state;
 
-    const { data } = await supabase.from('vendors').select('*').eq('status', 'active').ilike('city', city).ilike('state', state).ilike('category', `%${cat}%`);
+    const { data } = await supabase.from('vendors').select('*').eq('status', 'active').ilike('city', city).ilike('state', state).ilike('category', '%' + cat + '%');
     const vendorData = data || [];
     setSpaResults(vendorData);
     if (vendorData.length > 0) geocodeVendors(vendorData);
@@ -248,7 +248,7 @@ export default function LocalVendorSearch() {
             vicinity: p.formattedAddress || '',
             rating: p.rating,
             user_ratings_total: p.userRatingCount,
-            photo_url: p.photos?.[0] ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxWidthPx=400&key=${apiKey}` : undefined,
+            photo_url: p.photos?.[0] ? 'https://places.googleapis.com/v1/' + p.photos[0].name + '/media?maxWidthPx=400&key=' + apiKey : undefined,
             open_now: p.currentOpeningHours?.openNow,
             website: p.websiteUri,
             formatted_phone_number: p.nationalPhoneNumber,
@@ -344,11 +344,7 @@ export default function LocalVendorSearch() {
             autoFocus
             className="w-full px-5 py-4 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 text-lg text-center"
           />
-          <button
-            onClick={() => setStep(2)}
-            disabled={!city.trim()}
-            className="btn-primary w-full justify-center mt-4 disabled:opacity-40 text-base py-4"
-          >
+          <button onClick={() => setStep(2)} disabled={!city.trim()} className="btn-primary w-full justify-center mt-4 disabled:opacity-40 text-base py-4">
             Next <ChevronRight size={18} />
           </button>
         </div>
@@ -365,20 +361,13 @@ export default function LocalVendorSearch() {
           </div>
           <div className="grid grid-cols-5 sm:grid-cols-8 gap-2 max-h-64 overflow-y-auto">
             {US_STATES.map((s) => (
-              <button
-                key={s}
-                onClick={() => { setState(s); setStep(3); }}
-                className={`py-2 rounded-lg text-sm font-medium transition-all ${
-                  state === s ? 'bg-spa-purple text-white' : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/20'
-                }`}
-              >
+              <button key={s} onClick={() => { setState(s); setStep(3); }}
+                className={`py-2 rounded-lg text-sm font-medium transition-all ${state === s ? 'bg-spa-purple text-white' : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/20'}`}>
                 {s}
               </button>
             ))}
           </div>
-          <button onClick={() => setStep(1)} className="text-spa-gray text-sm mt-6 hover:text-spa-purple transition-colors mx-auto block">
-            ← Back
-          </button>
+          <button onClick={() => setStep(1)} className="text-spa-gray text-sm mt-6 hover:text-spa-purple transition-colors mx-auto block">← Back</button>
         </div>
       )}
 
@@ -389,25 +378,18 @@ export default function LocalVendorSearch() {
               <Star size={24} className="text-spa-purple" />
             </div>
             <h2 className="font-serif text-2xl text-spa-charcoal">What are you looking for?</h2>
-            <p className="text-spa-gray text-sm mt-2">
-              Searching in <span className="text-spa-purple font-medium">{city}, {state}</span>
-            </p>
+            <p className="text-spa-gray text-sm mt-2">Searching in <span className="text-spa-purple font-medium">{city}, {state}</span></p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {CATEGORIES.map((cat) => (
-              <button
-                key={cat.label}
-                onClick={() => handleCategorySelect(cat.label)}
-                className="flex flex-col items-center gap-2 p-4 bg-spa-lavender hover:bg-spa-purple hover:text-white rounded-xl text-spa-charcoal transition-all group"
-              >
+              <button key={cat.label} onClick={() => handleCategorySelect(cat.label)}
+                className="flex flex-col items-center gap-2 p-4 bg-spa-lavender hover:bg-spa-purple hover:text-white rounded-xl text-spa-charcoal transition-all group">
                 <span className="text-2xl">{cat.emoji}</span>
                 <span className="text-xs font-medium text-center leading-tight">{cat.label}</span>
               </button>
             ))}
           </div>
-          <button onClick={() => setStep(2)} className="text-spa-gray text-sm mt-6 hover:text-spa-purple transition-colors mx-auto block">
-            ← Back
-          </button>
+          <button onClick={() => setStep(2)} className="text-spa-gray text-sm mt-6 hover:text-spa-purple transition-colors mx-auto block">← Back</button>
         </div>
       )}
 
@@ -419,14 +401,10 @@ export default function LocalVendorSearch() {
                 {selectedCategory} <span className="text-spa-purple">in {city}, {state}</span>
               </h2>
               {searched && !loading && (
-                <p className="text-sm text-spa-gray mt-1">
-                  {spaResults.length + results.length} results found
-                </p>
+                <p className="text-sm text-spa-gray mt-1">{spaResults.length + results.length} results found</p>
               )}
             </div>
-            <button onClick={resetSearch} className="text-sm text-spa-purple hover:underline flex items-center gap-1">
-              ← New search
-            </button>
+            <button onClick={resetSearch} className="text-sm text-spa-purple hover:underline flex items-center gap-1">← New search</button>
           </div>
 
           {loading && (
@@ -441,9 +419,7 @@ export default function LocalVendorSearch() {
               <MapPin size={40} className="text-spa-purple/30 mx-auto mb-4" />
               <h3 className="font-serif text-xl text-spa-charcoal">No results found</h3>
               <p className="text-spa-gray mt-2 mb-6">Try a nearby city or different category.</p>
-              <button onClick={resetSearch} className="btn-primary inline-flex justify-center">
-                Search Again <ArrowRight size={16} />
-              </button>
+              <button onClick={resetSearch} className="btn-primary inline-flex justify-center">Search Again <ArrowRight size={16} /></button>
             </div>
           )}
 
@@ -454,7 +430,7 @@ export default function LocalVendorSearch() {
                   <MapPin size={14} className="text-spa-purple" />
                   <span className="text-xs font-medium text-spa-purple uppercase tracking-wider">Spa-Pregio Members on the Map</span>
                 </div>
-                <span className="text-xs text-spa-gray">{Object.keys(vendorCoords).length} location{Object.keys(vendorCoords).length !== 1 ? 's' : ''} plotted — click a pin for details</span>
+                <span className="text-xs text-spa-gray">{Object.keys(vendorCoords).length} location{Object.keys(vendorCoords).length !== 1 ? 's' : ''} — click a pin for details</span>
               </div>
               <div ref={mapRef} style={{ height: '340px', width: '100%' }} />
               <div className="bg-white px-4 py-3 flex flex-wrap gap-2 border-t border-spa-purple/10">
@@ -468,11 +444,7 @@ export default function LocalVendorSearch() {
                       googleMapRef.current.setZoom(14);
                       setSelectedPin(v.id);
                     }}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                      selectedPin === v.id
-                        ? 'bg-spa-purple text-white'
-                        : 'bg-spa-purple/10 text-spa-purple hover:bg-spa-purple/20'
-                    }`}
+                    className={'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ' + (selectedPin === v.id ? 'bg-spa-purple text-white' : 'bg-spa-purple/10 text-spa-purple hover:bg-spa-purple/20')}
                   >
                     <div className="w-2 h-2 rounded-full bg-current flex-shrink-0" />
                     {v.business_name}
@@ -497,11 +469,7 @@ export default function LocalVendorSearch() {
                   <div key={vendor.id} className="bg-white rounded-2xl overflow-hidden border-2 border-spa-purple/20 shadow-elegant">
                     <div className="aspect-[4/3] bg-gradient-to-br from-spa-lavender to-spa-blush flex items-center justify-center overflow-hidden">
                       {vendor.logo_url ? (
-                        <img
-                          src={vendor.logo_url}
-                          alt={vendor.business_name}
-                          className="w-full h-full object-contain p-4"
-                        />
+                        <img src={vendor.logo_url} alt={vendor.business_name} className="w-full h-full object-contain p-4" />
                       ) : (
                         <div className="text-center">
                           <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-2">
@@ -520,7 +488,7 @@ export default function LocalVendorSearch() {
                       <p className="text-xs text-spa-gray mt-1">{vendor.city}, {vendor.state}</p>
                       <div className="mt-3">
                         {vendor.contact_type === 'phone' ? (
-                          <a href={`tel:${vendor.contact_value}`} className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"><Phone size={12} /> {vendor.contact_value}</a>
+                          <a href={'tel:' + vendor.contact_value} className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"><Phone size={12} /> {vendor.contact_value}</a>
                         ) : (
                           <a href={vendor.contact_value} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"><Globe size={12} /> Visit Website</a>
                         )}
@@ -555,7 +523,7 @@ export default function LocalVendorSearch() {
                       </div>
                       {place.open_now !== undefined && (
                         <div className="absolute top-3 right-3">
-                          <span className={`px-3 py-1 text-xs rounded-full font-medium ${place.open_now ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          <span className={'px-3 py-1 text-xs rounded-full font-medium ' + (place.open_now ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700')}>
                             {place.open_now ? 'Open Now' : 'Closed'}
                           </span>
                         </div>
@@ -573,7 +541,7 @@ export default function LocalVendorSearch() {
                       )}
                       <div className="flex gap-3 mt-3">
                         {place.formatted_phone_number && (
-                          <a href={`tel:${place.formatted_phone_number}`} className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"><Phone size={12} /> Call</a>
+                          <a href={'tel:' + place.formatted_phone_number} className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"><Phone size={12} /> Call</a>
                         )}
                         {place.website && (
                           <a href={place.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"><Globe size={12} /> Website</a>
@@ -654,7 +622,7 @@ export default function LocalVendorSearch() {
                     <label className="block text-sm font-medium text-spa-charcoal mb-2">Service Categories *</label>
                     <div className="flex flex-wrap gap-2">
                       {SERVICE_CATEGORIES.map((cat) => (
-                        <button key={cat} type="button" onClick={() => setClaimForm(prev => ({...prev, service_categories: prev.service_categories.includes(cat) ? prev.service_categories.filter(c => c !== cat) : [...prev.service_categories, cat]}))} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${claimForm.service_categories.includes(cat) ? 'bg-spa-purple text-white' : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/10'}`}>
+                        <button key={cat} type="button" onClick={() => setClaimForm(prev => ({...prev, service_categories: prev.service_categories.includes(cat) ? prev.service_categories.filter(c => c !== cat) : [...prev.service_categories, cat]}))} className={'px-3 py-1.5 rounded-full text-xs font-medium transition-colors ' + (claimForm.service_categories.includes(cat) ? 'bg-spa-purple text-white' : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/10')}>
                           {cat}
                         </button>
                       ))}
