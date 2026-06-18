@@ -74,6 +74,9 @@ type VendorListing = {
   founding_member: boolean;
   status: string;
   email: string | null;
+  owner_name: string | null;
+  city: string | null;
+  state: string | null;
   created_at: string;
 };
 
@@ -363,8 +366,8 @@ function AdminDashboard() {
           businessName: vendor.business_name,
           ownerName: vendor.owner_name || vendor.business_name,
           category: vendor.category || '',
-          city: vendor.location || '',
-          state: '',
+          city: vendor.city || '',
+          state: vendor.state || '',
         }),
       });
     } catch (err) {
