@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MapPin, Star, Phone, Globe, ArrowRight, Loader, X, Check, ChevronRight, Instagram, Facebook } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -69,6 +69,140 @@ export default function LocalVendorSearch() {
 
   const apiKey = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY || '';
 
+  const [vendorCoords, setVendorCoords] = useState<Record<string, { lat: number; lng: number }>>({});
+  const [selectedPin, setSelectedPin] = useState<string | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const googleMapRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+
+  // Load Google Maps script once
+  useEffect(() => {
+    if (!apiKey || (window as any).google?.maps) return;
+    const existing = document.getElementById('gmap-script');
+    if (existing) return;
+    const script = document.createElement('script');
+    script.id = 'gmap-script';
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker`;
+    script.async = true;
+    document.head.appendChild(script);
+  }, [apiKey]);
+
+  // Build/update map whenever coords are ready
+  useEffect(() => {
+    if (!mapRef.current || Object.keys(vendorCoords).length === 0) return;
+
+    const initMap = () => {
+      const google = (window as any).google;
+      if (!google?.maps) return;
+
+      const coordValues = Object.values(vendorCoords);
+      const center = {
+        lat: coordValues.reduce((s, c) => s + c.lat, 0) / coordValues.length,
+        lng: coordValues.reduce((s, c) => s + c.lng, 0) / coordValues.length,
+      };
+
+      const map = new google.maps.Map(mapRef.current, {
+        center,
+        zoom: 11,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        styles: [
+          { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+          { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+        ],
+      });
+      googleMapRef.current = map;
+
+      // Clear old markers
+      markersRef.current.forEach(m => m.setMap(null));
+      markersRef.current = [];
+
+      const infoWindow = new google.maps.InfoWindow();
+
+      spaResults.forEach(vendor => {
+        const coords = vendorCoords[vendor.id];
+        if (!coords) return;
+
+        const marker = new google.maps.Marker({
+          position: coords,
+          map,
+          title: vendor.business_name,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: '#9B7CB6',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 2,
+          },
+        });
+
+        const contactHtml = vendor.contact_type === 'phone'
+          ? `<a href="tel:${vendor.contact_value}" style="color:#9B7CB6;text-decoration:none;">📞 ${vendor.contact_value}</a>`
+          : `<a href="${vendor.contact_value}" target="_blank" style="color:#9B7CB6;text-decoration:none;">🌐 Visit Website</a>`;
+
+        marker.addListener('click', () => {
+          infoWindow.setContent(`
+            <div style="font-family:'Helvetica Neue',sans-serif;padding:4px;max-width:200px;">
+              <div style="font-size:11px;color:#9B7CB6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Spa-Pregio Member</div>
+              <div style="font-size:15px;font-weight:600;color:#2C2C2C;margin-bottom:4px;">${vendor.business_name}</div>
+              <div style="font-size:12px;color:#888;margin-bottom:6px;">${vendor.city}, ${vendor.state}</div>
+              <div style="font-size:12px;">${contactHtml}</div>
+            </div>
+          `);
+          infoWindow.open(map, marker);
+          setSelectedPin(vendor.id);
+        });
+
+        markersRef.current.push(marker);
+      });
+
+      // Auto-fit bounds if multiple vendors
+      if (spaResults.length > 1) {
+        const bounds = new google.maps.LatLngBounds();
+        spaResults.forEach(v => {
+          if (vendorCoords[v.id]) bounds.extend(vendorCoords[v.id]);
+        });
+        map.fitBounds(bounds);
+      }
+    };
+
+    if ((window as any).google?.maps) {
+      initMap();
+    } else {
+      const script = document.getElementById('gmap-script');
+      if (script) script.addEventListener('load', initMap);
+    }
+  }, [vendorCoords, spaResults]);
+
+    if (!apiKey) return null;
+    try {
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cityState)}&key=${apiKey}`
+      );
+      const data = await res.json();
+      if (data.results?.[0]?.geometry?.location) {
+        return data.results[0].geometry.location;
+      }
+    } catch (e) {
+      console.warn('Geocode failed:', e);
+    }
+    return null;
+  };
+
+  const geocodeVendors = async (vendors: SupabaseVendor[]) => {
+    const coords: Record<string, { lat: number; lng: number }> = {};
+    await Promise.all(vendors.map(async (v) => {
+      const locationStr = v.city && v.state ? `${v.city}, ${v.state}` : '';
+      if (locationStr) {
+        const result = await geocodeCity(locationStr);
+        if (result) coords[v.id] = result;
+      }
+    }));
+    setVendorCoords(coords);
+  };
+
   useEffect(() => {
     const handler = (e: Event) => {
       const cat = (e as CustomEvent).detail;
@@ -91,7 +225,9 @@ export default function LocalVendorSearch() {
     const query = `${categoryData?.query || cat} in ${city} ${state}`;
 
     const { data } = await supabase.from('vendors').select('*').eq('status', 'active').ilike('city', city).ilike('state', state).ilike('category', `%${cat}%`);
-    setSpaResults(data || []);
+    const vendorData = data || [];
+    setSpaResults(vendorData);
+    if (vendorData.length > 0) geocodeVendors(vendorData);
 
     if (apiKey) {
       try {
@@ -141,6 +277,8 @@ export default function LocalVendorSearch() {
     setResults([]);
     setSpaResults([]);
     setSearched(false);
+    setVendorCoords({});
+    setSelectedPin(null);
   };
 
   const openClaimModal = async (place: PlaceResult) => {
@@ -306,6 +444,41 @@ export default function LocalVendorSearch() {
               <button onClick={resetSearch} className="btn-primary inline-flex justify-center">
                 Search Again <ArrowRight size={16} />
               </button>
+            </div>
+          )}
+
+          {searched && !loading && spaResults.length > 0 && Object.keys(vendorCoords).length > 0 && (
+            <div className="mb-8 rounded-2xl overflow-hidden border border-spa-purple/20 shadow-elegant">
+              <div className="bg-spa-purple/5 px-4 py-2.5 flex items-center justify-between border-b border-spa-purple/10">
+                <div className="flex items-center gap-2">
+                  <MapPin size={14} className="text-spa-purple" />
+                  <span className="text-xs font-medium text-spa-purple uppercase tracking-wider">Spa-Pregio Members on the Map</span>
+                </div>
+                <span className="text-xs text-spa-gray">{Object.keys(vendorCoords).length} location{Object.keys(vendorCoords).length !== 1 ? 's' : ''} plotted — click a pin for details</span>
+              </div>
+              <div ref={mapRef} style={{ height: '340px', width: '100%' }} />
+              <div className="bg-white px-4 py-3 flex flex-wrap gap-2 border-t border-spa-purple/10">
+                {spaResults.filter(v => vendorCoords[v.id]).map(v => (
+                  <button
+                    key={v.id}
+                    onClick={() => {
+                      const google = (window as any).google;
+                      if (!google?.maps || !googleMapRef.current || !vendorCoords[v.id]) return;
+                      googleMapRef.current.panTo(vendorCoords[v.id]);
+                      googleMapRef.current.setZoom(14);
+                      setSelectedPin(v.id);
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      selectedPin === v.id
+                        ? 'bg-spa-purple text-white'
+                        : 'bg-spa-purple/10 text-spa-purple hover:bg-spa-purple/20'
+                    }`}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-current flex-shrink-0" />
+                    {v.business_name}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
