@@ -348,6 +348,30 @@ function AdminDashboard() {
     loadAll();
   }
 
+  async function resendVendorWelcomeEmail(vendor: VendorListing) {
+    if (!vendor.email) return;
+    try {
+      await fetch('https://reompjeeiurwnbpbfhyj.supabase.co/functions/v1/send-transactional-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlb21wamVlaXVyd25icGJmaHlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MjkxMjcsImV4cCI6MjA1NTQwNTEyN30.oanFsHGxJnXLOIJmLHYQKBMFgkCBenabPTsORNbdkwA`,
+        },
+        body: JSON.stringify({
+          type: 'vendor_welcome',
+          to: vendor.email,
+          businessName: vendor.business_name,
+          ownerName: vendor.owner_name || vendor.business_name,
+          category: vendor.category || '',
+          city: vendor.location || '',
+          state: '',
+        }),
+      });
+    } catch (err) {
+      console.error('Resend vendor email error:', err);
+    }
+  }
+
   function formatCurrency(amount: number) {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
   }
@@ -556,6 +580,7 @@ function AdminDashboard() {
                               )}
                               {vendor.status === 'active' && <button onClick={() => removeVendor(vendor.id)} className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors"><X size={14} /> Remove Listing</button>}
                               {['denied', 'removed'].includes(vendor.status) && <button onClick={() => approveVendor(vendor.id)} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors"><Check size={14} /> Reactivate</button>}
+                              {vendor.email && <button onClick={() => resendVendorWelcomeEmail(vendor)} className="flex items-center gap-2 px-4 py-2 bg-spa-purple/10 text-spa-purple rounded-full text-sm font-medium hover:bg-spa-purple/20 transition-colors"><ArrowRight size={14} /> Resend Welcome Email</button>}
                             </div>
                           </div>
                         )}
