@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlb21wamVlaXVyd25icGJmaHlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MjkxMjcsImV4cCI6MjA1NTQwNTEyN30.oanFsHGxJnXLOIJmLHYQKBMFgkCBenabPTsORNbdkwA';
+const SUPABASE_FUNCTIONS_URL = 'https://reompjeeiurwnbpbfhyj.supabase.co/functions/v1';
 
 const vendorCategories = [
   { name: 'Maternity Boutiques', description: 'Clothing, accessories, and essentials for expectant mothers', icon: Store, examples: ['Dresses', 'Nursing wear', 'Jewelry', 'Bags'] },
@@ -30,7 +32,7 @@ const vendorCategories = [
 const freeTier = {
   name: 'Basic', price: 0, period: 'forever',
   description: 'Get listed and get found — no credit card needed',
-  features: ['Business name & category', 'City & state location', 'One contact method (phone or website)', 'Appears in local search results', 'No photos or featured placement'],
+  features: ['Business name & category', 'City & state location', 'One contact method (phone or website)', 'Logo or business photo', 'Appears in local search results'],
   cta: 'Create Free Listing', popular: false, badge: 'Free', eventAccess: 'Directory listing only',
 };
 
@@ -77,6 +79,13 @@ export default function ForVendors() {
   const [submitError, setSubmitError] = useState('');
   const [adSaving, setAdSaving] = useState(false);
   const [adSaveStatus, setAdSaveStatus] = useState<'idle' | 'saved' | 'error'>('idle');
+
+  // Logo upload state
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,6 +93,15 @@ export default function ForVendors() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => setAdPhoto(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setLogoPreview(ev.target?.result as string);
     reader.readAsDataURL(file);
   };
 
@@ -201,14 +219,81 @@ export default function ForVendors() {
   const handleProceedToCheckout = () => { if (selectedTier?.stripeLink) window.open(selectedTier.stripeLink, '_blank'); setShowConfirmModal(false); };
 
   const handleFreeListingSubmit = async () => {
-    if (!freeListingForm.business_name || !freeListingForm.city || !freeListingForm.state || !freeListingForm.contact_value || !freeListingForm.email) { setSubmitError('Please fill in all required fields.'); return; }
-    setSubmitting(true); setSubmitError('');
-    const { error } = await supabase.from('vendors').insert({ business_name: freeListingForm.business_name, category: freeListingForm.category, city: freeListingForm.city, state: freeListingForm.state, contact_type: freeListingForm.contact_type, contact_value: freeListingForm.contact_value, owner_name: freeListingForm.owner_name || null, email: freeListingForm.email, plan: 'free', status: 'pending' });
+    if (!freeListingForm.business_name || !freeListingForm.city || !freeListingForm.state || !freeListingForm.contact_value || !freeListingForm.email) {
+      setSubmitError('Please fill in all required fields.');
+      return;
+    }
+    setSubmitting(true);
+    setSubmitError('');
+
+    // Upload logo if provided
+    let logoUrl: string | null = null;
+    if (logoFile) {
+      setLogoUploading(true);
+      const ext = logoFile.name.split('.').pop();
+      const fileName = `vendor-logo-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('event-images')
+        .upload(fileName, logoFile, { cacheControl: '3600', upsert: false });
+      if (!uploadError) {
+        logoUrl = `https://reompjeeiurwnbpbfhyj.supabase.co/storage/v1/object/public/event-images/${fileName}`;
+      }
+      setLogoUploading(false);
+    }
+
+    const { error } = await supabase.from('vendors').insert({
+      business_name: freeListingForm.business_name,
+      category: freeListingForm.category,
+      city: freeListingForm.city,
+      state: freeListingForm.state,
+      contact_type: freeListingForm.contact_type,
+      contact_value: freeListingForm.contact_value,
+      owner_name: freeListingForm.owner_name || null,
+      email: freeListingForm.email,
+      plan: 'free',
+      status: 'pending',
+      logo_url: logoUrl,
+    });
+
     setSubmitting(false);
-    if (error) { setSubmitError('Something went wrong. Please try again.'); } else { setSubmitSuccess(true); }
+
+    if (error) {
+      setSubmitError('Something went wrong. Please try again.');
+    } else {
+      // Send vendor welcome email (non-blocking)
+      try {
+        await fetch(`${SUPABASE_FUNCTIONS_URL}/send-transactional-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            type: 'vendor_welcome',
+            to: freeListingForm.email,
+            businessName: freeListingForm.business_name,
+            ownerName: freeListingForm.owner_name || freeListingForm.business_name,
+            category: freeListingForm.category,
+            city: freeListingForm.city,
+            state: freeListingForm.state,
+          }),
+        });
+      } catch (emailErr) {
+        console.error('Vendor welcome email error:', emailErr);
+      }
+      setSubmitSuccess(true);
+    }
   };
 
-  const resetFreeListingModal = () => { setShowFreeListingModal(false); setSubmitSuccess(false); setSubmitError(''); setFreeListingForm({ business_name: '', category: 'Spas & Wellness', city: '', state: '', contact_type: 'website', contact_value: '', owner_name: '', email: '' }); };
+  const resetFreeListingModal = () => {
+    setShowFreeListingModal(false);
+    setSubmitSuccess(false);
+    setSubmitError('');
+    setLogoFile(null);
+    setLogoPreview(null);
+    if (logoInputRef.current) logoInputRef.current.value = '';
+    setFreeListingForm({ business_name: '', category: 'Spas & Wellness', city: '', state: '', contact_type: 'website', contact_value: '', owner_name: '', email: '' });
+  };
 
   return (
     <div className="w-full pt-20">
@@ -375,7 +460,7 @@ export default function ForVendors() {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle size={32} className="text-green-600" /></div>
                 <h3 className="font-serif text-2xl text-spa-charcoal mb-3">Listing Submitted!</h3>
                 <p className="text-spa-gray leading-relaxed mb-2">Thank you for listing <strong>{freeListingForm.business_name}</strong> on Spa-Pregio.</p>
-                <p className="text-spa-gray text-sm leading-relaxed mb-8">Your listing is pending review and will appear in the directory within 24–48 hours.</p>
+                <p className="text-spa-gray text-sm leading-relaxed mb-8">Your listing is pending review. Check your email for next steps — we'll be in touch within 24–48 hours.</p>
                 <button onClick={resetFreeListingModal} className="btn-primary mx-auto inline-flex">Done <ArrowRight size={16} /></button>
               </div>
             ) : (
@@ -397,13 +482,50 @@ export default function ForVendors() {
                     <input type={freeListingForm.contact_type === 'phone' ? 'tel' : 'url'} placeholder={freeListingForm.contact_type === 'phone' ? '(555) 555-5555' : 'https://yourwebsite.com'} value={freeListingForm.contact_value} onChange={e => setFreeListingForm({ ...freeListingForm, contact_value: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                   </div>
                   <div><label className="block text-sm font-medium text-spa-charcoal mb-2">Your Name</label><input type="text" placeholder="First and last name" value={freeListingForm.owner_name} onChange={e => setFreeListingForm({ ...freeListingForm, owner_name: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" /></div>
+
+                  {/* Logo upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-2">
+                      Business Logo or Photo <span className="text-spa-gray font-normal text-xs">(optional — appears on your listing card)</span>
+                    </label>
+                    <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                    {logoPreview ? (
+                      <div className="relative rounded-xl overflow-hidden aspect-[3/1]">
+                        <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => { setLogoFile(null); setLogoPreview(null); if (logoInputRef.current) logoInputRef.current.value = ''; }}
+                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center text-spa-charcoal hover:text-red-500 transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => logoInputRef.current?.click()}
+                        className="w-full p-4 border-2 border-dashed border-spa-purple/20 rounded-xl bg-spa-lavender hover:border-spa-purple/40 transition-colors flex items-center gap-3"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-spa-purple/10 flex items-center justify-center flex-shrink-0">
+                          <Upload size={16} className="text-spa-purple" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm font-medium text-spa-charcoal">Upload your logo</p>
+                          <p className="text-xs text-spa-gray">JPG, PNG or WEBP — makes your listing stand out</p>
+                        </div>
+                      </button>
+                    )}
+                  </div>
+
                   <div><label className="block text-sm font-medium text-spa-charcoal mb-2">Email Address <span className="text-spa-pink">*</span></label><input type="email" placeholder="you@yourbusiness.com" value={freeListingForm.email} onChange={e => setFreeListingForm({ ...freeListingForm, email: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" /></div>
                   {submitError && <p className="text-red-500 text-sm">{submitError}</p>}
-                  <p className="text-xs text-spa-gray">Your listing will be reviewed before going live.</p>
+                  <p className="text-xs text-spa-gray">Your listing will be reviewed before going live. You'll receive a confirmation email with next steps.</p>
                 </div>
                 <div className="flex gap-3 mt-6">
                   <button onClick={resetFreeListingModal} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">Cancel</button>
-                  <button onClick={handleFreeListingSubmit} disabled={submitting} className="flex-1 btn-primary justify-center disabled:opacity-50">{submitting ? 'Submitting...' : 'Submit Free Listing'} <ArrowRight size={16} /></button>
+                  <button onClick={handleFreeListingSubmit} disabled={submitting || logoUploading} className="flex-1 btn-primary justify-center disabled:opacity-50">
+                    {logoUploading ? 'Uploading logo...' : submitting ? 'Submitting...' : 'Submit Free Listing'} <ArrowRight size={16} />
+                  </button>
                 </div>
               </>
             )}
