@@ -78,6 +78,8 @@ type VendorListing = {
   city: string | null;
   state: string | null;
   logo_url?: string | null;
+  contact_type: string | null;
+  contact_value: string | null;
   created_at: string;
 };
 
