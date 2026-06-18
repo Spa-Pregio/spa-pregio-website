@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import {
   Users, DollarSign, CheckCircle, Clock, X, Check,
-  ChevronDown, ChevronUp, ArrowRight, Gift, Store, Plus, MapPin, Phone, Globe, Lock, Calendar
+  ChevronDown, ChevronUp, ArrowRight, Gift, Store, Plus, MapPin, Phone, Globe, Lock, Calendar, Eye
 } from 'lucide-react';
 
 type Affiliate = {
@@ -77,6 +77,7 @@ type VendorListing = {
   owner_name: string | null;
   city: string | null;
   state: string | null;
+  logo_url?: string | null;
   created_at: string;
 };
 
@@ -180,6 +181,7 @@ function AdminDashboard() {
   const [eventHostExpanded, setEventHostExpanded] = useState<string | null>(null);
   const [eventPayoutModal, setEventPayoutModal] = useState<{ hostUserId: string; hostName: string; amount: number; paypalEmail: string | null; venmoHandle: string | null; zelleInfo: string | null } | null>(null);
   const [eventPayoutForm, setEventPayoutForm] = useState({ method: 'venmo', reference: '', notes: '' });
+  const [previewVendor, setPreviewVendor] = useState<VendorListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -564,17 +566,19 @@ function AdminDashboard() {
                           <div className="bg-spa-cream/50 px-8 py-6 border-t border-spa-light space-y-5">
                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                               <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Business Name</p><p className="font-medium text-spa-charcoal">{vendor.business_name}</p></div>
-                              <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Business Type</p><p className="font-medium text-spa-charcoal">{friendlyBusinessType(vendor.business_type)}</p></div>
-                              <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Location</p><p className="font-medium text-spa-charcoal flex items-center gap-1"><MapPin size={13} className="text-spa-purple" />{vendor.location || '—'}</p></div>
+                              <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Category</p><p className="font-medium text-spa-charcoal">{vendor.category || friendlyBusinessType(vendor.business_type)}</p></div>
+                              <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Location</p><p className="font-medium text-spa-charcoal flex items-center gap-1"><MapPin size={13} className="text-spa-purple" />{vendor.city && vendor.state ? `${vendor.city}, ${vendor.state}` : vendor.location || '—'}</p></div>
                               <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Service Area</p><p className="font-medium text-spa-charcoal">{friendlyServiceArea(vendor.service_area)}</p></div>
                               <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Ideal Client</p><p className="font-medium text-spa-charcoal">{friendlyIdealClient(vendor.ideal_client)}</p></div>
                               <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Motivation</p><p className="font-medium text-spa-charcoal">{friendlyMotivation(vendor.motivation)}</p></div>
                               <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Email</p><p className="font-medium text-spa-charcoal">{vendor.email || '—'}</p></div>
+                              {vendor.owner_name && <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Owner Name</p><p className="font-medium text-spa-charcoal">{vendor.owner_name}</p></div>}
                               {vendor.phone && <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Phone</p><p className="font-medium text-spa-charcoal flex items-center gap-1"><Phone size={13} className="text-spa-purple" />{vendor.phone}</p></div>}
                               {vendor.website && <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Website</p><a href={vendor.website} target="_blank" rel="noopener noreferrer" className="font-medium text-spa-purple flex items-center gap-1 hover:underline"><Globe size={13} />{vendor.website}</a></div>}
                               {vendor.instagram && <div className="bg-white rounded-xl p-4"><p className="text-spa-gray text-xs mb-1">Instagram</p><p className="font-medium text-spa-charcoal">{vendor.instagram}</p></div>}
                             </div>
                             <div className="flex flex-wrap gap-3">
+                              <button onClick={() => setPreviewVendor(vendor)} className="flex items-center gap-2 px-4 py-2 bg-spa-lavender text-spa-charcoal rounded-full text-sm font-medium hover:bg-spa-purple/10 transition-colors"><Eye size={14} /> Preview Listing</button>
                               {['pending', 'pending_signup', 'pending_review'].includes(vendor.status) && (
                                 <>
                                   <button onClick={() => approveVendor(vendor.id)} className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors shadow-sm"><Check size={15} /> Approve Listing</button>
@@ -965,6 +969,49 @@ function AdminDashboard() {
             <div className="flex gap-3 mt-6">
               <button onClick={() => setEventPayoutModal(null)} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">Cancel</button>
               <button onClick={handleEventPayoutPaid} disabled={saving} className="flex-1 btn-primary justify-center disabled:opacity-50">{saving ? 'Saving...' : 'Record Payout'} <ArrowRight size={16} /></button>
+            </div>
+          </div>
+        </div>
+      )}
+      {previewVendor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-spa-light">
+              <h3 className="font-serif text-lg text-spa-charcoal">Listing Preview</h3>
+              <button onClick={() => setPreviewVendor(null)} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal"><X size={18} /></button>
+            </div>
+            <div className="bg-white rounded-2xl overflow-hidden border-2 border-spa-purple/20 m-4">
+              <div className="aspect-[4/3] bg-gradient-to-br from-spa-lavender to-spa-blush flex items-center justify-center overflow-hidden">
+                {previewVendor.logo_url ? (
+                  <img src={previewVendor.logo_url} alt={previewVendor.business_name} className="w-full h-full object-contain p-4" />
+                ) : (
+                  <div className="text-center">
+                    <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-2">
+                      <MapPin size={28} className="text-spa-purple" />
+                    </div>
+                    <p className="text-xs text-spa-purple font-medium">{previewVendor.category || '—'}</p>
+                  </div>
+                )}
+              </div>
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-1">
+                  <CheckCircle size={10} className="fill-spa-pink text-spa-pink" />
+                  <span className="text-xs text-spa-purple font-medium">Spa-Pregio Member</span>
+                </div>
+                <h3 className="font-serif text-lg text-spa-charcoal">{previewVendor.business_name}</h3>
+                <p className="text-xs text-spa-gray mt-1">{previewVendor.city && previewVendor.state ? `${previewVendor.city}, ${previewVendor.state}` : previewVendor.location || '—'}</p>
+                {previewVendor.category && <p className="text-xs text-spa-purple mt-1">{previewVendor.category}</p>}
+                <div className="mt-3">
+                  {previewVendor.contact_type === 'phone' ? (
+                    <span className="flex items-center gap-1 text-xs text-spa-gray"><Phone size={12} /> {previewVendor.contact_value || '—'}</span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-xs text-spa-gray"><Globe size={12} /> {previewVendor.website || previewVendor.contact_value || 'No website'}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="px-4 pb-4 text-center">
+              <p className="text-xs text-spa-gray">This is exactly how the listing will appear on Find Vendors once approved.</p>
             </div>
           </div>
         </div>
