@@ -26,6 +26,18 @@ const SERVICE_CATEGORIES = [
   'Caterer / Baker','Event Venue','Florist','Party Planner','Gift Shop','Doula / Midwife','Other',
 ];
 
+const RADIUS_MILES = 25;
+
+function distanceMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 3958.8;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
 interface PlaceResult {
   place_id: string;
   name: string;
@@ -50,6 +62,12 @@ interface SupabaseVendor {
   logo_url?: string | null;
 }
 
+interface VendorWithCoords extends SupabaseVendor {
+  lat: number;
+  lng: number;
+  distanceMiles: number;
+}
+
 export default function LocalVendorSearch() {
   const [step, setStep] = useState(1);
   const [city, setCity] = useState('');
@@ -57,10 +75,12 @@ export default function LocalVendorSearch() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [results, setResults] = useState<PlaceResult[]>([]);
   const [spaResults, setSpaResults] = useState<SupabaseVendor[]>([]);
+  const [nearbyVendors, setNearbyVendors] = useState<VendorWithCoords[]>([]);
+  const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [vendorCoords, setVendorCoords] = useState<Record<string, { lat: number; lng: number }>>({});
   const [selectedPin, setSelectedPin] = useState<string | null>(null);
+  const [mapReady, setMapReady] = useState(false);
 
   const [claimPlace, setClaimPlace] = useState<PlaceResult | null>(null);
   const [claimStatus, setClaimStatus] = useState<'idle'|'loading'|'success'|'error'|'noauth'>('idle');
@@ -72,69 +92,109 @@ export default function LocalVendorSearch() {
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const centerMarkerRef = useRef<any>(null);
 
   const apiKey = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY || '';
 
-  // Load Google Maps JS API script once
+  // Load Google Maps JS API once
   useEffect(() => {
-    if (!apiKey || (window as any).google?.maps) return;
-    if (document.getElementById('gmap-script')) return;
+    if (!apiKey) return;
+    if ((window as any).google?.maps) { setMapReady(true); return; }
+    if (document.getElementById('gmap-script')) {
+      const existing = document.getElementById('gmap-script');
+      if (existing) existing.addEventListener('load', () => setMapReady(true));
+      return;
+    }
     const script = document.createElement('script');
     script.id = 'gmap-script';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey;
     script.async = true;
+    script.onload = () => setMapReady(true);
     document.head.appendChild(script);
   }, [apiKey]);
 
-  // Build map whenever vendorCoords updates
+  // Render/update map whenever center or nearby vendors change
   useEffect(() => {
-    if (!mapRef.current || Object.keys(vendorCoords).length === 0) return;
+    if (!mapReady || !searchCenter) return;
 
-    const initMap = () => {
+    const tryMount = (attempts: number) => {
+      if (!mapRef.current) {
+        if (attempts < 20) setTimeout(() => tryMount(attempts + 1), 150);
+        return;
+      }
       const google = (window as any).google;
-      if (!google?.maps || !mapRef.current) return;
+      if (!google?.maps) return;
 
-      const coordValues = Object.values(vendorCoords);
-      const center = {
-        lat: coordValues.reduce((s, c) => s + c.lat, 0) / coordValues.length,
-        lng: coordValues.reduce((s, c) => s + c.lng, 0) / coordValues.length,
-      };
+      // Create or reuse map
+      if (!googleMapRef.current) {
+        googleMapRef.current = new google.maps.Map(mapRef.current, {
+          center: searchCenter,
+          zoom: 11,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: true,
+          styles: [
+            { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+            { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+          ],
+        });
 
-      const map = new google.maps.Map(mapRef.current, {
-        center,
-        zoom: 11,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-        styles: [
-          { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-          { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-        ],
-      });
-      googleMapRef.current = map;
+        // Draw 25-mile radius circle
+        new google.maps.Circle({
+          map: googleMapRef.current,
+          center: searchCenter,
+          radius: RADIUS_MILES * 1609.34,
+          fillColor: '#9B7CB6',
+          fillOpacity: 0.06,
+          strokeColor: '#9B7CB6',
+          strokeOpacity: 0.3,
+          strokeWeight: 1.5,
+        });
 
+        // Center pin
+        centerMarkerRef.current = new google.maps.Marker({
+          position: searchCenter,
+          map: googleMapRef.current,
+          title: city + ', ' + state,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: '#D09AC6',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 2,
+          },
+          zIndex: 1,
+        });
+      } else {
+        googleMapRef.current.setCenter(searchCenter);
+      }
+
+      // Clear old vendor markers
       markersRef.current.forEach(m => m.setMap(null));
       markersRef.current = [];
 
       const infoWindow = new google.maps.InfoWindow();
 
-      spaResults.forEach(vendor => {
-        const coords = vendorCoords[vendor.id];
-        if (!coords) return;
-
+      nearbyVendors.forEach(vendor => {
         const marker = new google.maps.Marker({
-          position: coords,
-          map,
+          position: { lat: vendor.lat, lng: vendor.lng },
+          map: googleMapRef.current,
           title: vendor.business_name,
           icon: {
             path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
+            scale: 11,
             fillColor: '#9B7CB6',
             fillOpacity: 1,
             strokeColor: '#ffffff',
             strokeWeight: 2,
           },
+          zIndex: 10,
         });
+
+        const dist = vendor.distanceMiles < 1
+          ? 'Less than 1 mile away'
+          : Math.round(vendor.distanceMiles) + ' miles away';
 
         const contactLine = vendor.contact_type === 'phone'
           ? '<a href="tel:' + vendor.contact_value + '" style="color:#9B7CB6;text-decoration:none;">📞 ' + vendor.contact_value + '</a>'
@@ -142,72 +202,43 @@ export default function LocalVendorSearch() {
 
         marker.addListener('click', () => {
           infoWindow.setContent(
-            '<div style="font-family:Helvetica Neue,sans-serif;padding:4px;max-width:200px;">' +
-            '<div style="font-size:11px;color:#9B7CB6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Spa-Pregio Member</div>' +
-            '<div style="font-size:15px;font-weight:600;color:#2C2C2C;margin-bottom:4px;">' + vendor.business_name + '</div>' +
-            '<div style="font-size:12px;color:#888;margin-bottom:6px;">' + vendor.city + ', ' + vendor.state + '</div>' +
+            '<div style="font-family:Helvetica Neue,sans-serif;padding:6px 2px;max-width:220px;">' +
+            '<div style="font-size:10px;color:#9B7CB6;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;font-weight:600;">Spa-Pregio Member</div>' +
+            '<div style="font-size:15px;font-weight:700;color:#2C2C2C;margin-bottom:2px;">' + vendor.business_name + '</div>' +
+            '<div style="font-size:11px;color:#9B7CB6;margin-bottom:2px;">' + vendor.category + '</div>' +
+            '<div style="font-size:11px;color:#888;margin-bottom:6px;">' + vendor.city + ', ' + vendor.state + ' · ' + dist + '</div>' +
             '<div style="font-size:12px;">' + contactLine + '</div>' +
             '</div>'
           );
-          infoWindow.open(map, marker);
+          infoWindow.open(googleMapRef.current, marker);
           setSelectedPin(vendor.id);
         });
 
         markersRef.current.push(marker);
       });
-
-      if (spaResults.length > 1) {
-        const bounds = new google.maps.LatLngBounds();
-        spaResults.forEach(v => {
-          if (vendorCoords[v.id]) bounds.extend(vendorCoords[v.id]);
-        });
-        map.fitBounds(bounds);
-      }
     };
 
-    if ((window as any).google?.maps) {
-      initMap();
-    } else {
-      const script = document.getElementById('gmap-script');
-      if (script) script.addEventListener('load', initMap);
-    }
-  }, [vendorCoords, spaResults]);
+    tryMount(0);
+  }, [mapReady, searchCenter, nearbyVendors]);
 
-  const geocodeCity = async (cityState: string): Promise<{ lat: number; lng: number } | null> => {
+  const geocode = async (address: string): Promise<{ lat: number; lng: number } | null> => {
     if (!apiKey) return null;
     try {
       const res = await fetch(
-        'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(cityState) + '&key=' + apiKey
+        'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address) + '&key=' + apiKey
       );
       const data = await res.json();
-      if (data.results?.[0]?.geometry?.location) {
-        return data.results[0].geometry.location;
-      }
+      if (data.results?.[0]?.geometry?.location) return data.results[0].geometry.location;
     } catch (e) {
       console.warn('Geocode failed:', e);
     }
     return null;
   };
 
-  const geocodeVendors = async (vendors: SupabaseVendor[]) => {
-    const coords: Record<string, { lat: number; lng: number }> = {};
-    await Promise.all(vendors.map(async (v) => {
-      const locationStr = v.city && v.state ? v.city + ', ' + v.state : '';
-      if (locationStr) {
-        const result = await geocodeCity(locationStr);
-        if (result) coords[v.id] = result;
-      }
-    }));
-    setVendorCoords(coords);
-  };
-
   useEffect(() => {
     const handler = (e: Event) => {
       const cat = (e as CustomEvent).detail;
-      if (cat) {
-        setSelectedCategory(cat);
-        setStep(3);
-      }
+      if (cat) { setSelectedCategory(cat); setStep(3); }
     };
     window.addEventListener('spa-pregio-preset-category', handler);
     return () => window.removeEventListener('spa-pregio-preset-category', handler);
@@ -218,17 +249,58 @@ export default function LocalVendorSearch() {
     setSearched(false);
     setResults([]);
     setSpaResults([]);
-    setVendorCoords({});
+    setNearbyVendors([]);
+    setSearchCenter(null);
     setSelectedPin(null);
+    googleMapRef.current = null;
+    markersRef.current.forEach(m => m.setMap && m.setMap(null));
+    markersRef.current = [];
 
+    // Geocode the searcher's city/state
+    const center = await geocode(city + ', ' + state);
+    if (center) {
+      setSearchCenter(center);
+
+      // Fetch ALL active vendors in this category and geocode each
+      const { data: allVendors } = await supabase
+        .from('vendors')
+        .select('*')
+        .eq('status', 'active')
+        .ilike('category', '%' + cat + '%');
+
+      if (allVendors && allVendors.length > 0) {
+        const withCoords: VendorWithCoords[] = [];
+        await Promise.all(allVendors.map(async (v: SupabaseVendor) => {
+          const addr = v.city && v.state ? v.city + ', ' + v.state : '';
+          if (!addr) return;
+          const coords = await geocode(addr);
+          if (!coords) return;
+          const dist = distanceMiles(center.lat, center.lng, coords.lat, coords.lng);
+          withCoords.push({ ...v, lat: coords.lat, lng: coords.lng, distanceMiles: dist });
+        }));
+
+        const inRadius = withCoords
+          .filter(v => v.distanceMiles <= RADIUS_MILES)
+          .sort((a, b) => a.distanceMiles - b.distanceMiles);
+
+        setNearbyVendors(inRadius);
+
+        // Also set exact-match results for the cards below the map
+        const exactMatch = inRadius.filter(v =>
+          v.city.toLowerCase() === city.toLowerCase() &&
+          v.state.toLowerCase() === state.toLowerCase()
+        );
+        setSpaResults(exactMatch.length > 0 ? exactMatch : inRadius);
+      }
+    } else {
+      // Fallback: exact city match if geocoding fails
+      const { data } = await supabase.from('vendors').select('*').eq('status', 'active').ilike('city', city).ilike('state', state).ilike('category', '%' + cat + '%');
+      setSpaResults(data || []);
+    }
+
+    // Google Places results
     const categoryData = CATEGORIES.find(c => c.label === cat);
     const query = (categoryData?.query || cat) + ' in ' + city + ' ' + state;
-
-    const { data } = await supabase.from('vendors').select('*').eq('status', 'active').ilike('city', city).ilike('state', state).ilike('category', '%' + cat + '%');
-    const vendorData = data || [];
-    setSpaResults(vendorData);
-    if (vendorData.length > 0) geocodeVendors(vendorData);
-
     if (apiKey) {
       try {
         const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
@@ -276,9 +348,11 @@ export default function LocalVendorSearch() {
     setSelectedCategory('');
     setResults([]);
     setSpaResults([]);
+    setNearbyVendors([]);
+    setSearchCenter(null);
     setSearched(false);
-    setVendorCoords({});
     setSelectedPin(null);
+    googleMapRef.current = null;
   };
 
   const openClaimModal = async (place: PlaceResult) => {
@@ -316,10 +390,9 @@ export default function LocalVendorSearch() {
         <div className="flex items-center justify-center gap-3 mb-10">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
-                step === s ? 'bg-spa-purple text-white scale-110' :
-                step > s ? 'bg-spa-purple/30 text-spa-purple' : 'bg-spa-lavender text-spa-gray'
-              }`}>{step > s ? <Check size={14} /> : s}</div>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${step === s ? 'bg-spa-purple text-white scale-110' : step > s ? 'bg-spa-purple/30 text-spa-purple' : 'bg-spa-lavender text-spa-gray'}`}>
+                {step > s ? <Check size={14} /> : s}
+              </div>
               {s < 3 && <div className={`h-px w-8 transition-all ${step > s ? 'bg-spa-purple' : 'bg-spa-lavender'}`} />}
             </div>
           ))}
@@ -398,10 +471,12 @@ export default function LocalVendorSearch() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="font-serif text-2xl text-spa-charcoal">
-                {selectedCategory} <span className="text-spa-purple">in {city}, {state}</span>
+                {selectedCategory} <span className="text-spa-purple">near {city}, {state}</span>
               </h2>
               {searched && !loading && (
-                <p className="text-sm text-spa-gray mt-1">{spaResults.length + results.length} results found</p>
+                <p className="text-sm text-spa-gray mt-1">
+                  {nearbyVendors.length > 0 ? nearbyVendors.length + ' Spa-Pregio member' + (nearbyVendors.length !== 1 ? 's' : '') + ' within ' + RADIUS_MILES + ' miles' + (results.length > 0 ? ' · ' + results.length + ' Google results' : '') : results.length + ' results found'}
+                </p>
               )}
             </div>
             <button onClick={resetSearch} className="text-sm text-spa-purple hover:underline flex items-center gap-1">← New search</button>
@@ -410,11 +485,11 @@ export default function LocalVendorSearch() {
           {loading && (
             <div className="text-center py-20">
               <Loader size={36} className="animate-spin text-spa-purple mx-auto mb-4" />
-              <p className="text-spa-gray">Finding {selectedCategory} in {city}, {state}...</p>
+              <p className="text-spa-gray">Finding {selectedCategory} near {city}, {state}...</p>
             </div>
           )}
 
-          {searched && !loading && !hasResults && (
+          {searched && !loading && !hasResults && nearbyVendors.length === 0 && (
             <div className="text-center py-20 bg-white rounded-2xl">
               <MapPin size={40} className="text-spa-purple/30 mx-auto mb-4" />
               <h3 className="font-serif text-xl text-spa-charcoal">No results found</h3>
@@ -423,34 +498,39 @@ export default function LocalVendorSearch() {
             </div>
           )}
 
-          {searched && !loading && spaResults.length > 0 && Object.keys(vendorCoords).length > 0 && (
+          {searched && !loading && searchCenter && (
             <div className="mb-8 rounded-2xl overflow-hidden border border-spa-purple/20 shadow-elegant">
               <div className="bg-spa-purple/5 px-4 py-2.5 flex items-center justify-between border-b border-spa-purple/10">
                 <div className="flex items-center gap-2">
                   <MapPin size={14} className="text-spa-purple" />
-                  <span className="text-xs font-medium text-spa-purple uppercase tracking-wider">Spa-Pregio Members on the Map</span>
+                  <span className="text-xs font-medium text-spa-purple uppercase tracking-wider">
+                    {nearbyVendors.length > 0 ? nearbyVendors.length + ' Spa-Pregio member' + (nearbyVendors.length !== 1 ? 's' : '') + ' within ' + RADIUS_MILES + ' miles' : 'Searching within ' + RADIUS_MILES + ' miles of ' + city}
+                  </span>
                 </div>
-                <span className="text-xs text-spa-gray">{Object.keys(vendorCoords).length} location{Object.keys(vendorCoords).length !== 1 ? 's' : ''} — click a pin for details</span>
+                <span className="text-xs text-spa-gray">Pan &amp; zoom to explore</span>
               </div>
-              <div ref={mapRef} style={{ height: '340px', width: '100%' }} />
-              <div className="bg-white px-4 py-3 flex flex-wrap gap-2 border-t border-spa-purple/10">
-                {spaResults.filter(v => vendorCoords[v.id]).map(v => (
-                  <button
-                    key={v.id}
-                    onClick={() => {
-                      const google = (window as any).google;
-                      if (!google?.maps || !googleMapRef.current || !vendorCoords[v.id]) return;
-                      googleMapRef.current.panTo(vendorCoords[v.id]);
-                      googleMapRef.current.setZoom(14);
-                      setSelectedPin(v.id);
-                    }}
-                    className={'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ' + (selectedPin === v.id ? 'bg-spa-purple text-white' : 'bg-spa-purple/10 text-spa-purple hover:bg-spa-purple/20')}
-                  >
-                    <div className="w-2 h-2 rounded-full bg-current flex-shrink-0" />
-                    {v.business_name}
-                  </button>
-                ))}
-              </div>
+              <div ref={mapRef} style={{ height: '380px', width: '100%' }} />
+              {nearbyVendors.length > 0 && (
+                <div className="bg-white px-4 py-3 flex flex-wrap gap-2 border-t border-spa-purple/10">
+                  {nearbyVendors.map(v => (
+                    <button
+                      key={v.id}
+                      onClick={() => {
+                        const google = (window as any).google;
+                        if (!google?.maps || !googleMapRef.current) return;
+                        googleMapRef.current.panTo({ lat: v.lat, lng: v.lng });
+                        googleMapRef.current.setZoom(14);
+                        setSelectedPin(v.id);
+                      }}
+                      className={'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ' + (selectedPin === v.id ? 'bg-spa-purple text-white' : 'bg-spa-purple/10 text-spa-purple hover:bg-spa-purple/20')}
+                    >
+                      <div className="w-2 h-2 rounded-full bg-current flex-shrink-0" />
+                      {v.business_name}
+                      <span className="opacity-60">{Math.round(v.distanceMiles)}mi</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -584,7 +664,7 @@ export default function LocalVendorSearch() {
                 <div className="text-center py-8">
                   <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4"><Check size={28} className="text-spa-purple" /></div>
                   <h4 className="font-serif text-xl text-spa-charcoal mb-2">Claim Submitted!</h4>
-                  <p className="text-spa-gray text-sm">We'll review your listing within 1–2 business days.</p>
+                  <p className="text-spa-gray text-sm">We'll review your listing within 1-2 business days.</p>
                 </div>
               )}
               {(claimStatus === 'idle' || claimStatus === 'loading' || claimStatus === 'error') && (
