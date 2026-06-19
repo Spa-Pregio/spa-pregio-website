@@ -340,11 +340,45 @@ function AdminDashboard() {
 
   async function approveVendor(id: string) {
     await supabase.from('vendors').update({ status: 'active' }).eq('id', id);
+    const vendor = vendors.find(v => v.id === id);
+    if (vendor?.email) {
+      try {
+        await fetch('https://reompjeeiurwnbpbfhyj.supabase.co/functions/v1/send-transactional-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlb21wamVlaXVyd25icGJmaHlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MjkxMjcsImV4cCI6MjA1NTQwNTEyN30.oanFsHGxJnXLOIJmLHYQKBMFgkCBenabPTsORNbdkwA` },
+          body: JSON.stringify({
+            type: 'vendor_approved',
+            to: vendor.email,
+            businessName: vendor.business_name,
+            ownerName: vendor.owner_name || vendor.business_name,
+            category: vendor.category || '',
+            city: vendor.city || '',
+            state: vendor.state || '',
+          }),
+        });
+      } catch (err) { console.error('Vendor approved email error:', err); }
+    }
     loadAll();
   }
 
   async function denyVendor(id: string) {
-    await supabase.from('vendors').update({ status: 'denied' }).eq('id', id);
+    await supabase.from('vendors').update({ status: 'denied', deny_reason: denyReason || null }).eq('id', id);
+    const vendor = vendors.find(v => v.id === id);
+    if (vendor?.email) {
+      try {
+        await fetch('https://reompjeeiurwnbpbfhyj.supabase.co/functions/v1/send-transactional-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlb21wamVlaXVyd25icGJmaHlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MjkxMjcsImV4cCI6MjA1NTQwNTEyN30.oanFsHGxJnXLOIJmLHYQKBMFgkCBenabPTsORNbdkwA` },
+          body: JSON.stringify({
+            type: 'vendor_denied',
+            to: vendor.email,
+            businessName: vendor.business_name,
+            ownerName: vendor.owner_name || vendor.business_name,
+            denyReason: denyReason || '',
+          }),
+        });
+      } catch (err) { console.error('Vendor denied email error:', err); }
+    }
     setDenyModal(null);
     setDenyReason('');
     loadAll();
