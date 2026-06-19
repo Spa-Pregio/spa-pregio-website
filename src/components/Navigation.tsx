@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, LogIn } from 'lucide-react';
+import { Menu, X, LogIn, Store } from 'lucide-react';
 
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -55,6 +55,15 @@ export default function Navigation() {
                 className="text-sm font-medium text-spa-charcoal/70 hover:text-spa-purple transition-colors whitespace-nowrap">
                 List Your Business
               </Link>
+              <Link to="/vendor-dashboard"
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
+                  isActive('/vendor-dashboard')
+                    ? 'border-spa-pink bg-spa-pink text-white'
+                    : 'border-spa-pink text-spa-pink hover:bg-spa-pink hover:text-white'
+                }`}>
+                <Store size={15} />
+                Vendor Login
+              </Link>
               <Link to="/my-account"
                 className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
                   isActive('/my-account')
@@ -104,6 +113,10 @@ export default function Navigation() {
             <Link to="/vendors" className="text-spa-charcoal/70 hover:text-spa-purple transition-colors">
               List Your Business
             </Link>
+            <Link to="/vendor-dashboard"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-spa-pink text-spa-pink font-medium hover:bg-spa-pink hover:text-white transition-colors">
+              <Store size={18} /> Vendor Login
+            </Link>
             <Link to="/my-account"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-spa-purple text-spa-purple font-medium hover:bg-spa-purple hover:text-white transition-colors">
               <LogIn size={18} /> Sign In
@@ -114,9 +127,3 @@ export default function Navigation() {
     </>
   );
 }
-
-
-
-
-
-
