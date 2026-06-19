@@ -363,7 +363,7 @@ export default function LocalVendorSearch() {
             </div>
           )}
 
-          {searched && !loading && searchCenter && (
+          {searched && !loading && (hasResults || nearbyVendors.length > 0) && (
             <div className="mb-8 rounded-2xl overflow-hidden border border-spa-purple/20 shadow-elegant">
               <div className="bg-spa-purple/5 px-4 py-2.5 flex items-center justify-between border-b border-spa-purple/10">
                 <div className="flex items-center gap-2">
