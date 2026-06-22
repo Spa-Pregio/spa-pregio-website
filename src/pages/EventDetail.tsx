@@ -478,9 +478,15 @@ export default function EventDetail() {
                 {event.time ? ` · ${event.time}` : ''}
               </div>
 
-              <div className="flex items-center gap-2 text-sm text-spa-gray">
-                <MapPin size={16} className="text-spa-purple flex-shrink-0" />
-                {event.location}
+              <div className="flex items-start gap-2 text-sm text-spa-gray">
+                <MapPin size={16} className="text-spa-purple flex-shrink-0 mt-0.5" />
+                <div>
+                  {event.venue_name && (
+                    <p className="font-medium text-spa-charcoal">{event.venue_name}</p>
+                  )}
+                  {event.address && <p>{event.address}</p>}
+                  <p>{event.location}</p>
+                </div>
               </div>
 
               <div className="flex items-center gap-2 text-sm text-spa-gray">

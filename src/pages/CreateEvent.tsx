@@ -30,6 +30,8 @@ const emptyEventForm = {
   date: '',
   time: '',
   location: '',
+  venue_name: '',
+  address: '',
   type: 'Gathering',
   description: '',
   max_attendees: '',
@@ -212,6 +214,8 @@ export default function CreateEvent() {
       date: form.date,
       time: form.time,
       location: form.location,
+      venue_name: form.venue_name || null,
+      address: form.address || null,
       type: form.type,
       description: form.description,
       max_attendees: form.max_attendees ? parseInt(form.max_attendees) : null,
@@ -249,7 +253,7 @@ export default function CreateEvent() {
           eventTitle: form.title,
           eventDate: form.date,
           eventTime: form.time,
-          eventLocation: form.location,
+          eventLocation: [form.venue_name, form.address, form.location].filter(Boolean).join(' · '),
           eventType: form.type,
           isPrivate: form.is_private,
           isFree: form.is_free,
@@ -426,8 +430,16 @@ export default function CreateEvent() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-spa-charcoal mb-1">Location *</label>
+                <label className="block text-sm font-medium text-spa-charcoal mb-1">City / Region *</label>
                 <input type="text" name="location" required value={form.location} onChange={handleChange} placeholder="e.g., High Point, NC or Virtual" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-spa-charcoal mb-1">Venue Name <span className="text-spa-gray font-normal">(optional)</span></label>
+                <input type="text" name="venue_name" value={form.venue_name} onChange={handleChange} placeholder="e.g., The Grand Ballroom" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-spa-charcoal mb-1">Street Address <span className="text-spa-gray font-normal">(optional)</span></label>
+                <input type="text" name="address" value={form.address} onChange={handleChange} placeholder="e.g., 123 Main St, High Point, NC 27260" className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-spa-charcoal mb-1">Event Type</label>
@@ -700,6 +712,8 @@ export default function CreateEvent() {
               <div className="p-6 space-y-3">
                 <h2 className="font-serif text-2xl text-spa-charcoal">{form.title}</h2>
                 <p className="text-sm text-spa-gray">{form.date} · {form.time}</p>
+                {form.venue_name && <p className="text-sm font-medium text-spa-charcoal">{form.venue_name}</p>}
+                {form.address && <p className="text-sm text-spa-gray">{form.address}</p>}
                 <p className="text-sm text-spa-gray">{form.location}</p>
                 {form.description && <p className="text-sm text-spa-gray leading-relaxed">{form.description}</p>}
                 {isVendor && (form.host_website || form.host_phone) && (
