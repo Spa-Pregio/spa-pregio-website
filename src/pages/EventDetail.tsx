@@ -288,6 +288,31 @@ export default function EventDetail() {
     } else {
       setRsvpStatus('success');
       setRsvpCount((c) => c + 1);
+
+      // Send free RSVP confirmation email
+      try {
+        await fetch(`${SUPABASE_FUNCTIONS_URL}/send-transactional-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            type: 'ticket_purchased',
+            to: rsvpEmail,
+            attendeeName: rsvpName,
+            eventTitle: event.title,
+            eventDate: event.date,
+            eventTime: event.time || '',
+            eventLocation: [event.venue_name, event.address, event.location].filter(Boolean).join(' · '),
+            ticketType: 'Free RSVP',
+            saleAmount: 0,
+            eventId: event.id,
+          }),
+        });
+      } catch (emailErr) {
+        console.error('Free RSVP email error:', emailErr);
+      }
     }
   };
 
