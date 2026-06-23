@@ -504,7 +504,7 @@ export default function LocalVendorSearch() {
 
       {claimPlace && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full my-8">
+          <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 lg:p-8">
               <div className="flex items-center justify-between mb-6">
                 <div>
