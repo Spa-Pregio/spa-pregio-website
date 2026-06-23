@@ -536,7 +536,7 @@ export default function ForVendors() {
       {/* PLAN CONFIRMATION MODAL */}
       {showConfirmModal && selectedTier && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl max-w-md w-full p-8">
+          <div className="bg-white rounded-2xl max-w-md w-full p-8 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6"><h3 className="font-serif text-2xl text-spa-charcoal">Confirm Your Plan</h3><button onClick={() => setShowConfirmModal(false)} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal transition-colors"><X size={18} /></button></div>
             <div className="bg-spa-lavender rounded-2xl p-6 mb-6">
               <div className="flex items-center justify-between mb-2"><h4 className="font-serif text-xl text-spa-charcoal">{selectedTier.name}</h4><span className="text-spa-purple font-medium">{selectedTier.isLifetime ? `$${selectedTier.lifetimePrice} one-time` : `$${selectedTier.price}/mo`}</span></div>
