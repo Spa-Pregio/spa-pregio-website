@@ -454,7 +454,7 @@ export default function ForVendors() {
       {/* FREE LISTING MODAL */}
       {showFreeListingModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/60 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-8 shadow-2xl my-8">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
             {submitSuccess ? (
               <div className="text-center py-8">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle size={32} className="text-green-600" /></div>
