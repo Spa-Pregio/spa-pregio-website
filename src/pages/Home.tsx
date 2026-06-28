@@ -6,40 +6,56 @@ export default function Home() {
     <div className="min-h-screen bg-spa-cream font-sans">
 
       {/* HERO */}
-      <section className="relative overflow-hidden py-24 px-6 text-center min-h-[85vh] flex items-center">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-spa-purple via-[#8a6aa8] to-spa-pink" />
-        <div className="absolute inset-0 bg-spa-charcoal/20" />
+      <section className="relative overflow-hidden bg-spa-cream">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 md:gap-16 items-center px-6 py-16 md:py-24">
 
-        <div className="relative w-full max-w-3xl mx-auto">
-          <span className="inline-block mb-4 text-xs tracking-[0.25em] uppercase text-spa-pink font-semibold">
-            The Celebration Suite Movement
-          </span>
+          {/* Text */}
+          <div className="text-center md:text-left">
+            <span className="inline-block mb-4 text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
+              The Celebration Suite Movement
+            </span>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight mb-6 font-serif">
-            Elevated Pregnancy Celebrations,
-            <br />
-            <span className="italic text-spa-pink">Designed With Intention</span>
-          </h1>
+            <h1 className="text-4xl md:text-6xl font-bold text-spa-charcoal leading-[1.08] mb-6 font-serif">
+              Where expecting moms celebrate together —
+              <br className="hidden md:block" />
+              <span className="italic text-spa-pink"> and a whole community shows up.</span>
+            </h1>
 
-          <p className="text-lg text-white/80 max-w-xl mx-auto mb-10 leading-relaxed">
-            Create your event, invite your guests, and bring your vision to life — all in one place.
-          </p>
+            <p className="text-lg text-spa-gray max-w-md mx-auto md:mx-0 mb-10 leading-relaxed">
+              You don't have to do pregnancy alone. And you shouldn't.
+            </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/suites"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold tracking-wide shadow-elegant hover:bg-[#7d5fa0] transition-colors"
-            >
-              Shop Celebration Suites
-            </Link>
-            <Link
-              to="/find-vendors"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-white/20 backdrop-blur-sm border border-white/40 text-white text-sm font-semibold tracking-wide hover:bg-white/30 transition-colors"
-            >
-              Find Local Vendors
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Link
+                to="/suites"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold tracking-wide shadow-elegant hover:bg-[#7d5fa0] transition-colors"
+              >
+                Shop Celebration Suites
+              </Link>
+              <Link
+                to="/find-vendors"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-white border border-spa-purple text-spa-purple text-sm font-semibold tracking-wide hover:bg-spa-blush transition-colors"
+              >
+                Find Local Vendors
+              </Link>
+            </div>
           </div>
+
+          {/* Photo */}
+          <div className="relative">
+            <div className="absolute -left-4 -top-4 w-full h-full bg-gradient-to-br from-spa-blush to-spa-light rounded-t-[140px] rounded-b-3xl" />
+            <div className="relative overflow-hidden rounded-t-[130px] rounded-b-3xl shadow-elegant">
+              <img
+                src="/images/hero-mom.jpg"
+                alt="Expectant mother in a Spa-Pregio robe, hands resting on her belly"
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
+            <div className="absolute bottom-6 -left-3 bg-white px-5 py-3 rounded-full shadow-elegant font-serif italic text-spa-purple text-base">
+              <span className="not-italic font-semibold text-spa-charcoal">Real moms.</span> Real celebrations.
+            </div>
+          </div>
+
         </div>
       </section>
 
