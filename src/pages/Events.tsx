@@ -60,11 +60,16 @@ export default function Events() {
   useEffect(() => { loadEvents(); }, []);
 
   const loadEvents = async () => {
+    // Today's date in the visitor's local timezone, formatted YYYY-MM-DD to match how events are stored.
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
     const { data } = await supabase
       .from('events')
       .select('*')
       .eq('is_private', false)
-      .order('created_at', { ascending: false });
+      .gte('date', todayStr)               // hide events whose date has already passed
+      .order('date', { ascending: true }); // show the soonest upcoming events first
     if (data) setUserEvents(data);
 
     const { data: rsvps } = await supabase.from('event_rsvps').select('event_id');
