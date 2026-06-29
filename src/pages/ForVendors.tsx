@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { 
   ArrowRight, Check, Star, Users, MapPin, Store,
   Image, Type, Palette, Eye, Download, Search, X, Zap, Clock, CheckCircle, Upload, Save
@@ -67,6 +67,13 @@ type FreeListingForm = { business_name: string; category: string; city: string; 
 
 export default function ForVendors() {
   const [showAdDesigner, setShowAdDesigner] = useState(false);
+
+  // Capture a Suite Sister's referral code if the vendor arrived via her link,
+  // so we can stamp it onto Stripe checkout for attribution.
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if (ref) { try { localStorage.setItem('sp_vendor_ref', ref); } catch { /* ignore */ } }
+  }, []);
   const [selectedSize, setSelectedSize] = useState(adSizes[0]);
   const [adText, setAdText] = useState({ headline: '', description: '', cta: 'Learn More' });
   const [adPhoto, setAdPhoto] = useState<string | null>(null);
@@ -216,7 +223,18 @@ export default function ForVendors() {
   const handleSelectMonthlyTier = (tier: typeof pricingTiers[0]) => { setSelectedTier({ ...tier, isLifetime: false, isFree: false }); setShowConfirmModal(true); };
   const handleSelectFreeTier = () => setShowFreeListingModal(true);
   const handleSelectFoundingTier = (tier: typeof foundingTiers[0]) => { setSelectedTier({ name: `${tier.name} — Founding Lifetime`, lifetimePrice: tier.lifetimePrice, description: tier.description, stripeLink: tier.stripeLink, isLifetime: true, isFree: false }); setShowConfirmModal(true); };
-  const handleProceedToCheckout = () => { if (selectedTier?.stripeLink) window.open(selectedTier.stripeLink, '_blank'); setShowConfirmModal(false); };
+  const handleProceedToCheckout = () => {
+    if (selectedTier?.stripeLink) {
+      let ref: string | null = new URLSearchParams(window.location.search).get('ref');
+      if (!ref) { try { ref = localStorage.getItem('sp_vendor_ref'); } catch { ref = null; } }
+      const sep = selectedTier.stripeLink.includes('?') ? '&' : '?';
+      const url = ref
+        ? `${selectedTier.stripeLink}${sep}client_reference_id=${encodeURIComponent(ref)}`
+        : selectedTier.stripeLink;
+      window.open(url, '_blank');
+    }
+    setShowConfirmModal(false);
+  };
 
   const handleFreeListingSubmit = async () => {
     if (!freeListingForm.business_name || !freeListingForm.city || !freeListingForm.state || !freeListingForm.contact_value || !freeListingForm.email) {
