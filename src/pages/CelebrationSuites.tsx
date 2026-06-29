@@ -122,7 +122,7 @@ function BackgroundImage({
   );
 }
 
-function SuiteHero({ suite }: { suite: Suite }) {
+function SuiteHero({ suite, buySuite }: { suite: Suite; buySuite: (id: string) => void }) {
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       <BackgroundImage
@@ -166,7 +166,7 @@ function SuiteHero({ suite }: { suite: Suite }) {
   );
 }
 
-function SuiteDetails({ suite }: { suite: Suite }) {
+function SuiteDetails({ suite, buySuite }: { suite: Suite; buySuite: (id: string) => void }) {
   return (
     <section className="bg-white py-16 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.05fr_0.95fr] gap-10 items-start">
@@ -265,8 +265,8 @@ export default function CelebrationSuites() {
   if (selectedSuite) {
     return (
       <div className="min-h-screen bg-spa-cream font-sans">
-        <SuiteHero suite={selectedSuite} />
-        <SuiteDetails suite={selectedSuite} />
+        <SuiteHero suite={selectedSuite} buySuite={buySuite} />
+        <SuiteDetails suite={selectedSuite} buySuite={buySuite} />
       </div>
     );
   }
