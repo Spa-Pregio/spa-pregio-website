@@ -557,7 +557,7 @@ export default function AffiliateDashboard() {
                 <div className="px-8 py-16 text-center">
                   <Store size={40} className="text-spa-purple/30 mx-auto mb-4" />
                   <p className="text-spa-gray">No vendor referrals yet — share your link to get started!</p>
-                  <button onClick={copyReferralLink} className="btn-primary mt-6 mx-auto inline-flex">
+                  <button onClick={() => copyLink('vendor')} className="btn-primary mt-6 mx-auto inline-flex">
                     <Copy size={16} /> Copy Your Link
                   </button>
                 </div>
