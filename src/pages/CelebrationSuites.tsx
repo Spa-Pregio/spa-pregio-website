@@ -13,6 +13,7 @@ type Suite = {
 
 import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
 
 const SUITES = [
   {
@@ -151,14 +152,12 @@ function SuiteHero({ suite }: { suite: Suite }) {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href={suite.payhip}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => buySuite(suite.id)}
                 className="inline-flex items-center justify-center rounded-full bg-white text-spa-charcoal px-8 py-4 text-sm font-semibold shadow-elegant hover:scale-[1.01] transition"
               >
                 Purchase Suite
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -212,14 +211,12 @@ function SuiteDetails({ suite }: { suite: Suite }) {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <a
-              href={suite.payhip}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => buySuite(suite.id)}
               className="inline-flex items-center justify-center rounded-full bg-spa-purple text-white px-8 py-4 text-sm font-semibold hover:bg-[#7d5fa0] transition-colors"
             >
-              Buy on Payhip
-            </a>
+              Purchase Suite
+            </button>
 
             <Link
               to="/suites"
@@ -236,6 +233,26 @@ function SuiteDetails({ suite }: { suite: Suite }) {
 
 export default function CelebrationSuites() {
   const [searchParams] = useSearchParams();
+
+  // Remember a Suite Sister's referral code if they arrived via her link.
+  React.useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) { try { localStorage.setItem('sp_ref', ref); } catch { /* ignore */ } }
+  }, [searchParams]);
+
+  const buySuite = async (suiteId: string) => {
+    let ref: string | null = searchParams.get('ref');
+    if (!ref) { try { ref = localStorage.getItem('sp_ref'); } catch { ref = null; } }
+    const { data, error } = await supabase.functions.invoke('create-suite-checkout', {
+      body: { suite_id: suiteId, ref: ref || undefined, origin: window.location.origin },
+    });
+    if (error || !data?.url) {
+      console.error('Suite checkout error:', error);
+      alert('Sorry — something went wrong starting checkout. Please try again.');
+      return;
+    }
+    window.location.href = data.url as string;
+  };
   const selectedType = searchParams.get('type');
 
   const filteredSuites = selectedType
@@ -328,14 +345,12 @@ export default function CelebrationSuites() {
                     View Suite
                   </Link>
 
-                  <a
-                    href={suite.payhip}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => buySuite(suite.id)}
                     className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-spa-purple text-white text-sm font-semibold hover:bg-[#7d5fa0] transition-colors"
                   >
                     Purchase Suite
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
