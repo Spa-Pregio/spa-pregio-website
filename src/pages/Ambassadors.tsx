@@ -137,7 +137,7 @@ export default function Ambassadors() {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="/my-account"
+                href="/sister-dashboard"
                 className="btn-primary justify-center"
               >
                 Join the Suite Sisters — Free
@@ -365,7 +365,7 @@ export default function Ambassadors() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="/join"
+              href="/sister-dashboard"
               className="inline-flex items-center gap-2 justify-center bg-white text-spa-purple px-8 py-4 rounded-full font-semibold hover:bg-spa-cream transition-colors text-lg"
             >
               Join the Suite Sisters — It's Free
