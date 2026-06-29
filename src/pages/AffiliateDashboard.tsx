@@ -145,7 +145,22 @@ export default function AffiliateDashboard() {
     });
 
     setApplying(false);
-    if (!error) { setApplySuccess(true); setTimeout(() => loadDashboard(), 1500); }
+    if (!error) {
+      setApplySuccess(true);
+      // Fire the Suite Sister welcome email with both referral links
+      const origin = window.location.origin;
+      supabase.functions.invoke('send-transactional-email', {
+        body: {
+          type: 'suite_sister_welcome',
+          to: user.email,
+          name: applyForm.full_name,
+          referralCode: referral_code,
+          suiteLink: `${origin}/suites?ref=${referral_code}`,
+          vendorLink: `${origin}/vendors?ref=${referral_code}`,
+        },
+      }).catch((e) => console.error('Welcome email error:', e));
+      setTimeout(() => loadDashboard(), 1500);
+    }
   }
 
   function copyLink(which: 'suite' | 'vendor') {
