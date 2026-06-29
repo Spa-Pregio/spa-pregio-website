@@ -41,6 +41,7 @@ type SuiteCommission = {
   status: string;
   created_at: string;
   payhip_order_id?: string;
+  stripe_session_id?: string;
 };
 
 type Payout = {
@@ -69,7 +70,7 @@ export default function AffiliateDashboard() {
   const [suiteCommissions, setSuiteCommissions] = useState<SuiteCommission[]>([]);
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<'suite' | 'vendor' | null>(null);
   const [notAffiliate, setNotAffiliate] = useState(false);
   const [noUser, setNoUser] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -140,19 +141,20 @@ export default function AffiliateDashboard() {
       paypal_email: applyForm.paypal_email || null,
       venmo_handle: applyForm.venmo_handle || null,
       zelle_info: applyForm.zelle_info || null,
-      status: 'pending',
+      status: 'active',
     });
 
     setApplying(false);
     if (!error) { setApplySuccess(true); setTimeout(() => loadDashboard(), 1500); }
   }
 
-  function copyReferralLink() {
+  function copyLink(which: 'suite' | 'vendor') {
     if (!affiliate) return;
-    const link = `${window.location.origin}/vendors?ref=${affiliate.referral_code}`;
+    const path = which === 'suite' ? '/suites' : '/vendors';
+    const link = `${window.location.origin}${path}?ref=${affiliate.referral_code}`;
     navigator.clipboard.writeText(link);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopied(which);
+    setTimeout(() => setCopied(null), 2000);
   }
 
   function formatCurrency(amount: number) {
@@ -275,7 +277,8 @@ export default function AffiliateDashboard() {
     );
   }
 
-  const referralLink = `${window.location.origin}/vendors?ref=${affiliate?.referral_code}`;
+  const suiteLink = `${window.location.origin}/suites?ref=${affiliate?.referral_code}`;
+  const vendorLink = `${window.location.origin}/vendors?ref=${affiliate?.referral_code}`;
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
     { id: 'overview', label: 'Overview', icon: BarChart2 },
@@ -299,7 +302,7 @@ export default function AffiliateDashboard() {
               {affiliate?.status === 'pending' && (
                 <div className="flex items-center gap-2 mt-3 bg-amber-400/20 border border-amber-400/30 rounded-full px-4 py-1.5 w-fit">
                   <AlertCircle size={14} className="text-amber-300" />
-                  <span className="text-amber-300 text-xs font-medium">Application pending review — your link is ready once approved</span>
+                  <span className="text-amber-300 text-xs font-medium">Application received — your links activate shortly</span>
                 </div>
               )}
               {affiliate?.status === 'active' && (
@@ -309,15 +312,33 @@ export default function AffiliateDashboard() {
                 </div>
               )}
             </div>
-            <div className="bg-white/10 rounded-2xl p-4 min-w-[300px]">
-              <p className="text-white/60 text-xs mb-2">Your referral link</p>
-              <p className="text-white text-sm font-mono truncate mb-3">{referralLink}</p>
-              <button
-                onClick={copyReferralLink}
-                className="w-full flex items-center justify-center gap-2 bg-white text-spa-purple px-4 py-2 rounded-full text-sm font-medium hover:bg-spa-cream transition-colors"
-              >
-                {copied ? <><Check size={14} /> Copied!</> : <><Copy size={14} /> Copy Link</>}
-              </button>
+            <div className="bg-white/10 rounded-2xl p-4 min-w-[320px] space-y-4">
+              <div>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Gift size={13} className="text-spa-pink" />
+                  <p className="text-white/80 text-xs font-medium">Suite link — 30% per sale</p>
+                </div>
+                <p className="text-white text-xs font-mono truncate mb-2">{suiteLink}</p>
+                <button
+                  onClick={() => copyLink('suite')}
+                  className="w-full flex items-center justify-center gap-2 bg-white text-spa-purple px-4 py-2 rounded-full text-sm font-medium hover:bg-spa-cream transition-colors"
+                >
+                  {copied === 'suite' ? <><Check size={14} /> Copied!</> : <><Copy size={14} /> Copy Suite Link</>}
+                </button>
+              </div>
+              <div className="border-t border-white/15 pt-3">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Store size={13} className="text-spa-pink" />
+                  <p className="text-white/80 text-xs font-medium">Vendor link — 10% recurring</p>
+                </div>
+                <p className="text-white text-xs font-mono truncate mb-2">{vendorLink}</p>
+                <button
+                  onClick={() => copyLink('vendor')}
+                  className="w-full flex items-center justify-center gap-2 bg-white text-spa-purple px-4 py-2 rounded-full text-sm font-medium hover:bg-spa-cream transition-colors"
+                >
+                  {copied === 'vendor' ? <><Check size={14} /> Copied!</> : <><Copy size={14} /> Copy Vendor Link</>}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -413,7 +434,7 @@ export default function AffiliateDashboard() {
                   <Gift size={20} className="text-white" />
                   <div>
                     <h3 className="font-serif text-lg text-white">Suite Commissions</h3>
-                    <p className="text-white/60 text-xs">30% per digital suite sale · via Payhip</p>
+                    <p className="text-white/60 text-xs">30% per digital suite sale</p>
                   </div>
                 </div>
                 <div className="p-6 space-y-4">
@@ -604,7 +625,7 @@ export default function AffiliateDashboard() {
                 <p className="font-medium text-spa-charcoal mb-1">How Suite Commissions Work</p>
                 <p className="text-spa-gray text-sm leading-relaxed">
                   You earn <strong>30% ($8.10)</strong> on every Celebration Suite™ sold through your referral link. 
-                  These are tracked via Payhip and synced here monthly. Commissions are confirmed after 30 days 
+                  These are tracked automatically and synced here. Commissions are confirmed after 30 days 
                   and paid via Venmo, PayPal, or Zelle.
                 </p>
               </div>
@@ -649,7 +670,7 @@ export default function AffiliateDashboard() {
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadge(sc.status)}`}>{sc.status}</span>
                           </td>
                           <td className="px-6 py-4 text-sm text-spa-gray">{formatDate(sc.created_at)}</td>
-                          <td className="px-6 py-4 text-xs text-spa-gray font-mono">{sc.payhip_order_id || '—'}</td>
+                          <td className="px-6 py-4 text-xs text-spa-gray font-mono">{sc.stripe_session_id ? sc.stripe_session_id.slice(-10) : (sc.payhip_order_id || '—')}</td>
                         </tr>
                       ))}
                     </tbody>

@@ -36,7 +36,8 @@ export default function Terms() {
           <TermsSection title="2. Digital Products">
             <p>
               All products sold through Spa-Pregio are <strong>digital downloads</strong>.
-              Upon purchase, you will receive access to your product via Payhip.
+              Upon purchase, you will receive access to your product via a secure download link
+              sent to your email.
             </p>
             <ul className="list-disc pl-5 space-y-2 mt-3">
               <li>
@@ -50,8 +51,8 @@ export default function Terms() {
                 from Spa-Pregio.
               </li>
               <li>
-                <strong>Access</strong> — You will receive a download link via email through
-                Payhip. Please save your files upon receipt, as access links may expire.
+                <strong>Access</strong> — You will receive a secure download link via email.
+                Please save your files upon receipt, as download links expire after 7 days.
               </li>
             </ul>
           </TermsSection>
@@ -74,8 +75,9 @@ export default function Terms() {
               </li>
             </ul>
             <p className="mt-3">
-              Commission payments are processed through Payhip's affiliate system. Spa-Pregio
-              is not responsible for delays caused by Payhip's payout schedule.
+              Commission payments are calculated through our own affiliate tracking system and
+              paid out manually via Venmo, PayPal, or Zelle. Spa-Pregio is not responsible for
+              delays caused by third-party payment platforms.
             </p>
           </TermsSection>
 

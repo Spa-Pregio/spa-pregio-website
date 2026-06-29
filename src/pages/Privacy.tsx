@@ -33,8 +33,8 @@ export default function Privacy() {
               </li>
               <li>
                 <strong>Purchase information</strong> — when you buy a digital product, your
-                transaction is processed through Payhip. We receive your name, email, and order
-                details. Payment card information is handled entirely by Payhip and is never
+                transaction is processed securely through Stripe. We receive your name, email, and
+                order details. Payment card information is handled entirely by Stripe and is never
                 stored on our systems.
               </li>
               <li>
@@ -71,12 +71,16 @@ export default function Privacy() {
             </p>
             <ul className="list-disc pl-5 space-y-2 mt-3">
               <li>
-                <strong>Payhip</strong> — handles digital product delivery and payment processing.
-                See <a href="https://payhip.com/privacy" target="_blank" rel="noopener noreferrer" className="text-spa-purple underline">Payhip's Privacy Policy</a>.
+                <strong>Stripe</strong> — securely processes all payments. See
+                <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-spa-purple underline"> Stripe's Privacy Policy</a>.
               </li>
               <li>
-                <strong>EmailJS</strong> — powers our contact form. Your message is transmitted
-                securely through their service.
+                <strong>Supabase</strong> — hosts our database and securely delivers your digital
+                product download links.
+              </li>
+              <li>
+                <strong>Resend</strong> — delivers our transactional emails, such as order
+                confirmations and download links.
               </li>
               <li>
                 <strong>Social media platforms</strong> — if you interact with us on Instagram,

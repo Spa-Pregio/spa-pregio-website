@@ -67,7 +67,7 @@ const earningStreams = [
       { label: '10 sales', value: '$81' },
       { label: '50 sales', value: '$405' },
     ],
-    note: 'Tracked via Payhip — paid monthly',
+    note: 'Paid monthly via Venmo, PayPal, or Zelle',
   },
   {
     icon: Store,
@@ -109,7 +109,7 @@ const steps = [
 
 const faqs = [
   { q: 'How much can I earn?', a: 'Two ways: 30% on digital suite sales ($8.10 per sale) plus 10% recurring on every vendor you refer. One Enterprise vendor alone pays you $14.90 every single month they\'re active.' },
-  { q: 'When do I get paid?', a: 'Digital suite commissions are tracked via Payhip and paid monthly. Vendor referral commissions are confirmed after 30 days and paid via Venmo, PayPal, or Zelle.' },
+  { q: 'When do I get paid?', a: 'Digital suite commissions are tracked automatically and paid monthly. Vendor referral commissions are confirmed after 30 days. All payouts are sent via Venmo, PayPal, or Zelle.' },
   { q: 'What\'s the difference between digital and vendor commissions?', a: 'Digital suite sales are one-time payments you earn when a mama buys a suite. Vendor commissions are recurring — you keep earning every month that vendor stays on the platform.' },
   { q: 'Do I need a big following?', a: 'Not at all! Some of the best referrals come from a simple conversation with a local spa owner or photographer. Authentic beats big every time.' },
   { q: 'Is there a cost to join?', a: 'Zero. Free to join, free to share, free to earn. You only get paid — never pay us.' },
