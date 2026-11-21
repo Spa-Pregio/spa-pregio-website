@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { 
+import {
   ArrowRight, Check, Star, Users, MapPin, Store,
-  Image, Type, Palette, Eye, Download, Search, X, Zap, Clock, CheckCircle, Upload, Save
+  Image, Type, Palette, Eye, Download, X, Zap, Clock, CheckCircle, Upload, Save
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -37,8 +37,8 @@ const freeTier = {
 };
 
 const pricingTiers = [
-  { name: 'Starter', price: 29, period: 'month', description: 'Perfect for individual vendors just starting out', features: ['Everything in Basic', 'Full business profile page', 'Photo gallery (up to 15 images)', 'Website & social links', 'Basic analytics'], cta: 'Get Started', popular: false, badge: 'Founding Member Rate', stripeLink: 'https://buy.stripe.com/8x23cwgC8d987N79Fx2go00', eventAccess: 'Up to 2 events/month' },
-  { name: 'Professional', price: 79, period: 'month', description: 'Enhanced visibility with event participation', features: ['Everything in Starter', 'Featured placement in category', '"Verified" badge on profile', 'Priority in search results', 'Event vendor opportunities', 'Customer reviews & ratings', 'Advanced analytics dashboard'], cta: 'Become a Partner', popular: true, badge: 'Most Popular', stripeLink: 'https://buy.stripe.com/9B6cN6adKfhg5EZ7xp2go01', eventAccess: 'Up to 5 events/month' },
+  { name: 'Starter', price: 29, period: 'month', description: 'Great for solo vendors building local visibility', features: ['Everything in Basic', 'Full business profile page', 'Photo gallery (up to 15 images)', 'Website & social links', 'Basic analytics'], cta: 'Get Started', popular: false, badge: 'Founding Member Rate', stripeLink: 'https://buy.stripe.com/8x23cwgC8d987N79Fx2go00', eventAccess: 'Up to 2 events/month' },
+  { name: 'Professional', price: 79, period: 'month', description: 'Stronger local reach plus event participation', features: ['Everything in Starter', 'Featured placement in category', '"Verified" badge on profile', 'Priority in search results', 'Event vendor opportunities', 'Customer reviews & ratings', 'Advanced analytics dashboard'], cta: 'Become a Partner', popular: true, badge: 'Most Popular', stripeLink: 'https://buy.stripe.com/9B6cN6adKfhg5EZ7xp2go01', eventAccess: 'Up to 5 events/month' },
   { name: 'Enterprise', price: 149, period: 'month', description: 'Maximum exposure for established businesses', features: ['Everything in Professional', 'Homepage featured banner placement', 'Custom ad designer with profile save', 'Rotating homepage slideshow feature', 'Multiple location listings', 'Exclusive event sponsorships', 'Dedicated account manager'], cta: 'Upgrade to Enterprise', popular: false, badge: 'Unlimited Events', stripeLink: 'https://buy.stripe.com/8x24gA71y0mm6J304X2go02', eventAccess: 'Unlimited events' },
 ];
 
@@ -68,12 +68,11 @@ type FreeListingForm = { business_name: string; category: string; city: string; 
 export default function ForVendors() {
   const [showAdDesigner, setShowAdDesigner] = useState(false);
 
-  // Capture a Suite Sister's referral code if the vendor arrived via her link,
-  // so we can stamp it onto Stripe checkout for attribution.
   useEffect(() => {
     const ref = new URLSearchParams(window.location.search).get('ref');
     if (ref) { try { localStorage.setItem('sp_vendor_ref', ref); } catch { /* ignore */ } }
   }, []);
+
   const [selectedSize, setSelectedSize] = useState(adSizes[0]);
   const [adText, setAdText] = useState({ headline: '', description: '', cta: 'Learn More' });
   const [adPhoto, setAdPhoto] = useState<string | null>(null);
@@ -87,13 +86,13 @@ export default function ForVendors() {
   const [adSaving, setAdSaving] = useState(false);
   const [adSaveStatus, setAdSaveStatus] = useState<'idle' | 'saved' | 'error'>('idle');
 
-  // Logo upload state
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
-
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const isCompactBanner = selectedSize.previewH <= 100;
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -223,6 +222,7 @@ export default function ForVendors() {
   const handleSelectMonthlyTier = (tier: typeof pricingTiers[0]) => { setSelectedTier({ ...tier, isLifetime: false, isFree: false }); setShowConfirmModal(true); };
   const handleSelectFreeTier = () => setShowFreeListingModal(true);
   const handleSelectFoundingTier = (tier: typeof foundingTiers[0]) => { setSelectedTier({ name: `${tier.name} — Founding Lifetime`, lifetimePrice: tier.lifetimePrice, description: tier.description, stripeLink: tier.stripeLink, isLifetime: true, isFree: false }); setShowConfirmModal(true); };
+
   const handleProceedToCheckout = () => {
     if (selectedTier?.stripeLink) {
       let ref: string | null = new URLSearchParams(window.location.search).get('ref');
@@ -231,7 +231,7 @@ export default function ForVendors() {
       const url = ref
         ? `${selectedTier.stripeLink}${sep}client_reference_id=${encodeURIComponent(ref)}`
         : selectedTier.stripeLink;
-      window.open(url, '_blank');
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
     setShowConfirmModal(false);
   };
@@ -244,7 +244,6 @@ export default function ForVendors() {
     setSubmitting(true);
     setSubmitError('');
 
-    // Upload logo if provided
     let logoUrl: string | null = null;
     if (logoFile) {
       setLogoUploading(true);
@@ -276,9 +275,8 @@ export default function ForVendors() {
     setSubmitting(false);
 
     if (error) {
-      setSubmitError('Something went wrong. Please try again.');
+      setSubmitError('Something went wrong saving your listing. Please try again.');
     } else {
-      // Send vendor welcome email (non-blocking)
       try {
         await fetch(`${SUPABASE_FUNCTIONS_URL}/send-transactional-email`, {
           method: 'POST',
@@ -314,19 +312,31 @@ export default function ForVendors() {
   };
 
   return (
-    <div className="w-full pt-20">
+    <div className="w-full pt-16 lg:pt-20">
 
       {/* Hero */}
-      <section className="w-full py-16 lg:py-24 bg-spa-cream">
+      <section className="w-full py-16 lg:py-22 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center max-w-3xl mx-auto">
-            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">For Vendors</span>
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-spa-charcoal leading-tight mt-4">Reach expectant mothers in <span className="text-spa-purple">your area.</span></h1>
-            <p className="mt-6 text-lg text-spa-gray leading-relaxed">Join Spa-Pregio's directory and get discovered by local mamas actively shopping for maternity products and services.</p>
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple font-semibold">For Vendors</span>
+            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-spa-charcoal leading-tight mt-4">
+              Reach expectant mothers in <span className="text-spa-purple">your area.</span>
+            </h1>
+            <p className="mt-6 text-lg text-spa-gray leading-relaxed">
+              Join Spa-Pregio's local directory, host mom-to-be events, and get discovered by families planning showers, reveals, and pampering days.
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-              <a href="#pricing" className="btn-primary">List Your Business <ArrowRight size={18} /></a>
-              <button onClick={() => setShowAdDesigner(true)} className="btn-outline"><Eye size={18} /> Try Ad Designer</button>
+              <a href="#pricing" className="btn-primary group">
+                Claim Your Spot or List Free
+                <ArrowRight size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
+              </a>
+              <button onClick={() => setShowAdDesigner(true)} className="btn-outline">
+                <Eye size={18} /> Preview Ad Designer
+              </button>
             </div>
+            <p className="text-xs italic text-spa-gray mt-3 font-serif">
+              Free starter listings available — paid plans start at $29/mo.
+            </p>
           </div>
         </div>
       </section>
@@ -335,9 +345,9 @@ export default function ForVendors() {
       <section className="w-full py-16 lg:py-20 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-12">
-            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Vendor Categories</span>
-            <h2 className="section-title mt-4">What can you <span className="text-spa-purple">sell?</span></h2>
-            <p className="mt-4 text-spa-gray max-w-2xl mx-auto">Click any category to find local vendors in your area — or list your own business below.</p>
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple font-semibold">Vendor Categories</span>
+            <h2 className="section-title mt-4">What can you <span className="text-spa-purple">offer?</span></h2>
+            <p className="mt-4 text-spa-gray max-w-2xl mx-auto">Click any category to see what local mamas are searching for — or list your own business below.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {vendorCategories.map((category, index) => (
@@ -347,7 +357,7 @@ export default function ForVendors() {
                 <h3 className="font-serif text-lg text-spa-charcoal mb-2">{category.name}</h3>
                 <p className="text-spa-gray text-sm mb-4">{category.description}</p>
                 <div className="flex flex-wrap gap-1 mb-4">{category.examples.map((e, i) => <span key={i} className="text-xs px-2 py-1 bg-spa-lavender rounded-full text-spa-gray">{e}</span>)}</div>
-                <p className="text-xs text-spa-purple font-medium flex items-center gap-1 group-hover:gap-2 transition-all">Find local vendors →</p>
+                <p className="text-xs text-spa-purple font-medium flex items-center gap-1 group-hover:gap-2 transition-all">See who's listed →</p>
               </a>
             ))}
           </div>
@@ -358,7 +368,7 @@ export default function ForVendors() {
       <section id="pricing" className="w-full py-16 lg:py-20 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-6">
-            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Pricing</span>
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple font-semibold">Pricing</span>
             <h2 className="section-title mt-4">Choose your <span className="text-spa-purple">plan.</span></h2>
             <p className="mt-4 text-spa-gray max-w-xl mx-auto">Start free and upgrade anytime. Founding member rates are locked in for early vendors.</p>
           </div>
@@ -421,15 +431,17 @@ export default function ForVendors() {
       {/* Be First CTA */}
       <section className="w-full py-16 lg:py-20 bg-spa-blush">
         <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
-          <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Early Opportunity</span>
+          <span className="text-sm uppercase tracking-[0.15em] text-spa-purple font-semibold">Early Opportunity</span>
           <h2 className="section-title mt-4">Be the first vendor <span className="text-spa-purple">in your city.</span></h2>
-          <p className="mt-4 text-spa-gray leading-relaxed max-w-2xl mx-auto">Spa-Pregio is growing fast. Early vendors get premium placement, founding member rates, and first access to every mama searching in their area.</p>
+          <p className="mt-4 text-spa-gray leading-relaxed max-w-2xl mx-auto">Early vendors get founding member pricing, priority visibility as local searches grow, and direct access to families planning celebrations in their area.</p>
           <div className="grid sm:grid-cols-3 gap-6 mt-10">
             {[{ icon: Star, title: 'Founding Member Badge', desc: 'Stand out as one of the first vendors to join the movement.' }, { icon: MapPin, title: 'Top of Local Search', desc: 'Early listings get priority placement in their city and category.' }, { icon: Users, title: 'Direct Mama Access', desc: 'Connect with expectant mothers actively looking for what you offer.' }].map(perk => (
               <div key={perk.title} className="bg-white rounded-2xl p-6 shadow-elegant text-left"><perk.icon size={24} className="text-spa-purple mb-3" /><h3 className="font-serif text-lg text-spa-charcoal mb-2">{perk.title}</h3><p className="text-sm text-spa-gray leading-relaxed">{perk.desc}</p></div>
             ))}
           </div>
-          <a href="#pricing" className="btn-primary mt-10 mx-auto inline-flex">Claim Your Spot <ArrowRight size={18} /></a>
+          <a href="#pricing" className="btn-primary mt-10 mx-auto inline-flex group">
+            Claim Your Spot <ArrowRight size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
+          </a>
         </div>
       </section>
 
@@ -438,20 +450,42 @@ export default function ForVendors() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Ad Designer</span>
-              <h2 className="section-title mt-4">Create beautiful <span className="text-spa-purple">advertisements.</span></h2>
-              <p className="mt-4 text-spa-gray leading-relaxed">Design stunning, on-brand ads in minutes. Enterprise vendors get their ads featured on the homepage slideshow.</p>
+              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple font-semibold">Ad Designer</span>
+              <h2 className="section-title mt-4">Create custom <span className="text-spa-purple">advertisements.</span></h2>
+              <p className="mt-4 text-spa-gray leading-relaxed">Build clean, branded ads in standard banner and sidebar sizes. Enterprise vendors can save ads directly to their profile for homepage slideshow placement.</p>
               <div className="mt-8 space-y-4">
-                {[{ icon: Upload, text: 'Upload your product photos' }, { icon: Type, text: 'Customize headlines and copy' }, { icon: Palette, text: 'Spa-Pregio branded design' }, { icon: Eye, text: 'Real-time preview' }, { icon: Download, text: 'Download + save to your profile' }].map((item, i) => (
+                {[{ icon: Upload, text: 'Upload your product or service photos' }, { icon: Type, text: 'Customize headlines and copy' }, { icon: Palette, text: 'Spa-Pregio branded styling' }, { icon: Eye, text: 'Live size preview before exporting' }, { icon: Download, text: 'Download PNG + save to your profile' }].map((item, i) => (
                   <div key={i} className="flex items-center gap-3"><item.icon size={20} className="text-spa-purple" /><span className="text-spa-charcoal">{item.text}</span></div>
                 ))}
               </div>
-              <button onClick={() => setShowAdDesigner(true)} className="btn-primary mt-8"><Eye size={18} /> Try the Ad Designer</button>
+              <button onClick={() => setShowAdDesigner(true)} className="btn-primary mt-8 group">
+                <Eye size={18} /> Open the Ad Designer <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+              </button>
             </div>
             <div className="relative">
-              <div className="elegant-card p-6">
-                <div className="aspect-[4/3] bg-spa-lavender rounded-xl flex items-center justify-center"><div className="text-center"><Palette size={48} className="text-spa-purple mx-auto mb-4" /><p className="text-spa-gray">Ad Designer Preview</p></div></div>
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowAdDesigner(true)}
+                className="w-full text-left elegant-card p-6 hover:border-spa-purple/30 transition-all group"
+              >
+                <div className="bg-spa-lavender rounded-xl p-6 flex flex-col items-center justify-center min-h-[260px]">
+                  <div className="w-44 bg-white rounded-xl overflow-hidden shadow-md border border-spa-purple/10">
+                    <div className="h-20 bg-gradient-to-r from-spa-pink/40 to-spa-purple/40 flex items-center justify-center">
+                      <SparklesOrPalette />
+                    </div>
+                    <div className="p-3">
+                      <p className="font-serif text-xs font-semibold text-spa-charcoal">Your Business Name</p>
+                      <p className="text-[10px] text-spa-gray mt-0.5 line-clamp-2">Prenatal care, sweet treats &amp; shower spaces local mamas love.</p>
+                      <span className="inline-block mt-2 px-2.5 py-0.5 bg-spa-purple text-white rounded-full text-[9px] font-medium">
+                        Book Now
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-spa-purple font-medium mt-4 group-hover:underline">
+                    Click to customize sizes, photos &amp; copy →
+                  </p>
+                </div>
+              </button>
             </div>
           </div>
         </div>
@@ -461,10 +495,10 @@ export default function ForVendors() {
       <section className="w-full py-16 lg:py-20 bg-spa-purple">
         <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
           <h2 className="font-serif text-3xl lg:text-4xl text-white">Ready to grow your <span className="text-spa-pink">business?</span></h2>
-          <p className="mt-4 text-white/70 leading-relaxed">Get in front of local mamas who are ready to buy.</p>
+          <p className="mt-4 text-white/75 leading-relaxed">Put your business in front of local mamas and hosts planning celebrations.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <a href="#pricing" className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center gap-2">Start Free <ArrowRight size={18} /></a>
-            <a href="#founding" className="bg-spa-pink text-white px-6 py-3 rounded-full font-medium hover:bg-spa-pink/90 transition-colors inline-flex items-center gap-2"><Zap size={18} /> Claim Founding Rate</a>
+            <a href="#pricing" className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center justify-center gap-2">Start Free <ArrowRight size={18} /></a>
+            <a href="#founding" className="bg-spa-pink text-white px-6 py-3 rounded-full font-medium hover:bg-spa-pink/90 transition-colors inline-flex items-center justify-center gap-2"><Zap size={18} /> Claim Founding Rate</a>
           </div>
         </div>
       </section>
@@ -496,12 +530,11 @@ export default function ForVendors() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-2">Contact Method <span className="text-spa-pink">*</span></label>
-                    <div className="flex gap-3 mb-3">{(['website', 'phone'] as const).map(type => <button key={type} onClick={() => setFreeListingForm({ ...freeListingForm, contact_type: type, contact_value: '' })} className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors capitalize ${freeListingForm.contact_type === type ? 'bg-spa-purple text-white' : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/10'}`}>{type}</button>)}</div>
+                    <div className="flex gap-3 mb-3">{(['website', 'phone'] as const).map(type => <button key={type} type="button" onClick={() => setFreeListingForm({ ...freeListingForm, contact_type: type, contact_value: '' })} className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors capitalize ${freeListingForm.contact_type === type ? 'bg-spa-purple text-white' : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/10'}`}>{type}</button>)}</div>
                     <input type={freeListingForm.contact_type === 'phone' ? 'tel' : 'url'} placeholder={freeListingForm.contact_type === 'phone' ? '(555) 555-5555' : 'https://yourwebsite.com'} value={freeListingForm.contact_value} onChange={e => setFreeListingForm({ ...freeListingForm, contact_value: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" />
                   </div>
                   <div><label className="block text-sm font-medium text-spa-charcoal mb-2">Your Name</label><input type="text" placeholder="First and last name" value={freeListingForm.owner_name} onChange={e => setFreeListingForm({ ...freeListingForm, owner_name: e.target.value })} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30" /></div>
 
-                  {/* Logo upload */}
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-2">
                       Business Logo or Photo <span className="text-spa-gray font-normal text-xs">(optional — appears on your listing card)</span>
@@ -540,8 +573,8 @@ export default function ForVendors() {
                   <p className="text-xs text-spa-gray">Your listing will be reviewed before going live. You'll receive a confirmation email with next steps.</p>
                 </div>
                 <div className="flex gap-3 mt-6">
-                  <button onClick={resetFreeListingModal} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">Cancel</button>
-                  <button onClick={handleFreeListingSubmit} disabled={submitting || logoUploading} className="flex-1 btn-primary justify-center disabled:opacity-50">
+                  <button type="button" onClick={resetFreeListingModal} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">Cancel</button>
+                  <button type="button" onClick={handleFreeListingSubmit} disabled={submitting || logoUploading} className="flex-1 btn-primary justify-center disabled:opacity-50">
                     {logoUploading ? 'Uploading logo...' : submitting ? 'Submitting...' : 'Submit Free Listing'} <ArrowRight size={16} />
                   </button>
                 </div>
@@ -561,7 +594,11 @@ export default function ForVendors() {
               <p className="text-sm text-spa-gray mb-4">{selectedTier.description}</p>
               {selectedTier.eventAccess && <div className="flex items-center gap-2 text-sm text-spa-purple font-medium"><Store size={14} /> {selectedTier.eventAccess}</div>}
             </div>
-            <p className="text-sm text-spa-gray mb-6 text-center">{selectedTier.isLifetime ? "You'll be taken to Stripe's secure checkout for a one-time payment." : "You'll be taken to Stripe's secure checkout to complete your subscription."}</p>
+            <p className="text-xs text-spa-gray mb-6 text-center">
+              {selectedTier.isLifetime
+                ? 'Opens Stripe Checkout for a one-time founding payment. Use the email tied to your listing so your upgrade is easy to match.'
+                : 'Opens Stripe Checkout for your monthly subscription. Use the email tied to your listing so your upgrade is easy to match.'}
+            </p>
             <div className="flex gap-3">
               <button onClick={() => setShowConfirmModal(false)} className="flex-1 px-6 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium">Go Back</button>
               <button onClick={handleProceedToCheckout} className="flex-1 btn-primary justify-center">Proceed to Checkout <ArrowRight size={16} /></button>
@@ -587,7 +624,7 @@ export default function ForVendors() {
                     <label className="block text-sm font-medium text-spa-charcoal mb-2">Ad Size</label>
                     <div className="grid grid-cols-2 gap-2">
                       {adSizes.map(size => (
-                        <button key={size.name} onClick={() => setSelectedSize(size)} className={`p-3 rounded-xl text-left transition-colors ${selectedSize.name === size.name ? 'bg-spa-purple text-white' : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/10'}`}>
+                        <button key={size.name} type="button" onClick={() => setSelectedSize(size)} className={`p-3 rounded-xl text-left transition-colors ${selectedSize.name === size.name ? 'bg-spa-purple text-white' : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/10'}`}>
                           <p className="font-medium">{size.name}</p>
                           <p className={`text-xs ${selectedSize.name === size.name ? 'text-white/70' : 'text-spa-gray'}`}>{size.dimensions}</p>
                         </button>
@@ -620,20 +657,20 @@ export default function ForVendors() {
 
                 <div>
                   <label className="block text-sm font-medium text-spa-charcoal mb-2">Preview</label>
-                  <div className="bg-spa-lavender rounded-xl p-4 flex items-center justify-center min-h-[400px]">
+                  <div className="bg-spa-lavender rounded-xl p-4 flex items-center justify-center min-h-[360px]">
                     <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{ width: selectedSize.previewW, height: selectedSize.previewH }}>
                       {adPhoto ? (
-                        <img src={adPhoto} alt="Preview" className="w-full object-cover" style={{ height: selectedSize.name === 'Banner' ? '100%' : '55%' }} />
+                        <img src={adPhoto} alt="Preview" className="w-full object-cover" style={{ height: isCompactBanner ? '100%' : '55%' }} />
                       ) : (
-                        <div className="bg-gradient-to-r from-spa-pink/30 to-spa-purple/30 flex items-center justify-center" style={{ height: selectedSize.name === 'Banner' ? '100%' : '55%' }}>
+                        <div className="bg-gradient-to-r from-spa-pink/30 to-spa-purple/30 flex items-center justify-center" style={{ height: isCompactBanner ? '100%' : '55%' }}>
                           <Image size={20} className="text-spa-purple/50" />
                         </div>
                       )}
-                      {selectedSize.name !== 'Banner' && (
+                      {!isCompactBanner && (
                         <div className="p-2">
                           <p className="font-serif text-xs text-spa-charcoal font-medium truncate">{adText.headline || 'Your Business Name'}</p>
                           <p className="text-spa-gray mt-0.5 line-clamp-2" style={{ fontSize: '9px' }}>{adText.description || 'Your business description...'}</p>
-                          <button className="mt-1.5 px-2 py-0.5 bg-spa-purple text-white rounded-full" style={{ fontSize: '8px' }}>{adText.cta}</button>
+                          <span className="inline-block mt-1.5 px-2 py-0.5 bg-spa-purple text-white rounded-full" style={{ fontSize: '8px' }}>{adText.cta}</span>
                         </div>
                       )}
                     </div>
@@ -649,14 +686,14 @@ export default function ForVendors() {
                 <div className="mt-6 flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-3 rounded-xl text-sm"><X size={16} /> Not logged in — ad was downloaded but not saved to profile.</div>
               )}
 
-              <div className="flex gap-3 mt-6">
-                <button onClick={handleSaveToProfile} disabled={adSaving} className="flex-1 btn-primary justify-center disabled:opacity-50">
+              <div className="flex flex-wrap gap-3 mt-6">
+                <button type="button" onClick={handleSaveToProfile} disabled={adSaving} className="flex-1 btn-primary justify-center disabled:opacity-50">
                   <Save size={18} /> {adSaving ? 'Saving...' : 'Save to Profile & Download'}
                 </button>
-                <button onClick={handleDownload} disabled={adSaving} className="flex items-center gap-2 px-5 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium disabled:opacity-50">
+                <button type="button" onClick={handleDownload} disabled={adSaving} className="flex items-center gap-2 px-5 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm font-medium disabled:opacity-50">
                   <Download size={16} /> Download Only
                 </button>
-                <button onClick={() => setShowAdDesigner(false)} className="px-5 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm">Close</button>
+                <button type="button" onClick={() => setShowAdDesigner(false)} className="px-5 py-3 border border-spa-charcoal/20 rounded-full text-spa-charcoal hover:bg-spa-lavender transition-colors text-sm">Close</button>
               </div>
             </div>
           </div>
@@ -664,4 +701,8 @@ export default function ForVendors() {
       )}
     </div>
   );
+}
+
+function SparklesOrPalette() {
+  return <Palette size={24} className="text-spa-purple" />;
 }
