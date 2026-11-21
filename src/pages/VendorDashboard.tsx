@@ -155,7 +155,7 @@ export default function VendorDashboard() {
 
       if (currentUser) {
         await Promise.all([
-          loadProfile(currentUser.id),
+          loadProfile(currentUser.id, currentUser),
           loadMyEvents(currentUser.id, currentUser.email || ''),
         ]);
       }
@@ -166,7 +166,7 @@ export default function VendorDashboard() {
     }
   };
 
-  const loadProfile = async (userId: string) => {
+  const loadProfile = async (userId: string, currentUser?: any) => {
     const { data, error } = await supabase
       .from('vendor_profiles')
       .select('*')
@@ -199,8 +199,15 @@ export default function VendorDashboard() {
         setPhotos([]);
       }
     } else {
+      const metaBusinessName =
+        currentUser?.user_metadata?.business_name || authForm.business_name || '';
       setProfile(null);
       setPhotos([]);
+      setFormData((prev) => ({
+        ...prev,
+        business_name: prev.business_name || metaBusinessName,
+        tier: prev.tier || 'Starter',
+      }));
     }
   };
 
@@ -215,23 +222,28 @@ export default function VendorDashboard() {
       console.error('Error loading created events:', createdError);
     }
 
-    const { data: rsvpData, error: rsvpError } = await supabase
-      .from('event_rsvps')
-      .select(
+    let rsvpData: any[] = [];
+    if (userEmail.trim()) {
+      const { data: rsvps, error: rsvpError } = await supabase
+        .from('event_rsvps')
+        .select(
+          `
+          id,
+          user_email,
+          created_at,
+          is_vendor,
+          stripe_session_id,
+          events (*)
         `
-        id,
-        user_email,
-        created_at,
-        is_vendor,
-        stripe_session_id,
-        events (*)
-      `
-      )
-      .eq('user_email', userEmail)
-      .order('created_at', { ascending: false });
+        )
+        .ilike('user_email', userEmail.trim())
+        .order('created_at', { ascending: false });
 
-    if (rsvpError) {
-      console.error('Error loading joined events:', rsvpError);
+      if (rsvpError) {
+        console.error('Error loading joined events:', rsvpError);
+      } else if (rsvps) {
+        rsvpData = rsvps;
+      }
     }
 
     const created = (createdData || []).map((event: any) => ({
@@ -241,7 +253,7 @@ export default function VendorDashboard() {
 
     const createdIds = new Set(created.map((event: any) => event.id));
 
-    const joined = (rsvpData || [])
+    const joined = rsvpData
       .map((row: any) => {
         if (!row.events) return null;
         return {
@@ -313,7 +325,7 @@ export default function VendorDashboard() {
 
       if (upsertError) throw upsertError;
 
-      await loadProfile(user.id);
+      await loadProfile(user.id, user);
     } catch (err) {
       console.error('Photo upload error:', err);
     } finally {
@@ -348,7 +360,7 @@ export default function VendorDashboard() {
 
       if (error) throw error;
 
-      await loadProfile(user.id);
+      await loadProfile(user.id, user);
     } catch (err) {
       console.error('Remove photo error:', err);
     }
@@ -437,13 +449,15 @@ export default function VendorDashboard() {
     setAuthStatus('loading');
     setAuthError('');
 
-    const { error } = await supabase.auth.signUp({
+    const trimmedBusinessName = authForm.business_name.trim();
+
+    const { data, error } = await supabase.auth.signUp({
       email: authForm.email,
       password: authForm.password,
       options: {
         data: {
-          first_name: authForm.first_name,
-          business_name: authForm.business_name,
+          first_name: authForm.first_name.trim(),
+          business_name: trimmedBusinessName,
           role: 'vendor',
         },
       },
@@ -452,6 +466,22 @@ export default function VendorDashboard() {
     if (error) {
       setAuthError(error.message);
       setAuthStatus('error');
+      return;
+    }
+
+    if (data.user && data.session) {
+      if (trimmedBusinessName) {
+        await supabase.from('vendor_profiles').upsert(
+          {
+            user_id: data.user.id,
+            business_name: trimmedBusinessName,
+            tier: 'Starter',
+          },
+          { onConflict: 'user_id' }
+        );
+      }
+      await checkUser();
+      setAuthStatus('idle');
     } else {
       setAuthStatus('verify');
     }
@@ -520,6 +550,7 @@ export default function VendorDashboard() {
             <div className="bg-white rounded-2xl p-8 shadow-elegant">
               <div className="flex gap-2 mb-6 p-1 bg-spa-lavender rounded-full">
                 <button
+                  type="button"
                   onClick={() => setAuthMode('login')}
                   className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors ${
                     authMode === 'login' ? 'bg-white text-spa-charcoal shadow-sm' : 'text-spa-gray'
@@ -528,6 +559,7 @@ export default function VendorDashboard() {
                   Sign In
                 </button>
                 <button
+                  type="button"
                   onClick={() => setAuthMode('signup')}
                   className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors ${
                     authMode === 'signup' ? 'bg-white text-spa-charcoal shadow-sm' : 'text-spa-gray'
@@ -612,6 +644,7 @@ export default function VendorDashboard() {
                 <p className="text-center text-sm text-spa-gray mt-4">
                   Don&apos;t have an account?{' '}
                   <button
+                    type="button"
                     onClick={() => setAuthMode('signup')}
                     className="text-spa-purple font-medium hover:underline"
                   >
@@ -621,12 +654,12 @@ export default function VendorDashboard() {
               )}
 
               <div className="mt-6 pt-6 border-t border-spa-charcoal/5 text-center">
-                <p className="text-xs text-spa-gray mb-3">Don&apos;t have a plan yet?</p>
+                <p className="text-xs text-spa-gray mb-3">Curious how vendor plans &amp; founding rates work?</p>
                 <Link
                   to="/vendors"
-                  className="text-spa-purple text-sm font-medium flex items-center justify-center gap-1 hover:gap-2 transition-all"
+                  className="text-spa-purple text-sm font-medium inline-flex items-center justify-center gap-1 hover:gap-2 transition-all group"
                 >
-                  View vendor plans <ArrowRight size={14} />
+                  Explore vendor plans <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-1" />
                 </Link>
               </div>
             </div>
@@ -636,7 +669,8 @@ export default function VendorDashboard() {
     );
   }
 
-  const TierIcon = tierIcons[profile?.tier || formData.tier || 'Starter'];
+  const currentTier = profile?.tier || formData.tier || 'Starter';
+  const TierIcon = tierIcons[currentTier] || Store;
 
   const tabs: { id: Tab; label: string; icon: any }[] = [
     { id: 'overview', label: 'Overview', icon: BarChart2 },
@@ -659,16 +693,17 @@ export default function VendorDashboard() {
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span
                 className={`text-xs px-3 py-1 rounded-full font-medium ${
-                  tierColors[profile?.tier || formData.tier || 'Starter']
+                  tierColors[currentTier] || tierColors.Starter
                 }`}
               >
-                {profile?.tier || formData.tier || 'Starter'} Plan
+                {currentTier} Plan
               </span>
               <span className="text-sm text-spa-gray">{user.email}</span>
             </div>
           </div>
 
           <button
+            type="button"
             onClick={handleLogout}
             className="flex items-center gap-2 text-spa-gray hover:text-spa-charcoal transition-colors text-sm"
           >
@@ -680,6 +715,7 @@ export default function VendorDashboard() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 activeTab === tab.id
@@ -696,14 +732,14 @@ export default function VendorDashboard() {
           <div className="space-y-6">
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { label: 'Profile Views', value: '—', icon: Eye, note: 'Coming soon' },
+                { label: 'Profile Views', value: '0', icon: Eye, note: 'Grows with local searches' },
                 {
                   label: 'My Events',
                   value: totalEvents,
                   icon: Calendar,
-                  note: eventLimits[profile?.tier || formData.tier || 'Starter'],
+                  note: eventLimits[currentTier] || eventLimits.Starter,
                 },
-                { label: 'Inquiries', value: '—', icon: Users, note: 'Coming soon' },
+                { label: 'Inquiries', value: '0', icon: Users, note: 'Direct mama & host leads' },
                 {
                   label: 'Listing Status',
                   value: listingStatusLabel,
@@ -733,7 +769,7 @@ export default function VendorDashboard() {
                     </p>
                   </div>
                 </div>
-                <button onClick={() => setActiveTab('profile')} className="btn-primary flex-shrink-0">
+                <button type="button" onClick={() => setActiveTab('profile')} className="btn-primary flex-shrink-0">
                   Set Up Profile <ChevronRight size={16} />
                 </button>
               </div>
@@ -741,6 +777,7 @@ export default function VendorDashboard() {
 
             <div className="grid sm:grid-cols-3 gap-4">
               <button
+                type="button"
                 onClick={() => setActiveTab('profile')}
                 className="bg-white rounded-2xl p-6 shadow-elegant text-left hover:shadow-elegant-hover transition-all group"
               >
@@ -754,6 +791,7 @@ export default function VendorDashboard() {
               </button>
 
               <button
+                type="button"
                 onClick={() => navigate('/create-event')}
                 className="bg-white rounded-2xl p-6 shadow-elegant text-left hover:shadow-elegant-hover transition-all group"
               >
@@ -767,6 +805,7 @@ export default function VendorDashboard() {
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   setActiveTab('events');
                   setEventsView('joined');
@@ -792,6 +831,7 @@ export default function VendorDashboard() {
 
               {!editing ? (
                 <button
+                  type="button"
                   onClick={() => {
                     setEditing(true);
                     setSaveStatus('idle');
@@ -804,6 +844,7 @@ export default function VendorDashboard() {
               ) : (
                 <div className="flex gap-2">
                   <button
+                    type="button"
                     onClick={() => {
                       setEditing(false);
                       setSaveStatus('idle');
@@ -827,6 +868,7 @@ export default function VendorDashboard() {
                   </button>
 
                   <button
+                    type="button"
                     onClick={handleSaveProfile}
                     disabled={saveStatus === 'saving'}
                     className="flex items-center gap-2 px-4 py-2 bg-spa-purple text-white rounded-full text-sm font-medium hover:bg-spa-purple/90 transition-colors disabled:opacity-50"
@@ -995,7 +1037,7 @@ export default function VendorDashboard() {
               <h2 className="font-serif text-2xl text-spa-charcoal">My Events</h2>
 
               <div className="flex flex-wrap gap-3">
-                <button onClick={() => navigate('/create-event')} className="btn-primary">
+                <button type="button" onClick={() => navigate('/create-event')} className="btn-primary">
                   <Plus size={16} /> Create a Vendor Event
                 </button>
 
@@ -1011,10 +1053,9 @@ export default function VendorDashboard() {
             <div className="bg-spa-purple/10 border border-spa-purple/20 rounded-2xl p-4 flex items-center gap-3">
               <TierIcon size={18} className="text-spa-purple flex-shrink-0" />
               <p className="text-sm text-spa-purple font-medium">
-                Your {profile?.tier || formData.tier || 'Starter'} plan includes{' '}
-                {eventLimits[profile?.tier || formData.tier || 'Starter']}.
-                {(profile?.tier || formData.tier || 'Starter') !== 'Enterprise' && (
-                  <button onClick={() => setActiveTab('subscription')} className="ml-2 underline">
+                Your {currentTier} plan includes {eventLimits[currentTier] || eventLimits.Starter}.
+                {currentTier !== 'Enterprise' && (
+                  <button type="button" onClick={() => setActiveTab('subscription')} className="ml-2 underline">
                     Upgrade for more →
                   </button>
                 )}
@@ -1023,6 +1064,7 @@ export default function VendorDashboard() {
 
             <div className="flex gap-2 overflow-x-auto pb-1">
               <button
+                type="button"
                 onClick={() => setEventsView('created')}
                 className={`px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   eventsView === 'created'
@@ -1034,6 +1076,7 @@ export default function VendorDashboard() {
               </button>
 
               <button
+                type="button"
                 onClick={() => setEventsView('joined')}
                 className={`px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   eventsView === 'joined'
@@ -1058,7 +1101,7 @@ export default function VendorDashboard() {
                 </p>
 
                 {eventsView === 'created' ? (
-                  <button onClick={() => navigate('/create-event')} className="btn-primary inline-flex">
+                  <button type="button" onClick={() => navigate('/create-event')} className="btn-primary inline-flex">
                     Create a Vendor Event <ArrowRight size={16} />
                   </button>
                 ) : (
@@ -1109,6 +1152,7 @@ export default function VendorDashboard() {
                     {event.isOwner ? (
                       <div className="flex flex-wrap gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
                         <button
+                          type="button"
                           onClick={() => navigate(`/events/${event.id}?edit=true`)}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-spa-lavender text-spa-charcoal rounded-full text-xs font-medium hover:bg-spa-purple/10 transition-colors"
                         >
@@ -1116,6 +1160,7 @@ export default function VendorDashboard() {
                         </button>
 
                         <button
+                          type="button"
                           onClick={() => handleDeleteEvent(event.id)}
                           disabled={deletingEventId === event.id}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-500 rounded-full text-xs font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
@@ -1156,12 +1201,8 @@ export default function VendorDashboard() {
                 </div>
 
                 <div>
-                  <h3 className="font-serif text-xl text-spa-charcoal">
-                    {profile?.tier || formData.tier || 'Starter'} Plan
-                  </h3>
-                  <p className="text-sm text-spa-gray">
-                    {eventLimits[profile?.tier || formData.tier || 'Starter']}
-                  </p>
+                  <h3 className="font-serif text-xl text-spa-charcoal">{currentTier} Plan</h3>
+                  <p className="text-sm text-spa-gray">{eventLimits[currentTier] || eventLimits.Starter}</p>
                 </div>
 
                 <span className="ml-auto px-4 py-1.5 bg-spa-purple/10 text-spa-purple text-sm font-medium rounded-full">
@@ -1170,7 +1211,7 @@ export default function VendorDashboard() {
               </div>
 
               <p className="text-sm text-spa-gray mb-6">
-                Manage your billing, update payment methods, view invoices, or cancel your subscription via the Stripe customer portal.
+                Manage billing, update your payment method, download invoices, or cancel anytime through the Stripe customer portal.
               </p>
 
               <a
@@ -1183,32 +1224,31 @@ export default function VendorDashboard() {
               </a>
             </div>
 
-            {(profile?.tier === 'Starter' || profile?.tier === 'Professional') &&
-              upgradeLinks[profile?.tier] && (
-                <div className="bg-spa-purple rounded-2xl p-8 text-white">
-                  <Crown size={24} className="text-spa-pink mb-3" />
-                  <h3 className="font-serif text-2xl mb-2">Upgrade your plan</h3>
-                  <p className="text-white/70 mb-6">
-                    Get more visibility, more events, and homepage banner placement with Enterprise.
-                  </p>
+            {(currentTier === 'Starter' || currentTier === 'Professional') && upgradeLinks[currentTier] && (
+              <div className="bg-spa-purple rounded-2xl p-8 text-white">
+                <Crown size={24} className="text-spa-pink mb-3" />
+                <h3 className="font-serif text-2xl mb-2">Want more local visibility?</h3>
+                <p className="text-white/75 mb-6">
+                  Step up for higher event limits, priority search placement, or homepage banner spots with Enterprise.
+                </p>
 
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    {upgradeLinks[profile.tier].map((link) => (
-                      <a
-                        key={link.url}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors flex items-center justify-center gap-2 text-sm"
-                      >
-                        {link.label} <ArrowRight size={16} />
-                      </a>
-                    ))}
-                  </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {upgradeLinks[currentTier].map((link) => (
+                    <a
+                      key={link.url}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors flex items-center justify-center gap-2 text-sm"
+                    >
+                      {link.label} <ArrowRight size={16} />
+                    </a>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-            {profile?.tier === 'Enterprise' && (
+            {currentTier === 'Enterprise' && (
               <div className="bg-spa-pink/10 border border-spa-pink/20 rounded-2xl p-6 flex items-center gap-4">
                 <Crown size={24} className="text-spa-pink flex-shrink-0" />
                 <div>
