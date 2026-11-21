@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { MapPin, Star, Phone, Globe, ArrowRight, Loader, X, Check, ChevronRight, Instagram, Facebook } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -36,6 +37,10 @@ function distanceMiles(lat1: number, lng1: number, lat2: number, lng2: number): 
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
     Math.sin(dLng/2) * Math.sin(dLng/2);
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function formatCleanAddress(address: string): string {
+  return address.replace(/,\s*(USA|United States)$/i, '').trim();
 }
 
 interface PlaceResult {
@@ -76,10 +81,8 @@ export default function LocalVendorSearch() {
   const [results, setResults] = useState<PlaceResult[]>([]);
   const [spaResults, setSpaResults] = useState<SupabaseVendor[]>([]);
   const [nearbyVendors, setNearbyVendors] = useState<VendorWithCoords[]>([]);
-  const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [selectedPin, setSelectedPin] = useState<string | null>(null);
 
   const [claimPlace, setClaimPlace] = useState<PlaceResult | null>(null);
   const [claimStatus, setClaimStatus] = useState<'idle'|'loading'|'success'|'error'|'noauth'>('idle');
@@ -119,15 +122,9 @@ export default function LocalVendorSearch() {
     setResults([]);
     setSpaResults([]);
     setNearbyVendors([]);
-    setSearchCenter(null);
-    setSelectedPin(null);
 
-    // Geocode the searcher's city/state
     const center = await geocode(city + ', ' + state);
     if (center) {
-      setSearchCenter(center);
-
-      // Fetch ALL active vendors in this category and geocode each
       const { data: allVendors } = await supabase
         .from('vendors')
         .select('*')
@@ -151,7 +148,6 @@ export default function LocalVendorSearch() {
 
         setNearbyVendors(inRadius);
 
-        // Also set exact-match results for the cards below the map
         const exactMatch = inRadius.filter(v =>
           v.city.toLowerCase() === city.toLowerCase() &&
           v.state.toLowerCase() === state.toLowerCase()
@@ -159,12 +155,10 @@ export default function LocalVendorSearch() {
         setSpaResults(exactMatch.length > 0 ? exactMatch : inRadius);
       }
     } else {
-      // Fallback: exact city match if geocoding fails
       const { data } = await supabase.from('vendors').select('*').eq('status', 'active').ilike('city', city).ilike('state', state).ilike('category', '%' + cat + '%');
       setSpaResults(data || []);
     }
 
-    // Google Places results
     const categoryData = CATEGORIES.find(c => c.label === cat);
     const query = (categoryData?.query || cat) + ' in ' + city + ' ' + state;
     if (apiKey) {
@@ -183,7 +177,7 @@ export default function LocalVendorSearch() {
           setResults(data.places.map((p: any) => ({
             place_id: p.id,
             name: p.displayName?.text || '',
-            vicinity: p.formattedAddress || '',
+            vicinity: formatCleanAddress(p.formattedAddress || ''),
             rating: p.rating,
             user_ratings_total: p.userRatingCount,
             photo_url: p.photos?.[0] ? 'https://places.googleapis.com/v1/' + p.photos[0].name + '/media?maxWidthPx=400&key=' + apiKey : undefined,
@@ -215,9 +209,7 @@ export default function LocalVendorSearch() {
     setResults([]);
     setSpaResults([]);
     setNearbyVendors([]);
-    setSearchCenter(null);
     setSearched(false);
-    setSelectedPin(null);
   };
 
   const openClaimModal = async (place: PlaceResult) => {
@@ -340,7 +332,7 @@ export default function LocalVendorSearch() {
               </h2>
               {searched && !loading && (
                 <p className="text-sm text-spa-gray mt-1">
-                  {nearbyVendors.length > 0 ? nearbyVendors.length + ' Spa-Pregio member' + (nearbyVendors.length !== 1 ? 's' : '') + ' within ' + RADIUS_MILES + ' miles' + (results.length > 0 ? ' · ' + results.length + ' Google results' : '') : results.length + ' results found'}
+                  {nearbyVendors.length > 0 ? nearbyVendors.length + ' Spa-Pregio member' + (nearbyVendors.length !== 1 ? 's' : '') + ' within ' + RADIUS_MILES + ' miles' + (results.length > 0 ? ' · ' + results.length + ' local directory picks' : '') : results.length + ' local directory picks'}
                 </p>
               )}
             </div>
@@ -372,7 +364,7 @@ export default function LocalVendorSearch() {
                     {selectedCategory} near {city}, {state}
                   </span>
                 </div>
-                <span className="text-xs text-spa-gray">Pan &amp; zoom to explore · Click any pin for details</span>
+                <span className="text-xs text-spa-gray">Pan &amp; zoom to explore</span>
               </div>
               <iframe
                 width="100%"
@@ -448,7 +440,7 @@ export default function LocalVendorSearch() {
               {spaResults.length > 0 && (
                 <div className="flex items-center gap-3 mb-5">
                   <div className="h-px flex-1 bg-spa-gray/20" />
-                  <span className="text-xs text-spa-gray bg-spa-cream px-4 py-1.5 rounded-full">More local results from Google</span>
+                  <span className="text-xs text-spa-gray bg-spa-cream px-4 py-1.5 rounded-full">Local businesses in {city}, {state}</span>
                   <div className="h-px flex-1 bg-spa-gray/20" />
                 </div>
               )}
@@ -462,24 +454,28 @@ export default function LocalVendorSearch() {
                         <div className="w-full h-full flex items-center justify-center"><MapPin size={40} className="text-spa-purple/30" /></div>
                       )}
                       <div className="absolute top-3 left-3">
-                        <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-spa-gray text-xs rounded-full font-medium">Unclaimed</span>
+                        <span className="px-3 py-1 bg-white/95 backdrop-blur-sm text-spa-purple text-xs rounded-full font-medium shadow-sm">
+                          Local Pick
+                        </span>
                       </div>
-                      {place.open_now !== undefined && (
+                      {place.open_now === true && (
                         <div className="absolute top-3 right-3">
-                          <span className={'px-3 py-1 text-xs rounded-full font-medium ' + (place.open_now ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700')}>
-                            {place.open_now ? 'Open Now' : 'Closed'}
+                          <span className="px-3 py-1 text-xs rounded-full font-medium bg-emerald-100 text-emerald-800 shadow-sm">
+                            Open Now
                           </span>
                         </div>
                       )}
                     </div>
                     <div className="p-5">
                       <h3 className="font-serif text-lg text-spa-charcoal">{place.name}</h3>
-                      <p className="text-xs text-spa-gray mt-1 truncate">{place.vicinity}</p>
+                      <p className="text-xs text-spa-gray mt-1 truncate">{formatCleanAddress(place.vicinity)}</p>
                       {place.rating && (
                         <div className="flex items-center gap-1 mt-2">
                           <Star size={13} className="text-amber-400 fill-amber-400" />
                           <span className="text-sm font-medium text-spa-charcoal">{place.rating}</span>
-                          <span className="text-xs text-spa-gray">({place.user_ratings_total?.toLocaleString()})</span>
+                          {place.user_ratings_total !== undefined && (
+                            <span className="text-xs text-spa-gray">({place.user_ratings_total.toLocaleString()} reviews)</span>
+                          )}
                         </div>
                       )}
                       <div className="flex gap-3 mt-3">
@@ -490,8 +486,11 @@ export default function LocalVendorSearch() {
                           <a href={place.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"><Globe size={12} /> Website</a>
                         )}
                       </div>
-                      <button onClick={() => openClaimModal(place)} className="w-full mt-4 px-4 py-2 bg-amber-50 border border-amber-300 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors flex items-center justify-center gap-2">
-                        Claim This Listing <ArrowRight size={14} />
+                      <button
+                        onClick={() => openClaimModal(place)}
+                        className="w-full mt-4 px-4 py-2.5 bg-amber-50 border border-amber-300 text-amber-800 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors flex items-center justify-center gap-2"
+                      >
+                        Claim &amp; Post Events Free <ArrowRight size={14} />
                       </button>
                     </div>
                   </div>
@@ -508,7 +507,7 @@ export default function LocalVendorSearch() {
             <div className="p-6 lg:p-8">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="font-serif text-2xl text-spa-charcoal">Claim Your Listing</h3>
+                  <h3 className="font-serif text-2xl text-spa-charcoal">Claim &amp; Post Events</h3>
                   <p className="text-sm text-spa-gray mt-1">{claimPlace.name}</p>
                 </div>
                 <button onClick={() => { setClaimPlace(null); setClaimStatus('idle'); }} className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal">
@@ -518,28 +517,31 @@ export default function LocalVendorSearch() {
               {claimStatus === 'noauth' && (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4"><Globe size={28} className="text-spa-purple" /></div>
-                  <h4 className="font-serif text-xl text-spa-charcoal mb-2">Account Required</h4>
-                  <p className="text-spa-gray text-sm mb-6">You need a free Spa-Pregio account to claim your listing.</p>
-                  <a href="/my-account" className="btn-primary inline-flex justify-center">Create Free Account <ArrowRight size={16} /></a>
+                  <h4 className="font-serif text-xl text-spa-charcoal mb-2">Free Account Required</h4>
+                  <p className="text-spa-gray text-sm mb-6">Create a free Spa-Pregio account to claim your listing and post local events.</p>
+                  <Link to="/my-account" className="btn-primary inline-flex justify-center">Create Free Account <ArrowRight size={16} /></Link>
                 </div>
               )}
               {claimStatus === 'success' && (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4"><Check size={28} className="text-spa-purple" /></div>
                   <h4 className="font-serif text-xl text-spa-charcoal mb-2">Claim Submitted!</h4>
-                  <p className="text-spa-gray text-sm">We'll review your listing within 1-2 business days.</p>
+                  <p className="text-spa-gray text-sm mb-6">We'll review your listing within 1–2 business days. You can also head to your dashboard to get ready for events and listing upgrades.</p>
+                  <Link to="/vendor-dashboard" className="btn-primary inline-flex justify-center">
+                    Go to Vendor Dashboard <ArrowRight size={16} />
+                  </Link>
                 </div>
               )}
               {(claimStatus === 'idle' || claimStatus === 'loading' || claimStatus === 'error') && (
                 <form onSubmit={handleClaimSubmit} className="space-y-4">
                   <div className="bg-spa-lavender rounded-xl p-4">
-                    <p className="text-xs uppercase tracking-wider text-spa-purple font-medium mb-1">From Google Places</p>
+                    <p className="text-xs uppercase tracking-wider text-spa-purple font-medium mb-1">Starter Listing Details</p>
                     <p className="text-sm text-spa-charcoal font-medium">{claimPlace.name}</p>
-                    <p className="text-xs text-spa-gray">{claimPlace.vicinity}</p>
+                    <p className="text-xs text-spa-gray">{formatCleanAddress(claimPlace.vicinity)}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-spa-charcoal mb-1">Business Description *</label>
-                    <textarea rows={3} required placeholder="Tell expectant mothers about your business..." value={claimForm.business_description} onChange={(e) => setClaimForm({...claimForm, business_description: e.target.value})} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none" />
+                    <textarea rows={3} required placeholder="Tell expectant mothers about your services, baby shower packages, or upcoming events..." value={claimForm.business_description} onChange={(e) => setClaimForm({...claimForm, business_description: e.target.value})} className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
