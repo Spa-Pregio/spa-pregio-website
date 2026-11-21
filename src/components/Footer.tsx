@@ -4,25 +4,31 @@ import { Instagram, Pin, Mail, Heart, Facebook } from 'lucide-react';
 export default function Footer() {
   return (
     <footer className="w-full bg-white border-t border-spa-purple/10">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-20">
-        <div className="grid lg:grid-cols-5 gap-12 lg:gap-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-14 lg:py-16">
+        <div className="grid lg:grid-cols-5 gap-10 lg:gap-8">
 
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link to="/" className="inline-flex items-center gap-2 mb-6">
-              <img src="/images/spa-pregio-icon-512.png" alt="Spa-Pregio™" className="h-12 w-auto" />
+            <Link to="/" className="inline-flex items-center gap-2.5 mb-5">
+              <img
+                src="/images/spa-pregio-icon-512.png"
+                alt="Spa-Pregio™"
+                className="h-11 w-auto mix-blend-multiply"
+              />
               <div className="flex flex-col">
-                <span className="font-serif text-2xl font-semibold tracking-tight">
+                <span className="font-serif text-2xl font-semibold tracking-tight leading-none">
                   <span className="text-spa-purple">Spa</span>
                   <span className="text-spa-charcoal">-</span>
                   <span className="text-spa-pink">Pregio</span>
                   <span className="text-spa-purple text-sm align-super">™</span>
                 </span>
-                <span className="text-xs text-spa-purple/70 uppercase tracking-[0.12em]">The Celebration Suite Movement™</span>
+                <span className="text-[11px] text-spa-purple/75 uppercase tracking-[0.12em] mt-1 whitespace-nowrap">
+                  The Celebration Suite Movement™
+                </span>
               </div>
             </Link>
-            <p className="text-spa-gray leading-relaxed max-w-sm mb-6">
-              Where motherhood becomes a celebration. Find vendors, plan your perfect suite, and join a community of mamas who get it.
+            <p className="text-spa-gray text-sm sm:text-base leading-relaxed max-w-sm mb-6">
+              Where motherhood becomes a celebration. Find trusted local vendors, plan your perfect suite, and join a community of mamas who get it.
             </p>
             <div className="flex gap-3">
               <a href="https://www.instagram.com/spapregio/" target="_blank" rel="noopener noreferrer"
@@ -52,8 +58,8 @@ export default function Footer() {
 
           {/* Explore */}
           <div>
-            <h4 className="font-medium text-spa-charcoal mb-4 text-sm uppercase tracking-wider">Explore</h4>
-            <ul className="space-y-3">
+            <h4 className="font-medium text-spa-charcoal mb-4 text-xs uppercase tracking-wider">Explore</h4>
+            <ul className="space-y-2.5 text-sm">
               {[
                 { name: 'Celebration Suites', href: '/suites' },
                 { name: 'Events', href: '/events' },
@@ -69,8 +75,8 @@ export default function Footer() {
 
           {/* Suite Sisters */}
           <div>
-            <h4 className="font-medium text-spa-charcoal mb-4 text-sm uppercase tracking-wider">Suite Sisters™</h4>
-            <ul className="space-y-3">
+            <h4 className="font-medium text-spa-charcoal mb-4 text-xs uppercase tracking-wider">Suite Sisters™</h4>
+            <ul className="space-y-2.5 text-sm">
               {[
                 { name: 'Become a Suite Sister™', href: '/ambassadors', external: false },
                 { name: 'Sister Dashboard', href: '/sister-dashboard', external: false },
@@ -89,8 +95,8 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="font-medium text-spa-charcoal mb-4 text-sm uppercase tracking-wider">Support</h4>
-            <ul className="space-y-3">
+            <h4 className="font-medium text-spa-charcoal mb-4 text-xs uppercase tracking-wider">Support</h4>
+            <ul className="space-y-2.5 text-sm">
               {[
                 { name: 'List Your Business', href: '/vendors' },
                 { name: 'Vendor Dashboard', href: '/vendor-dashboard' },
@@ -108,7 +114,7 @@ export default function Footer() {
 
         </div>
 
-        <div className="mt-16 pt-8 border-t border-spa-purple/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-12 pt-8 border-t border-spa-purple/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-spa-gray">© 2026 Spa-Pregio™. All rights reserved.</p>
           <p className="text-sm text-spa-gray flex items-center gap-1">
             Made with <Heart size={14} className="text-spa-pink fill-spa-pink" /> for expectant mothers everywhere
