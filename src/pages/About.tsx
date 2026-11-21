@@ -13,8 +13,8 @@ const values = [
   },
   {
     icon: Sparkles,
-    title: 'Elevated & Intimate',
-    desc: "After 25 years in the beauty industry, we know what it feels like to be truly pampered. Spa-Pregio brings that elevated, personal touch to every mama's journey.",
+    title: 'Warm & Intentional',
+    desc: "After 25 years in the beauty industry, we know what it feels like to be truly pampered. Spa-Pregio brings that thoughtful, personal care to every mama's journey.",
   },
   {
     icon: Users,
@@ -65,16 +65,16 @@ export default function About() {
   };
 
   return (
-    <div className="w-full pt-20">
+    <div className="w-full pt-16 lg:pt-20">
       {/* Hero */}
-      <section className="w-full py-16 lg:py-24 bg-spa-cream">
+      <section className="w-full py-16 lg:py-22 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center max-w-3xl mx-auto">
-            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Our Story</span>
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple font-medium">Our Story</span>
             <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-spa-charcoal leading-tight mt-4">
               It started with a <span className="text-spa-purple">shrimp ring.</span>
             </h1>
-            <p className="mt-6 text-lg text-spa-gray leading-relaxed">
+            <p className="mt-5 text-lg text-spa-gray leading-relaxed">
               And a late-night craving. And a joke that became a calling.
             </p>
           </div>
@@ -86,7 +86,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
-              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">The "Uh Oh" Moment</span>
+              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple font-medium">The "Uh Oh" Moment</span>
               <h2 className="section-title mt-4">
                 "Uh Oh, <span className="text-spa-purple"><BrandTM /></span>"
               </h2>
@@ -100,16 +100,13 @@ export default function About() {
                 <p>
                   I was teasing her — her husband had just had a vasectomy, and here she was craving shrimp rings at midnight. We laughed. But that name? It stuck. And somewhere between the laughter and the shrimp ring, a brand was born.
                 </p>
-                <p>
-                  That's the thing about real moments — they have a way of becoming something bigger than you expected.
-                </p>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative pb-4 pl-4">
               <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-elegant">
                 <img src="/images/connect_bright.jpg" alt="Mothers connecting" className="w-full h-full object-cover" />
               </div>
-              <div className="absolute -bottom-4 -left-4 bg-spa-purple text-white px-6 py-4 rounded-2xl shadow-lg max-w-[220px]">
+              <div className="absolute bottom-0 left-0 bg-spa-purple text-white px-6 py-4 rounded-2xl shadow-lg max-w-[230px]">
                 <p className="font-serif text-sm italic">"Every mama deserves to be celebrated."</p>
               </div>
             </div>
@@ -127,7 +124,7 @@ export default function About() {
               </div>
             </div>
             <div className="order-1 lg:order-2">
-              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">The Mission</span>
+              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple font-medium">The Mission</span>
               <h2 className="section-title mt-4">
                 25 years of listening to <span className="text-spa-purple">women.</span>
               </h2>
@@ -154,7 +151,7 @@ export default function About() {
       <section className="w-full py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <div className="relative">
+            <div className="relative pb-5 pr-4">
               <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-elegant">
                 <img
                   src="/images/angie_founder.jpeg"
@@ -162,13 +159,13 @@ export default function About() {
                   className="w-full h-full object-cover object-top"
                 />
               </div>
-              <div className="absolute -bottom-4 -right-4 bg-white border border-spa-light rounded-2xl shadow-elegant px-6 py-4 max-w-[220px]">
+              <div className="absolute bottom-0 right-0 bg-white border border-spa-light rounded-2xl shadow-elegant px-6 py-4 max-w-[235px]">
                 <p className="font-serif text-sm text-spa-charcoal italic">"Every gift deserves to be wrapped with love."</p>
                 <p className="text-xs text-spa-purple mt-2 font-medium">— Angie, Founder</p>
               </div>
             </div>
             <div>
-              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">From a Grandmother's Heart</span>
+              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple font-medium">From a Grandmother's Heart</span>
               <h2 className="section-title mt-4">
                 The world has stopped <span className="text-spa-purple">celebrating mamas.</span>
               </h2>
@@ -199,7 +196,7 @@ export default function About() {
       <section className="w-full py-16 lg:py-20 bg-spa-cream">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-16">
-            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">What We Stand For</span>
+            <span className="text-sm uppercase tracking-[0.15em] text-spa-purple font-medium">What We Stand For</span>
             <h2 className="section-title mt-4">
               What we <span className="text-spa-purple">believe.</span>
             </h2>
@@ -223,7 +220,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
             <div>
-              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple">Contact</span>
+              <span className="text-sm uppercase tracking-[0.15em] text-spa-purple font-medium">Contact</span>
               <h2 className="section-title mt-4">
                 Get in <span className="text-spa-purple">touch.</span>
               </h2>
@@ -301,30 +298,36 @@ export default function About() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Curiosity-Led CTA */}
       <section className="w-full py-16 lg:py-20 bg-spa-purple">
         <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center">
+          <span className="inline-block text-xs uppercase tracking-[0.2em] text-spa-blush font-semibold mb-3">
+            See It In Action
+          </span>
           <h2 className="font-serif text-3xl lg:text-4xl text-white">
-            Ready to join the <span className="text-spa-pink">movement?</span>
+            Curious what a <BrandTM /> celebration looks like?
           </h2>
-          <p className="mt-4 text-white/70 leading-relaxed">
-            Free membership. A community of mamas who celebrate each other. Local vendors who show up for you.
+          <p className="mt-4 text-white/80 leading-relaxed max-w-2xl mx-auto">
+            Peek inside our ready-to-launch digital suites or see what local spas, bakers, and hosts are planning near you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <Link
-              to="/join"
-              className="bg-white text-spa-purple px-6 py-3 rounded-full font-medium hover:bg-spa-cream transition-colors inline-flex items-center justify-center gap-2"
+              to="/suites"
+              className="group bg-white text-spa-purple px-7 py-3.5 rounded-full font-semibold hover:bg-spa-cream transition-colors inline-flex items-center justify-center gap-2 shadow-sm"
             >
-              Become a Member — Free
-              <ArrowRight size={18} />
+              Peek Inside a Celebration Suite
+              <ArrowRight size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
             <Link
               to="/events"
-              className="px-6 py-3 border-2 border-white/30 text-white rounded-full font-medium hover:bg-white/10 transition-colors"
+              className="group px-7 py-3.5 border-2 border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition-colors inline-flex items-center justify-center gap-2"
             >
-              Explore Events
+              See What's Happening Near You
             </Link>
           </div>
+          <p className="text-xs italic text-white/65 mt-4 font-serif">
+            No account needed to browse — take a look around in 60 seconds.
+          </p>
         </div>
       </section>
     </div>
