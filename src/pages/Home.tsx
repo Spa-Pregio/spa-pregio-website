@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
+import { Sparkles, CalendarHeart, Users } from "lucide-react";
 import EnterpriseBanner from "../components/EnterpriseBanner";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-spa-cream font-sans">
+    <div className="min-h-screen bg-spa-cream font-sans pt-16 lg:pt-20">
 
       {/* HERO */}
       <section className="relative overflow-hidden bg-spa-cream">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 md:gap-16 items-center px-6 py-16 md:py-24">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 md:gap-16 items-center px-6 py-12 md:py-20">
 
           {/* Text */}
           <div className="text-center md:text-left">
@@ -21,8 +22,8 @@ export default function Home() {
               <span className="italic text-spa-pink"> and a whole community shows up.</span>
             </h1>
 
-            <p className="text-lg text-spa-gray max-w-md mx-auto md:mx-0 mb-10 leading-relaxed">
-              You don't have to do pregnancy alone. And you shouldn't.
+            <p className="text-lg text-spa-gray max-w-md mx-auto md:mx-0 mb-8 leading-relaxed">
+              Curated digital celebration suites, mama-friendly local vendors, and community events—all in one place.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
@@ -60,55 +61,55 @@ export default function Home() {
       </section>
 
       {/* TWO PATHS */}
-      <section className="py-16 px-6 bg-white">
+      <section className="pt-14 pb-8 px-6 bg-white">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
 
-          <div className="rounded-3xl bg-spa-blush p-10 flex flex-col">
+          <div className="rounded-3xl bg-spa-blush p-8 sm:p-10 flex flex-col">
             <h2 className="text-2xl font-bold text-spa-charcoal mb-3 font-serif">
-              For Moms & Hosts
+              For Moms &amp; Hosts
             </h2>
 
             <p className="text-spa-gray leading-relaxed mb-6 flex-1">
               Planning a baby shower, gender reveal, sip-and-see, or push present?
-              Start your celebration and we’ll guide you every step of the way.
+              Pick a digital celebration suite, invite guests, and book trusted local pros in minutes.
             </p>
 
             <div className="flex flex-col gap-3">
               <Link to="/suites" className="text-center px-6 py-3 rounded-full bg-spa-purple text-white text-sm font-semibold hover:bg-[#7d5fa0] transition-colors">
                 Shop Celebration Suites
               </Link>
-              <Link to="/about" className="text-center px-6 py-3 rounded-full border border-spa-purple text-spa-purple text-sm font-semibold hover:bg-spa-blush transition-colors">
-                Meet the Movement
+              <Link to="/events" className="text-center px-6 py-3 rounded-full border border-spa-purple text-spa-purple text-sm font-semibold hover:bg-white/60 transition-colors">
+                Browse Local Events
               </Link>
             </div>
           </div>
 
-          <div className="rounded-3xl bg-spa-light p-10 flex flex-col">
+          <div className="rounded-3xl bg-spa-light p-8 sm:p-10 flex flex-col">
             <h2 className="text-2xl font-bold text-spa-charcoal mb-3 font-serif">
-              For Vendors & Partners
+              For Vendors &amp; Partners
             </h2>
 
             <p className="text-spa-gray leading-relaxed mb-6 flex-1">
-              Connect with hosts actively planning celebrations in your community
-              and grow your business through Spa-Pregio™.
+              Claim your free local directory profile, post mom-to-be events and workshops,
+              and connect with expecting families actively planning in your city.
             </p>
 
             <div className="flex flex-col gap-3">
               <Link to="/vendors" className="text-center px-6 py-3 rounded-full bg-spa-charcoal text-white text-sm font-semibold hover:bg-[#555] transition-colors">
-                Become a Vendor Partner
+                Claim or List Your Business
               </Link>
-              <Link to="/ambassadors" className="text-center px-6 py-3 rounded-full border border-spa-charcoal text-spa-charcoal text-sm font-semibold hover:bg-spa-light transition-colors">
-                Become a Suite Sister
+              <Link to="/ambassadors" className="text-center px-6 py-3 rounded-full border border-spa-charcoal text-spa-charcoal text-sm font-semibold hover:bg-white/60 transition-colors">
+                Become a Suite Sister™
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS (UPDATED) */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+      {/* HOW IT WORKS */}
+      <section className="pt-10 pb-16 px-6 bg-white">
+        <div className="max-w-5xl mx-auto border-t border-stone-100 pt-14">
+          <div className="text-center mb-12">
             <span className="text-xs tracking-[0.25em] uppercase text-spa-purple font-semibold">
               Simple by Design
             </span>
@@ -122,24 +123,24 @@ export default function Home() {
               {
                 step: "01",
                 title: "Choose Your Celebration",
-                desc: "Start with the milestone you’re planning.",
+                desc: "Start with the milestone you’re planning—shower, reveal, or pampering day.",
               },
               {
                 step: "02",
                 title: "Select Your Suite",
-                desc: "Pick a curated experience designed for your moment.",
+                desc: "Pick a digital celebration suite and connect with mama-friendly local vendors.",
               },
               {
                 step: "03",
                 title: "Launch Your Event",
-                desc: "Create your event, invite guests, and bring it to life.",
+                desc: "Publish your event page, invite guests, and bring your celebration to life.",
               },
             ].map(({ step, title, desc }) => (
               <div key={step} className="text-center px-4">
-                <div className="text-6xl font-bold text-spa-pink mb-4 leading-none font-serif">
+                <div className="text-5xl sm:text-6xl font-bold text-spa-pink mb-4 leading-none font-serif">
                   {step}
                 </div>
-                <h3 className="text-lg font-bold text-spa-charcoal mb-3">
+                <h3 className="text-lg font-bold text-spa-charcoal mb-2">
                   {title}
                 </h3>
                 <p className="text-spa-gray leading-relaxed text-sm">{desc}</p>
@@ -147,10 +148,51 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-10">
             <Link to="/suites" className="inline-block px-8 py-4 rounded-full bg-spa-purple text-white text-sm font-semibold shadow-elegant hover:bg-[#7d5fa0] transition-colors">
               Start Your Celebration
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* PLATFORM PILLARS */}
+      <section className="py-14 px-6 bg-spa-cream/60 border-t border-stone-200/60">
+        <div className="max-w-5xl mx-auto grid sm:grid-cols-3 gap-6">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100">
+            <div className="w-10 h-10 rounded-full bg-spa-lavender flex items-center justify-center text-spa-purple mb-4">
+              <Sparkles size={18} />
+            </div>
+            <h3 className="font-serif text-lg font-semibold text-spa-charcoal mb-1.5">
+              Digital Celebration Suites
+            </h3>
+            <p className="text-sm text-spa-gray leading-relaxed">
+              Ready-to-launch digital invites, shower themes, and planning kits designed for modern hosts.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100">
+            <div className="w-10 h-10 rounded-full bg-spa-blush flex items-center justify-center text-spa-pink mb-4">
+              <CalendarHeart size={18} />
+            </div>
+            <h3 className="font-serif text-lg font-semibold text-spa-charcoal mb-1.5">
+              Local Vendors &amp; Events
+            </h3>
+            <p className="text-sm text-spa-gray leading-relaxed">
+              Discover vetted prenatal spas, bakers, and event venues—or RSVP to local mom-to-be gatherings.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100">
+            <div className="w-10 h-10 rounded-full bg-spa-lavender flex items-center justify-center text-spa-purple mb-4">
+              <Users size={18} />
+            </div>
+            <h3 className="font-serif text-lg font-semibold text-spa-charcoal mb-1.5">
+              Suite Sisters™ Community
+            </h3>
+            <p className="text-sm text-spa-gray leading-relaxed">
+              Earn commissions by sharing digital suites and inviting favorite local businesses to join.
+            </p>
           </div>
         </div>
       </section>
