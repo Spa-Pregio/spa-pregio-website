@@ -955,4 +955,50 @@ export default function LocalVendorSearch({ initialCategory = 'All' }: LocalVend
                             onClick={() =>
                               setClaimForm((prev) => ({
                                 ...prev,
-                                service_categories:
+                                service_categories: selected
+                                  ? prev.service_categories.filter((c) => c !== cat.label)
+                                  : [...prev.service_categories, cat.label],
+                              }))
+                            }
+                            className={
+                              'px-3 py-1.5 rounded-full text-xs font-medium transition-colors ' +
+                              (selected
+                                ? 'bg-spa-purple text-white'
+                                : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/10')
+                            }
+                          >
+                            {cat.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {claimError && <p className="text-red-500 text-sm">{claimError}</p>}
+
+                  <button
+                    type="submit"
+                    disabled={
+                      claimStatus === 'loading' || claimForm.service_categories.length === 0
+                    }
+                    className="btn-primary w-full justify-center disabled:opacity-50"
+                  >
+                    {claimStatus === 'loading' ? (
+                      <>
+                        <Loader size={16} className="animate-spin" /> Submitting...
+                      </>
+                    ) : (
+                      <>
+                        Submit Claim <ArrowRight size={16} />
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
