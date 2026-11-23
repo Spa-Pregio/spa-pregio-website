@@ -375,4 +375,324 @@ export default function ForVendors() {
       </section>
 
       {/* Founding Vendor Lifetime Access Tiers */}
-      <section id="founding-tiers" className="w-full py-16 bg-spa-charcoal text
+      <section id="founding-tiers" className="w-full py-16 bg-spa-charcoal text-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-xs uppercase tracking-[0.2em] text-spa-blush font-semibold">
+              Limited Time Offer
+            </span>
+            <h2 className="font-serif text-3xl sm:text-5xl mt-2">
+              Founding Vendor <span className="text-spa-blush">Lifetime Access</span>
+            </h2>
+            <p className="text-white/75 text-sm sm:text-base mt-3">
+              One payment. No recurring monthly fees. Limited to the first 100 founding partners sitewide.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 items-stretch">
+            {/* Starter */}
+            <div className="rounded-3xl bg-white/5 border border-white/15 p-7 flex flex-col">
+              <p className="font-serif text-2xl">Starter</p>
+              <p className="text-xs text-white/70 mt-1">Lock in full Starter access forever.</p>
+              <div className="mt-5 flex items-baseline gap-2">
+                <span className="font-serif text-4xl font-bold">$199</span>
+                <span className="text-xs text-white/60">one-time</span>
+                <span className="text-xs line-through text-white/45">$29/mo</span>
+              </div>
+              <ul className="space-y-2.5 mt-6 text-sm text-white/85 flex-1">
+                {[
+                  'Full Starter directory listing',
+                  'Founding Member badge',
+                  'Up to 2 events/month',
+                  'No monthly subscription fee',
+                ].map((line) => (
+                  <li key={line} className="flex items-center gap-2">
+                    <Check size={15} className="text-spa-blush flex-shrink-0" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+              <a
+                href={FOUNDING_LINKS.Starter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-7 w-full py-3.5 px-5 rounded-full bg-spa-pink text-spa-charcoal font-semibold text-sm text-center hover:opacity-95 transition-opacity inline-flex items-center justify-center gap-2"
+              >
+                Claim Founding Rate - $199 <ArrowRight size={15} />
+              </a>
+            </div>
+
+            {/* Professional */}
+            <div className="rounded-3xl bg-spa-purple border-2 border-spa-blush p-7 flex flex-col shadow-xl relative">
+              <span className="self-start px-3 py-1 rounded-full bg-white text-spa-purple text-[11px] font-bold uppercase tracking-wider mb-3">
+                Best Value
+              </span>
+              <p className="font-serif text-2xl">Professional</p>
+              <p className="text-xs text-white/80 mt-1">Priority visibility &amp; up to 5 events/month.</p>
+              <div className="mt-5 flex items-baseline gap-2">
+                <span className="font-serif text-4xl font-bold">$499</span>
+                <span className="text-xs text-white/75">one-time</span>
+                <span className="text-xs line-through text-white/55">$79/mo</span>
+              </div>
+              <ul className="space-y-2.5 mt-6 text-sm text-white/95 flex-1">
+                {[
+                  'Everything in Starter plan',
+                  'Priority local category placement',
+                  'Up to 5 events/month',
+                  'Founding Member badge + lifetime lock',
+                ].map((line) => (
+                  <li key={line} className="flex items-center gap-2">
+                    <Check size={15} className="text-spa-blush flex-shrink-0" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+              <a
+                href={FOUNDING_LINKS.Professional}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-7 w-full py-3.5 px-5 rounded-full bg-white text-spa-purple font-semibold text-sm text-center hover:bg-spa-cream transition-colors inline-flex items-center justify-center gap-2"
+              >
+                Claim Founding Rate - $499 <ArrowRight size={15} />
+              </a>
+            </div>
+
+            {/* Enterprise */}
+            <div className="rounded-3xl bg-white/5 border border-white/15 p-7 flex flex-col">
+              <div className="flex items-center justify-between">
+                <p className="font-serif text-2xl">Enterprise</p>
+                <Crown size={20} className="text-spa-blush" />
+              </div>
+              <p className="text-xs text-white/70 mt-1">Unlimited events &amp; homepage spotlight access.</p>
+              <div className="mt-5 flex items-baseline gap-2">
+                <span className="font-serif text-4xl font-bold">$999</span>
+                <span className="text-xs text-white/60">one-time</span>
+                <span className="text-xs line-through text-white/45">$149/mo</span>
+              </div>
+              <ul className="space-y-2.5 mt-6 text-sm text-white/85 flex-1">
+                {[
+                  'Everything in Professional plan',
+                  'Unlimited local events',
+                  'Ad Designer homepage spotlight eligibility',
+                  'Founding Member badge + lifetime lock',
+                ].map((line) => (
+                  <li key={line} className="flex items-center gap-2">
+                    <Check size={15} className="text-spa-blush flex-shrink-0" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+              <a
+                href={FOUNDING_LINKS.Enterprise}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-7 w-full py-3.5 px-5 rounded-full bg-spa-pink text-spa-charcoal font-semibold text-sm text-center hover:opacity-95 transition-opacity inline-flex items-center justify-center gap-2"
+              >
+                Claim Founding Rate - $999 <ArrowRight size={15} />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Free Starter Listing Form */}
+      <section ref={signupRef} className="w-full py-16 bg-spa-cream scroll-mt-20">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-3xl shadow-elegant p-6 sm:p-10 border border-spa-purple/10">
+            <div className="text-center mb-8">
+              <span className="text-xs uppercase tracking-[0.18em] text-spa-purple font-semibold">
+                Free Starter Listing
+              </span>
+              <h2 className="font-serif text-3xl text-spa-charcoal mt-2">
+                Submit your business in under 2 minutes.
+              </h2>
+              <p className="text-sm text-spa-gray mt-2">
+                Start with a free listing or manage full profile photos in your Vendor Dashboard.
+              </p>
+            </div>
+
+            {submitted ? (
+              <div className="text-center py-8 space-y-4">
+                <div className="w-14 h-14 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto">
+                  <Check size={28} className="text-spa-purple" />
+                </div>
+                <h3 className="font-serif text-2xl text-spa-charcoal">Listing Submitted!</h3>
+                <p className="text-sm text-spa-gray max-w-md mx-auto">
+                  We received your submission for <strong>{formData.business_name}</strong> under{' '}
+                  <strong>{formData.category}</strong>. You can also sign into your Vendor Dashboard to customize your profile.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                  <Link to="/vendor-dashboard" className="btn-primary justify-center">
+                    Go to Vendor Dashboard <ArrowRight size={16} />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSubmitted(false);
+                      setFormData({
+                        business_name: '',
+                        contact_name: '',
+                        email: '',
+                        phone: '',
+                        city: '',
+                        state: 'NC',
+                        category: selectedCategory,
+                        description: '',
+                        website: '',
+                      });
+                    }}
+                    className="px-6 py-3 rounded-full bg-spa-lavender text-spa-charcoal text-sm font-medium hover:bg-spa-purple/10 transition-colors"
+                  >
+                    Submit Another Business
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleQuickSignup} className="space-y-4">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">
+                      Business Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.business_name}
+                      onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
+                      placeholder="e.g., Triad Prenatal Glow Spa"
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">
+                      Category *
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => {
+                        setFormData({ ...formData, category: e.target.value });
+                        setSelectedCategory(e.target.value);
+                      }}
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    >
+                      {VENDOR_CATEGORIES.map((c) => (
+                        <option key={c.label} value={c.label}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">
+                      City *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      placeholder="e.g., High Point"
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">
+                      State *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={2}
+                      value={formData.state}
+                      onChange={(e) =>
+                        setFormData({ ...formData, state: e.target.value.toUpperCase() })
+                      }
+                      placeholder="NC"
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="you@business.com"
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-spa-charcoal mb-1">
+                      Phone or Website
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.phone || formData.website}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="(336) 555-0199 or https://..."
+                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                    />
+                  </div>
+                </div>
+
+                {submitError && (
+                  <p className="text-sm text-red-600 bg-red-50 px-4 py-2.5 rounded-xl">
+                    {submitError}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn-primary w-full justify-center py-3.5 text-base disabled:opacity-50"
+                >
+                  {submitting ? 'Submitting...' : 'Submit Free Listing'}
+                  <ArrowRight size={17} />
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom CTA Banner */}
+      <section className="w-full py-14 bg-spa-purple text-center">
+        <div className="max-w-4xl mx-auto px-6">
+          <h2 className="font-serif text-3xl sm:text-4xl text-white">
+            Ready to grow your <span className="text-spa-blush italic">business?</span>
+          </h2>
+          <p className="text-white/80 text-sm sm:text-base mt-2">
+            Get in front of local mamas who are ready to plan, celebrate, and book.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+            <button
+              type="button"
+              onClick={scrollToForm}
+              className="px-6 py-3 rounded-full bg-white text-spa-purple font-semibold text-sm hover:bg-spa-cream transition-colors inline-flex items-center justify-center gap-2"
+            >
+              Start Free <ArrowRight size={15} />
+            </button>
+            <a
+              href="#founding-tiers"
+              className="px-6 py-3 rounded-full bg-spa-pink text-spa-charcoal font-semibold text-sm hover:opacity-95 transition-opacity inline-flex items-center justify-center gap-2"
+            >
+              <Zap size={15} /> Claim Founding Rate
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
