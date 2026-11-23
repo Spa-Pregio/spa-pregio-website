@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   MapPin,
@@ -13,28 +13,139 @@ import {
   Facebook,
   Navigation,
   Search,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
 export const VENDOR_CATEGORIES = [
-  { label: 'Maternity Boutiques', emoji: '👗', query: 'maternity boutique clothing' },
-  { label: 'Local Crafters', emoji: '🧶', query: 'handmade gifts local crafter baby' },
-  { label: 'Spas & Wellness', emoji: '💆‍♀️', query: 'prenatal spa wellness' },
-  { label: 'Photographers', emoji: '📸', query: 'maternity photographer' },
-  { label: 'Caterers & Bakers', emoji: '🎂', query: 'baby shower catering bakery' },
-  { label: 'Event Venues', emoji: '🏡', query: 'event venue baby shower' },
-  { label: 'Florists', emoji: '💐', query: 'florist baby shower' },
-  { label: 'Party Planners', emoji: '🎉', query: 'baby shower party planner' },
-  { label: 'Realtors', emoji: '🔑', query: 'family realtor home buying' },
-  { label: 'Pediatricians', emoji: '👶', query: 'pediatrician newborn care' },
-  { label: 'OB-GYN & Midwives', emoji: '🏥', query: 'obgyn midwife prenatal' },
-  { label: 'Doulas', emoji: '🤱', query: 'birth doula postpartum doula' },
-  { label: 'Lactation Consultants', emoji: '🍼', query: 'lactation consultant breastfeeding' },
-  { label: 'Postpartum Support', emoji: '💜', query: 'postpartum support new mother' },
-  { label: 'Family Therapists & Counselors', emoji: '🌿', query: 'family therapist maternal counselor' },
-  { label: 'Insurance Agents', emoji: '🛡️', query: 'family life health insurance agent' },
-  { label: 'House Cleaning Services', emoji: '🏠', query: 'house cleaning service' },
-  { label: 'Estate Planning & Attorneys', emoji: '📄', query: 'estate planning family attorney' },
+  {
+    label: 'Spas & Wellness',
+    subtitle: 'Prenatal massage & pampering',
+    emoji: '💆‍♀️',
+    query: 'prenatal spa wellness',
+    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Photographers',
+    subtitle: 'Maternity & newborn portraits',
+    emoji: '📸',
+    query: 'maternity photographer',
+    image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Caterers & Bakers',
+    subtitle: 'Custom cakes & shower spreads',
+    emoji: '🎂',
+    query: 'baby shower catering bakery',
+    image: 'https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Event Venues',
+    subtitle: 'Intimate spaces for sip & sees',
+    emoji: '🏡',
+    query: 'event venue baby shower',
+    image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Maternity Boutiques',
+    subtitle: 'Bump-friendly style & robes',
+    emoji: '👗',
+    query: 'maternity boutique clothing',
+    image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Florists',
+    subtitle: 'Lush bouquets & table florals',
+    emoji: '💐',
+    query: 'florist baby shower',
+    image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Party Planners',
+    subtitle: 'Stress-free shower styling',
+    emoji: '🎉',
+    query: 'baby shower party planner',
+    image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Local Crafters',
+    subtitle: 'Custom keepsakes & signage',
+    emoji: '🧶',
+    query: 'handmade gifts local crafter baby',
+    image: 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Doulas',
+    subtitle: 'Birth & postpartum guidance',
+    emoji: '🤱',
+    query: 'birth doula postpartum doula',
+    image: 'https://images.unsplash.com/photo-1531983412531-1f49a365ffed?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'OB-GYN & Midwives',
+    subtitle: 'Trusted prenatal care',
+    emoji: '🏥',
+    query: 'obgyn midwife prenatal',
+    image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Lactation Consultants',
+    subtitle: 'Feeding & nursing support',
+    emoji: '🍼',
+    query: 'lactation consultant breastfeeding',
+    image: 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Postpartum Support',
+    subtitle: 'Fourth-trimester recovery',
+    emoji: '💜',
+    query: 'postpartum support new mother',
+    image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Pediatricians',
+    subtitle: 'Newborn & infant doctors',
+    emoji: '👶',
+    query: 'pediatrician newborn care',
+    image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Family Therapists & Counselors',
+    subtitle: 'Maternal & family wellbeing',
+    emoji: '🌿',
+    query: 'family therapist maternal counselor',
+    image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'House Cleaning Services',
+    subtitle: 'Nesting & pre-baby deep cleans',
+    emoji: '🏠',
+    query: 'house cleaning service',
+    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Realtors',
+    subtitle: 'Room to grow for your family',
+    emoji: '🔑',
+    query: 'family realtor home buying',
+    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Insurance Agents',
+    subtitle: 'Family & life protection',
+    emoji: '🛡️',
+    query: 'family life health insurance agent',
+    image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    label: 'Estate Planning & Attorneys',
+    subtitle: 'Wills & guardianship peace of mind',
+    emoji: '📄',
+    query: 'estate planning family attorney',
+    image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80',
+  },
 ];
 
 const RADIUS_MILES = 25;
@@ -123,6 +234,7 @@ export default function LocalVendorSearch({ initialCategory = 'All' }: LocalVend
   const [activeZip, setActiveZip] = useState('');
   const [locating, setLocating] = useState(false);
   const [locationNotice, setLocationNotice] = useState('');
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   const [selectedCategory, setSelectedCategory] = useState(
     initialCategory && initialCategory !== 'All' ? initialCategory : 'Spas & Wellness'
@@ -132,6 +244,9 @@ export default function LocalVendorSearch({ initialCategory = 'All' }: LocalVend
   const [nearbyVendors, setNearbyVendors] = useState<VendorWithCoords[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const resultsSectionRef = useRef<HTMLDivElement>(null);
 
   const [claimPlace, setClaimPlace] = useState<PlaceResult | null>(null);
   const [claimStatus, setClaimStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'noauth'>('idle');
@@ -147,6 +262,12 @@ export default function LocalVendorSearch({ initialCategory = 'All' }: LocalVend
   });
 
   const apiKey = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY || '';
+
+  const scrollCategories = (direction: 'left' | 'right') => {
+    if (!carouselRef.current) return;
+    const distance = direction === 'left' ? -320 : 320;
+    carouselRef.current.scrollBy({ left: distance, behavior: 'smooth' });
+  };
 
   const geocode = useCallback(
     async (address: string): Promise<{ lat: number; lng: number } | null> => {
@@ -394,11 +515,13 @@ export default function LocalVendorSearch({ initialCategory = 'All' }: LocalVend
     setSelectedCategory(catLabel);
     if (city || activeZip) {
       await runSearch(catLabel, city, state, activeZip);
+      resultsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else if (locationInput.trim()) {
       const parsed = parseLocationInput(locationInput);
       setCity(parsed.city);
       setState(parsed.state);
       await runSearch(catLabel, parsed.city, parsed.state, parsed.zip || '');
+      resultsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
       setLocationNotice('Enter a ZIP code or city above (or click Use my location) to search.');
     }
@@ -468,8 +591,9 @@ export default function LocalVendorSearch({ initialCategory = 'All' }: LocalVend
   const hasResults = spaResults.length > 0 || results.length > 0;
 
   return (
-    <div className="w-full space-y-6">
-      <div className="bg-white rounded-2xl shadow-elegant p-5 sm:p-6 border border-spa-purple/10">
+    <div className="w-full space-y-8">
+      {/* Location Bar + Visual Category Gallery */}
+      <div className="bg-white rounded-3xl shadow-elegant p-5 sm:p-7 border border-spa-purple/10">
         <form onSubmit={handleLocationSubmit} className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1">
             <MapPin
@@ -514,491 +638,112 @@ export default function LocalVendorSearch({ initialCategory = 'All' }: LocalVend
           <p className="text-xs text-spa-purple mt-2.5 px-1">{locationNotice}</p>
         )}
 
-        <div className="mt-5 pt-4 border-t border-spa-charcoal/5">
-          <div className="flex items-center justify-between mb-2.5">
-            <span className="text-xs font-semibold uppercase tracking-wider text-spa-gray">
-              Category
-            </span>
-            {activeZip && city && (
-              <span className="text-xs text-spa-purple font-medium">
-                ZIP {activeZip} -&gt; {city}
-                {state ? ', ' + state : ''}
+        {/* Visual Photo Category Selector */}
+        <div className="mt-6 pt-5 border-t border-spa-charcoal/5">
+          <div className="flex items-center justify-between gap-2 mb-3.5">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-spa-purple flex items-center gap-1.5">
+                <Sparkles size={13} /> Tap a category to explore
               </span>
-            )}
+              {activeZip && city && (
+                <p className="text-xs text-spa-gray mt-0.5">
+                  ZIP {activeZip} -&gt; {city}
+                  {state ? ', ' + state : ''}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-spa-gray mr-1 sm:hidden">Swipe -&gt;</span>
+              <button
+                type="button"
+                onClick={() => scrollCategories('left')}
+                aria-label="Scroll categories left"
+                className="hidden sm:inline-flex w-8 h-8 rounded-full bg-spa-lavender hover:bg-spa-purple hover:text-white text-spa-charcoal items-center justify-center transition-colors"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollCategories('right')}
+                aria-label="Scroll categories right"
+                className="hidden sm:inline-flex w-8 h-8 rounded-full bg-spa-lavender hover:bg-spa-purple hover:text-white text-spa-charcoal items-center justify-center transition-colors"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div
+            ref={carouselRef}
+            className="flex gap-3.5 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth"
+            style={{ scrollbarWidth: 'none' }}
+          >
             {VENDOR_CATEGORIES.map((cat) => {
               const isActive = selectedCategory === cat.label;
+              const imgBroken = Boolean(failedImages[cat.label]);
+
               return (
                 <button
                   key={cat.label}
                   type="button"
                   onClick={() => handleCategoryClick(cat.label)}
                   className={
-                    'px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium inline-flex items-center gap-1.5 transition-all ' +
+                    'group relative flex-shrink-0 w-40 sm:w-44 h-48 rounded-2xl overflow-hidden text-left snap-start transition-all duration-300 focus:outline-none ' +
                     (isActive
-                      ? 'bg-spa-purple text-white shadow-sm'
-                      : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/15')
+                      ? 'ring-4 ring-spa-purple shadow-lg scale-[1.01]'
+                      : 'ring-1 ring-spa-charcoal/10 hover:ring-2 hover:ring-spa-purple/50 hover:shadow-md')
                   }
                 >
-                  <span>{cat.emoji}</span>
-                  <span>{cat.label}</span>
+                  {!imgBroken ? (
+                    <img
+                      src={cat.image}
+                      alt={cat.label}
+                      loading="lazy"
+                      onError={() =>
+                        setFailedImages((prev) => ({ ...prev, [cat.label]: true }))
+                      }
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-spa-lavender via-spa-blush to-spa-purple/30 flex items-center justify-center">
+                      <span className="text-4xl">{cat.emoji}</span>
+                    </div>
+                  )}
+
+                  {/* Editorial Gradient Overlay */}
+                  <div
+                    className={
+                      'absolute inset-0 transition-opacity ' +
+                      (isActive
+                        ? 'bg-gradient-to-t from-spa-charcoal/90 via-spa-purple/40 to-transparent'
+                        : 'bg-gradient-to-t from-spa-charcoal/85 via-spa-charcoal/25 to-transparent group-hover:from-spa-charcoal/90')
+                    }
+                  />
+
+                  {/* Top Badge */}
+                  <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between">
+                    <span className="w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-sm shadow-sm">
+                      {cat.emoji}
+                    </span>
+                    {isActive && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-spa-purple text-white text-[10px] font-semibold uppercase tracking-wide shadow-sm">
+                        Viewing
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Bottom Title & Subtitle */}
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <p className="font-serif text-white text-base leading-snug font-medium drop-shadow-sm">
+                      {cat.label}
+                    </p>
+                    <p className="text-white/80 text-[11px] leading-tight mt-0.5 line-clamp-1">
+                      {cat.subtitle}
+                    </p>
+                  </div>
                 </button>
               );
             })}
           </div>
         </div>
-      </div>
-
-      <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-          <div>
-            <h2 className="font-serif text-2xl sm:text-3xl text-spa-charcoal">
-              {selectedCategory}{' '}
-              <span className="text-spa-purple">near {activeLocationLabel}</span>
-            </h2>
-            {searched && !loading && (
-              <p className="text-sm text-spa-gray mt-1">
-                {nearbyVendors.length > 0
-                  ? nearbyVendors.length +
-                    ' Spa-Pregio member' +
-                    (nearbyVendors.length !== 1 ? 's' : '') +
-                    ' within ' +
-                    RADIUS_MILES +
-                    ' miles' +
-                    (results.length > 0 ? ' | ' + results.length + ' local directory picks' : '')
-                  : results.length + ' local directory picks'}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {(loading || locating) && (
-          <div className="text-center py-16 bg-white rounded-2xl shadow-elegant">
-            <Loader size={36} className="animate-spin text-spa-purple mx-auto mb-4" />
-            <p className="text-spa-gray">
-              Finding {selectedCategory} near {activeLocationLabel}...
-            </p>
-          </div>
-        )}
-
-        {searched && !loading && !locating && !hasResults && nearbyVendors.length === 0 && (
-          <div className="text-center py-16 bg-white rounded-2xl shadow-elegant px-6">
-            <MapPin size={40} className="text-spa-purple/30 mx-auto mb-4" />
-            <h3 className="font-serif text-xl text-spa-charcoal">No local listings found yet</h3>
-            <p className="text-spa-gray mt-2 mb-6 max-w-md mx-auto">
-              Try another ZIP code or city nearby, switch categories above, or list your business first.
-            </p>
-            <Link to="/vendors" className="btn-primary inline-flex justify-center">
-              List Your Business Free <ArrowRight size={16} />
-            </Link>
-          </div>
-        )}
-
-        {searched && !loading && !locating && (hasResults || nearbyVendors.length > 0) && (
-          <div className="mb-8 rounded-2xl overflow-hidden border border-spa-purple/20 shadow-elegant">
-            <div className="bg-spa-purple/5 px-4 py-2.5 flex items-center justify-between border-b border-spa-purple/10">
-              <div className="flex items-center gap-2">
-                <MapPin size={14} className="text-spa-purple" />
-                <span className="text-xs font-medium text-spa-purple uppercase tracking-wider">
-                  {selectedCategory} near {activeLocationLabel}
-                </span>
-              </div>
-              <span className="text-xs text-spa-gray">Pan &amp; zoom to explore</span>
-            </div>
-            <iframe
-              width="100%"
-              height="380"
-              style={{ border: 0, display: 'block' }}
-              loading="lazy"
-              allowFullScreen
-              referrerPolicy="no-referrer-when-downgrade"
-              src={
-                'https://www.google.com/maps/embed/v1/search?key=' +
-                apiKey +
-                '&q=' +
-                encodeURIComponent(selectedCategory + ' near ' + activeLocationLabel) +
-                '&zoom=11'
-              }
-            />
-            {nearbyVendors.length > 0 && (
-              <div className="bg-white px-4 py-3 flex flex-wrap gap-2 border-t border-spa-purple/10">
-                <span className="text-xs text-spa-gray self-center mr-1">
-                  Spa-Pregio members nearby:
-                </span>
-                {nearbyVendors.map((v) => (
-                  <div
-                    key={v.id}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-spa-purple/10 rounded-full text-xs text-spa-purple font-medium"
-                  >
-                    <div className="w-2 h-2 rounded-full bg-spa-purple flex-shrink-0" />
-                    {v.business_name}{' '}
-                    <span className="opacity-60">{Math.round(v.distanceMiles)}mi</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {searched && !loading && !locating && spaResults.length > 0 && (
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="h-px flex-1 bg-spa-purple/20" />
-              <div className="flex items-center gap-2 bg-spa-purple rounded-full px-4 py-1.5">
-                <Star size={14} className="text-spa-pink fill-spa-pink" />
-                <span className="text-white text-xs font-medium uppercase tracking-wide">
-                  Spa-Pregio Members
-                </span>
-              </div>
-              <div className="h-px flex-1 bg-spa-purple/20" />
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {spaResults.map((vendor) => (
-                <div
-                  key={vendor.id}
-                  className="bg-white rounded-2xl overflow-hidden border-2 border-spa-purple/20 shadow-elegant"
-                >
-                  <div className="aspect-[4/3] bg-gradient-to-br from-spa-lavender to-spa-blush flex items-center justify-center overflow-hidden">
-                    {vendor.logo_url ? (
-                      <img
-                        src={vendor.logo_url}
-                        alt={vendor.business_name}
-                        className="w-full h-full object-contain p-4"
-                      />
-                    ) : (
-                      <div className="text-center">
-                        <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-2">
-                          <MapPin size={28} className="text-spa-purple" />
-                        </div>
-                        <p className="text-xs text-spa-purple font-medium">{vendor.category}</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-5">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Star size={10} className="fill-spa-pink text-spa-pink" />
-                      <span className="text-xs text-spa-purple font-medium">Spa-Pregio Member</span>
-                    </div>
-                    <h3 className="font-serif text-lg text-spa-charcoal">{vendor.business_name}</h3>
-                    <p className="text-xs text-spa-gray mt-1">
-                      {vendor.city}, {vendor.state}
-                    </p>
-                    <div className="mt-3">
-                      {vendor.contact_type === 'phone' ? (
-                        <a
-                          href={'tel:' + vendor.contact_value}
-                          className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"
-                        >
-                          <Phone size={12} /> {vendor.contact_value}
-                        </a>
-                      ) : (
-                        <a
-                          href={vendor.contact_value}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"
-                        >
-                          <Globe size={12} /> Visit Website
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {searched && !loading && !locating && results.length > 0 && (
-          <div>
-            {spaResults.length > 0 && (
-              <div className="flex items-center gap-3 mb-5">
-                <div className="h-px flex-1 bg-spa-gray/20" />
-                <span className="text-xs text-spa-gray bg-spa-cream px-4 py-1.5 rounded-full">
-                  Local businesses near {activeLocationLabel}
-                </span>
-                <div className="h-px flex-1 bg-spa-gray/20" />
-              </div>
-            )}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {results.map((place) => (
-                <div
-                  key={place.place_id}
-                  className="bg-white rounded-2xl overflow-hidden shadow-elegant group"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden bg-spa-lavender">
-                    {place.photo_url ? (
-                      <img
-                        src={place.photo_url}
-                        alt={place.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <MapPin size={40} className="text-spa-purple/30" />
-                      </div>
-                    )}
-                    <div className="absolute top-3 left-3">
-                      <span className="px-3 py-1 bg-white/95 backdrop-blur-sm text-spa-purple text-xs rounded-full font-medium shadow-sm">
-                        Local Pick
-                      </span>
-                    </div>
-                    {place.open_now === true && (
-                      <div className="absolute top-3 right-3">
-                        <span className="px-3 py-1 text-xs rounded-full font-medium bg-emerald-100 text-emerald-800 shadow-sm">
-                          Open Now
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-serif text-lg text-spa-charcoal">{place.name}</h3>
-                    <p className="text-xs text-spa-gray mt-1 truncate">
-                      {formatCleanAddress(place.vicinity)}
-                    </p>
-                    {place.rating && (
-                      <div className="flex items-center gap-1 mt-2">
-                        <Star size={13} className="text-amber-400 fill-amber-400" />
-                        <span className="text-sm font-medium text-spa-charcoal">
-                          {place.rating}
-                        </span>
-                        {place.user_ratings_total !== undefined && (
-                          <span className="text-xs text-spa-gray">
-                            ({place.user_ratings_total.toLocaleString()} reviews)
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    <div className="flex gap-3 mt-3">
-                      {place.formatted_phone_number && (
-                        <a
-                          href={'tel:' + place.formatted_phone_number}
-                          className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"
-                        >
-                          <Phone size={12} /> Call
-                        </a>
-                      )}
-                      {place.website && (
-                        <a
-                          href={place.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-xs text-spa-gray hover:text-spa-purple transition-colors"
-                        >
-                          <Globe size={12} /> Website
-                        </a>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => openClaimModal(place)}
-                      className="w-full mt-4 px-4 py-2.5 bg-amber-50 border border-amber-300 text-amber-800 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors flex items-center justify-center gap-2"
-                    >
-                      Claim &amp; Post Events Free <ArrowRight size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {claimPlace && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-spa-charcoal/50 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 lg:p-8">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="font-serif text-2xl text-spa-charcoal">Claim &amp; Post Events</h3>
-                  <p className="text-sm text-spa-gray mt-1">{claimPlace.name}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setClaimPlace(null);
-                    setClaimStatus('idle');
-                  }}
-                  className="w-8 h-8 rounded-full bg-spa-lavender flex items-center justify-center text-spa-gray hover:text-spa-charcoal"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {claimStatus === 'noauth' && (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4">
-                    <Globe size={28} className="text-spa-purple" />
-                  </div>
-                  <h4 className="font-serif text-xl text-spa-charcoal mb-2">Free Account Required</h4>
-                  <p className="text-spa-gray text-sm mb-6">
-                    Create a free Spa-Pregio account to claim your listing and post local events.
-                  </p>
-                  <Link to="/my-account" className="btn-primary inline-flex justify-center">
-                    Create Free Account <ArrowRight size={16} />
-                  </Link>
-                </div>
-              )}
-
-              {claimStatus === 'success' && (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 rounded-full bg-spa-purple/10 flex items-center justify-center mx-auto mb-4">
-                    <Check size={28} className="text-spa-purple" />
-                  </div>
-                  <h4 className="font-serif text-xl text-spa-charcoal mb-2">Claim Submitted!</h4>
-                  <p className="text-spa-gray text-sm mb-6">
-                    We will review your listing within 1-2 business days. You can also head to your dashboard to get ready for events and listing upgrades.
-                  </p>
-                  <Link to="/vendor-dashboard" className="btn-primary inline-flex justify-center">
-                    Go to Vendor Dashboard <ArrowRight size={16} />
-                  </Link>
-                </div>
-              )}
-
-              {(claimStatus === 'idle' || claimStatus === 'loading' || claimStatus === 'error') && (
-                <form onSubmit={handleClaimSubmit} className="space-y-4">
-                  <div className="bg-spa-lavender rounded-xl p-4">
-                    <p className="text-xs uppercase tracking-wider text-spa-purple font-medium mb-1">
-                      Starter Listing Details
-                    </p>
-                    <p className="text-sm text-spa-charcoal font-medium">{claimPlace.name}</p>
-                    <p className="text-xs text-spa-gray">{formatCleanAddress(claimPlace.vicinity)}</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-1">
-                      Business Description *
-                    </label>
-                    <textarea
-                      rows={3}
-                      required
-                      placeholder="Tell expectant mothers about your services, baby shower packages, or upcoming events..."
-                      value={claimForm.business_description}
-                      onChange={(e) =>
-                        setClaimForm({ ...claimForm, business_description: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30 resize-none"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-spa-charcoal mb-1">
-                        Phone
-                      </label>
-                      <input
-                        type="tel"
-                        placeholder="(555) 000-0000"
-                        value={claimForm.phone}
-                        onChange={(e) => setClaimForm({ ...claimForm, phone: e.target.value })}
-                        className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-spa-charcoal mb-1">
-                        Website
-                      </label>
-                      <input
-                        type="url"
-                        placeholder="https://"
-                        value={claimForm.website}
-                        onChange={(e) => setClaimForm({ ...claimForm, website: e.target.value })}
-                        className="w-full px-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="relative">
-                      <Instagram
-                        size={16}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-spa-purple"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Instagram handle"
-                        value={claimForm.instagram}
-                        onChange={(e) =>
-                          setClaimForm({ ...claimForm, instagram: e.target.value })
-                        }
-                        className="w-full pl-9 pr-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
-                      />
-                    </div>
-                    <div className="relative">
-                      <Facebook
-                        size={16}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-spa-purple"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Facebook page URL"
-                        value={claimForm.facebook}
-                        onChange={(e) => setClaimForm({ ...claimForm, facebook: e.target.value })}
-                        className="w-full pl-9 pr-4 py-3 bg-spa-lavender rounded-xl text-spa-charcoal placeholder:text-spa-gray focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-spa-charcoal mb-2">
-                      Service Categories *
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {VENDOR_CATEGORIES.map((cat) => {
-                        const selected = claimForm.service_categories.includes(cat.label);
-                        return (
-                          <button
-                            key={cat.label}
-                            type="button"
-                            onClick={() =>
-                              setClaimForm((prev) => ({
-                                ...prev,
-                                service_categories: selected
-                                  ? prev.service_categories.filter((c) => c !== cat.label)
-                                  : [...prev.service_categories, cat.label],
-                              }))
-                            }
-                            className={
-                              'px-3 py-1.5 rounded-full text-xs font-medium transition-colors ' +
-                              (selected
-                                ? 'bg-spa-purple text-white'
-                                : 'bg-spa-lavender text-spa-charcoal hover:bg-spa-purple/10')
-                            }
-                          >
-                            {cat.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {claimError && <p className="text-red-500 text-sm">{claimError}</p>}
-
-                  <button
-                    type="submit"
-                    disabled={
-                      claimStatus === 'loading' || claimForm.service_categories.length === 0
-                    }
-                    className="btn-primary w-full justify-center disabled:opacity-50"
-                  >
-                    {claimStatus === 'loading' ? (
-                      <>
-                        <Loader size={16} className="animate-spin" /> Submitting...
-                      </>
-                    ) : (
-                      <>
-                        Submit Claim <ArrowRight size={16} />
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
