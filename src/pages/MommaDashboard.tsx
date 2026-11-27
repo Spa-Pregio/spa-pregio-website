@@ -1,61 +1,55 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import {
   Heart, Download, Calendar, User, LogOut, Star,
   Edit2, Check, X, ChevronRight, Baby, Gift,
-  Ticket, Clock, MapPin, ExternalLink, ShoppingBag,
-  Sparkles, AlertCircle, Eye, EyeOff
+  Ticket, Clock, MapPin, ShoppingBag,
+  Sparkles, AlertCircle, Eye, EyeOff, Loader2
 } from 'lucide-react';
 
-// All 5 Celebration Suites with real Payhip links
 const SUITES = [
   {
-    id: 'baby-shower',
+    id: 'baby_shower',
     name: 'Baby Shower Suite',
     subtitle: 'Plan the Perfect Shower',
     price: '$27',
-    payhip: 'https://payhip.com/b/lZ6WG',
     color: 'from-pink-300 to-spa-purple',
     icon: '🍼',
     description: 'Everything you need to host or attend the most beautiful baby shower — themes, timelines & checklists.',
   },
   {
-    id: 'gender-reveal',
+    id: 'gender_reveal',
     name: 'Gender Reveal Suite',
     subtitle: 'Make It a Moment',
     price: '$27',
-    payhip: 'https://payhip.com/b/jLSWB',
     color: 'from-blue-300 to-pink-300',
     icon: '🎉',
     description: 'Creative reveal ideas, vendor checklists, and planning guides for an unforgettable gender reveal.',
   },
   {
-    id: 'sip-and-see',
+    id: 'sip_and_see',
     name: 'Sip & See Suite',
     subtitle: 'Welcome Baby in Style',
     price: '$27',
-    payhip: 'https://payhip.com/b/WbdBP',
     color: 'from-green-200 to-spa-purple',
     icon: '🌸',
     description: 'Host a gorgeous post-birth sip & see that celebrates mama and baby with grace and ease.',
   },
   {
-    id: 'push-present',
+    id: 'push_present_pampering',
     name: 'Push Present & Pampering Suite',
     subtitle: 'She Deserves It',
     price: '$27',
-    payhip: 'https://payhip.com/b/Ldkxz',
     color: 'from-yellow-200 to-spa-pink',
     icon: '💐',
     description: 'Pampering gift guides, spa & wellness vendor lists, and self-care checklists for the new mama.',
   },
   {
-    id: 'pregnancy-announcement',
+    id: 'pregnancy_announcement',
     name: 'Pregnancy Announcement Suite',
     subtitle: 'Share Your Joy',
     price: '$27',
-    payhip: 'https://payhip.com/b/j6hfL',
     color: 'from-spa-pink to-yellow-200',
     icon: '✨',
     description: 'Creative pregnancy announcement ideas, photo guides, and keepsake checklists for your big reveal.',
@@ -65,6 +59,7 @@ const SUITES = [
 type Tab = 'overview' | 'downloads' | 'events' | 'profile';
 
 export default function MommaDashboard() {
+  const [searchParams] = useSearchParams();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -73,6 +68,7 @@ export default function MommaDashboard() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [myRsvps, setMyRsvps] = useState<any[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
+  const [buyingSuiteId, setBuyingSuiteId] = useState<string | null>(null);
 
   // Auth
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -98,7 +94,7 @@ export default function MommaDashboard() {
     setUser(user);
     if (user) {
       await loadProfile(user.id);
-      await loadMyRsvps(user.email);
+      await loadMyRsvps(user.email || '');
       await loadUpcomingEvents();
     }
     setLoading(false);
@@ -109,7 +105,7 @@ export default function MommaDashboard() {
       .from('momma_profiles')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
     if (data) {
       setProfile(data);
       setFormData({
@@ -124,22 +120,45 @@ export default function MommaDashboard() {
   };
 
   const loadMyRsvps = async (email: string) => {
+    if (!email.trim()) return;
     const { data } = await supabase
       .from('event_rsvps')
       .select('*, events(*)')
-      .eq('user_email', email)
+      .ilike('user_email', email.trim())
       .order('created_at', { ascending: false });
     if (data) setMyRsvps(data);
   };
 
   const loadUpcomingEvents = async () => {
+    const nowIso = new Date().toISOString();
     const { data } = await supabase
       .from('events')
       .select('*')
-      .gte('date', new Date().toISOString())
+      .gte('date', nowIso.slice(0, 10))
       .order('date', { ascending: true })
       .limit(4);
     if (data) setUpcomingEvents(data);
+  };
+
+  const handleBuySuite = async (suiteId: string) => {
+    setBuyingSuiteId(suiteId);
+    let ref: string | null = searchParams.get('ref');
+    if (!ref) {
+      try {
+        ref = localStorage.getItem('sp_ref');
+      } catch {
+        ref = null;
+      }
+    }
+    const { data, error } = await supabase.functions.invoke('create-suite-checkout', {
+      body: { suite_id: suiteId, ref: ref || undefined, origin: window.location.origin },
+    });
+    if (error || !data?.url) {
+      console.error('Suite checkout error:', error);
+      setBuyingSuiteId(null);
+      return;
+    }
+    window.location.href = data.url as string;
   };
 
   const handleAuth = async () => {
@@ -154,11 +173,11 @@ export default function MommaDashboard() {
         });
         if (error) throw error;
         if (data.user) {
-          await supabase.from('momma_profiles').insert({
+          await supabase.from('momma_profiles').upsert({
             user_id: data.user.id,
             first_name: authForm.first_name,
             last_name: authForm.last_name,
-          });
+          }, { onConflict: 'user_id' });
         }
         setAuthStatus('verify');
       } else {
@@ -201,7 +220,6 @@ export default function MommaDashboard() {
     { id: 'profile', label: 'My Profile', icon: User },
   ];
 
-  // ─── LOADING ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen bg-spa-cream flex items-center justify-center pt-20">
@@ -213,7 +231,6 @@ export default function MommaDashboard() {
     );
   }
 
-  // ─── NOT LOGGED IN ───────────────────────────────────────────────────────────
   if (!user) {
     return (
       <div className="min-h-screen bg-spa-cream flex items-center justify-center pt-20 px-4">
@@ -349,8 +366,12 @@ export default function MommaDashboard() {
     );
   }
 
-  // ─── LOGGED IN DASHBOARD ─────────────────────────────────────────────────────
   const displayName = profile?.first_name || user.email?.split('@')[0] || 'Mama';
+  const upcomingRsvpCount = myRsvps.filter((r) => {
+    if (!r.events?.date) return false;
+    const parsed = new Date(r.events.date);
+    return !Number.isNaN(parsed.getTime()) && parsed >= new Date(new Date().toDateString());
+  }).length;
 
   return (
     <div className="min-h-screen bg-spa-cream pt-20">
@@ -358,7 +379,7 @@ export default function MommaDashboard() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 py-4 flex items-center justify-between">
           <div>
             <p className="text-spa-charcoal/50 text-xs font-sans uppercase tracking-widest">Member Dashboard</p>
-            <h1 className="font-serif text-2xl text-spa-charcoal">Hello, {displayName} 💜</h1>
+            <h1 className="font-serif text-2xl text-spa-charcoal">Hello, {displayName}</h1>
           </div>
           <button
             onClick={handleSignOut}
@@ -393,8 +414,6 @@ export default function MommaDashboard() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
-
-        {/* ── OVERVIEW TAB ── */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
             <div className="bg-gradient-to-r from-spa-purple to-spa-pink rounded-2xl p-6 text-white">
@@ -402,7 +421,7 @@ export default function MommaDashboard() {
                 <Sparkles size={20} />
                 <span className="font-sans text-sm font-medium uppercase tracking-widest opacity-80">Your Celebration Journey</span>
               </div>
-              <h2 className="font-serif text-3xl mb-1">Welcome to Spa-Pregio™</h2>
+              <h2 className="font-serif text-3xl mb-1">Welcome to Spa-Pregio</h2>
               <p className="font-sans text-sm opacity-80">
                 {profile?.due_date
                   ? `Your estimated due date: ${new Date(profile.due_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
@@ -412,8 +431,8 @@ export default function MommaDashboard() {
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { label: 'Suites Owned', value: '—', icon: Download, note: 'Browse suites ↓' },
-                { label: 'Events RSVPd', value: myRsvps.length, icon: Ticket, note: `${myRsvps.filter(r => r.events?.date > new Date().toISOString()).length} upcoming` },
+                { label: 'Suites', value: '5 Kits', icon: Download, note: 'Instant Stripe checkout' },
+                { label: 'Events RSVPd', value: myRsvps.length, icon: Ticket, note: `${upcomingRsvpCount} upcoming` },
                 { label: 'Upcoming Events', value: upcomingEvents.length, icon: Calendar, note: 'In the community' },
                 { label: 'Member Since', value: new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }), icon: Heart, note: 'Suite member' },
               ].map(stat => {
@@ -448,10 +467,15 @@ export default function MommaDashboard() {
                       <p className="text-xs text-spa-charcoal/50 font-sans mb-3 line-clamp-2">{suite.description}</p>
                       <div className="flex items-center justify-between">
                         <span className="font-serif text-spa-purple font-bold">{suite.price}</span>
-                        <a href={suite.payhip} target="_blank" rel="noopener noreferrer"
-                          className="text-xs bg-spa-purple text-white px-3 py-1.5 rounded-full font-sans hover:bg-spa-purple/90 transition-colors flex items-center gap-1">
-                          Get It <ExternalLink size={10} />
-                        </a>
+                        <button
+                          type="button"
+                          onClick={() => handleBuySuite(suite.id)}
+                          disabled={buyingSuiteId === suite.id}
+                          className="text-xs bg-spa-purple text-white px-3 py-1.5 rounded-full font-sans hover:bg-spa-purple/90 transition-colors flex items-center gap-1 disabled:opacity-60"
+                        >
+                          {buyingSuiteId === suite.id ? <Loader2 size={11} className="animate-spin" /> : null}
+                          Get It
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -475,10 +499,8 @@ export default function MommaDashboard() {
                       </div>
                       <div className="min-w-0">
                         <h4 className="font-serif text-base text-spa-charcoal truncate">{event.title}</h4>
-                        <p className="text-xs text-spa-charcoal/50 font-sans">
-                          {new Date(event.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                        </p>
-                        <p className="text-xs text-spa-purple font-sans mt-1">{event.is_free ? 'Free' : event.price}</p>
+                        <p className="text-xs text-spa-charcoal/50 font-sans">{event.date}</p>
+                        <p className="text-xs text-spa-purple font-sans mt-1">{event.is_free ? 'Free' : 'Ticketed'}</p>
                       </div>
                     </div>
                   ))}
@@ -488,12 +510,11 @@ export default function MommaDashboard() {
           </div>
         )}
 
-        {/* ── DOWNLOADS / SUITES TAB ── */}
         {activeTab === 'downloads' && (
           <div>
             <div className="mb-6">
               <h2 className="font-serif text-2xl text-spa-charcoal mb-1">Celebration Suites</h2>
-              <p className="text-spa-charcoal/50 font-sans text-sm">Each suite is a complete digital planning kit — download instantly after purchase.</p>
+              <p className="text-spa-charcoal/50 font-sans text-sm">Each suite is a complete digital planning kit — emailed immediately after checkout.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -509,15 +530,15 @@ export default function MommaDashboard() {
                     <p className="text-sm text-spa-charcoal/60 font-sans mb-4 leading-relaxed">{suite.description}</p>
                     <div className="flex items-center justify-between pt-3 border-t border-spa-charcoal/5">
                       <span className="font-serif text-xl text-spa-purple font-bold">{suite.price}</span>
-                      <a
-                        href={suite.payhip}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 bg-spa-purple text-white text-sm font-sans px-4 py-2 rounded-full hover:bg-spa-purple/90 transition-colors group-hover:scale-105 transform duration-200"
+                      <button
+                        type="button"
+                        onClick={() => handleBuySuite(suite.id)}
+                        disabled={buyingSuiteId === suite.id}
+                        className="flex items-center gap-2 bg-spa-purple text-white text-sm font-sans px-4 py-2 rounded-full hover:bg-spa-purple/90 transition-colors disabled:opacity-60"
                       >
-                        <ShoppingBag size={14} />
+                        {buyingSuiteId === suite.id ? <Loader2 size={14} className="animate-spin" /> : <ShoppingBag size={14} />}
                         Purchase
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -526,8 +547,8 @@ export default function MommaDashboard() {
 
             <div className="mt-8 bg-spa-purple/5 border border-spa-purple/20 rounded-2xl p-6 text-center">
               <Gift size={24} className="text-spa-purple mx-auto mb-3" />
-              <h3 className="font-serif text-lg text-spa-charcoal mb-1">Want All 5 Suites?</h3>
-              <p className="text-spa-charcoal/60 font-sans text-sm mb-4">A bundle option is coming soon. Join the Suite Sisters affiliate program to earn 30% on every suite you share!</p>
+              <h3 className="font-serif text-lg text-spa-charcoal mb-1">Love Sharing Great Finds?</h3>
+              <p className="text-spa-charcoal/60 font-sans text-sm mb-4">Join the Suite Sisters program to earn 30% on every suite you share.</p>
               <Link to="/ambassadors" className="inline-flex items-center gap-2 bg-spa-purple text-white text-sm font-sans px-5 py-2.5 rounded-full hover:bg-spa-purple/90 transition-colors">
                 <Star size={14} />
                 Become a Suite Sister
@@ -536,7 +557,6 @@ export default function MommaDashboard() {
           </div>
         )}
 
-        {/* ── EVENTS TAB ── */}
         {activeTab === 'events' && (
           <div className="space-y-8">
             <div>
@@ -557,7 +577,8 @@ export default function MommaDashboard() {
                 <div className="space-y-3">
                   {myRsvps.map(rsvp => {
                     const event = rsvp.events;
-                    const isPast = event?.date && new Date(event.date) < new Date();
+                    const parsedDate = event?.date ? new Date(event.date) : null;
+                    const isPast = parsedDate && !Number.isNaN(parsedDate.getTime()) && parsedDate < new Date(new Date().toDateString());
                     return (
                       <div key={rsvp.id} className={`bg-white rounded-xl border p-5 flex items-center gap-4 ${isPast ? 'border-spa-charcoal/10 opacity-60' : 'border-spa-purple/10'}`}>
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isPast ? 'bg-spa-charcoal/10' : 'bg-spa-purple/10'}`}>
@@ -569,7 +590,7 @@ export default function MommaDashboard() {
                             {event?.date && (
                               <span className="flex items-center gap-1 text-xs text-spa-charcoal/50 font-sans">
                                 <Clock size={11} />
-                                {new Date(event.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                {event.date}
                               </span>
                             )}
                             {event?.location && (
@@ -598,21 +619,18 @@ export default function MommaDashboard() {
                 <div className="bg-white rounded-2xl border border-spa-purple/10 p-10 text-center">
                   <Calendar size={32} className="text-spa-purple/30 mx-auto mb-3" />
                   <p className="font-serif text-lg text-spa-charcoal/50">No upcoming events yet</p>
-                  <p className="text-sm text-spa-charcoal/40 font-sans mt-1">Check back soon — we're always adding new celebrations!</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {upcomingEvents.map(event => (
-                    <Link to="/events" key={event.id} className="bg-white rounded-xl border border-spa-purple/10 p-5 hover:shadow-md transition-shadow block">
+                    <Link to={`/events/${event.id}`} key={event.id} className="bg-white rounded-xl border border-spa-purple/10 p-5 hover:shadow-md transition-shadow block">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-spa-purple/10 rounded-xl flex items-center justify-center flex-shrink-0">
                           <Calendar size={20} className="text-spa-purple" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-serif text-base text-spa-charcoal mb-1 truncate">{event.title}</h4>
-                          <p className="text-xs text-spa-charcoal/50 font-sans">
-                            {new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                          </p>
+                          <p className="text-xs text-spa-charcoal/50 font-sans">{event.date}</p>
                           {event.location && (
                             <p className="text-xs text-spa-charcoal/40 font-sans flex items-center gap-1 mt-0.5">
                               <MapPin size={10} /> {event.location}
@@ -628,17 +646,10 @@ export default function MommaDashboard() {
                   ))}
                 </div>
               )}
-
-              <div className="mt-4 text-center">
-                <Link to="/events" className="inline-flex items-center gap-2 text-spa-purple font-sans text-sm hover:underline">
-                  See all events <ChevronRight size={14} />
-                </Link>
-              </div>
             </div>
           </div>
         )}
 
-        {/* ── PROFILE TAB ── */}
         {activeTab === 'profile' && (
           <div className="max-w-2xl">
             <div className="flex items-center justify-between mb-6">
@@ -677,7 +688,6 @@ export default function MommaDashboard() {
               <div className="pb-5 border-b border-spa-charcoal/5">
                 <label className="block text-xs font-medium text-spa-charcoal/50 uppercase tracking-wider mb-1.5">Email Address</label>
                 <p className="font-sans text-spa-charcoal">{user.email}</p>
-                <p className="text-xs text-spa-charcoal/40 font-sans mt-0.5">Contact support to change your email</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -769,15 +779,8 @@ export default function MommaDashboard() {
                 )}
               </div>
             </div>
-
-            <div className="mt-6 bg-red-50 border border-red-100 rounded-xl p-5">
-              <h4 className="font-sans text-sm font-medium text-red-700 mb-1">Account</h4>
-              <p className="text-xs text-red-500 font-sans mb-3">Need to delete your account or change your email? Contact us.</p>
-              <a href="mailto:hello@spa-pregio.com" className="text-xs text-red-600 font-medium hover:underline">hello@spa-pregio.com</a>
-            </div>
           </div>
         )}
-
       </div>
     </div>
   );
