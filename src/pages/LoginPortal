@@ -1,0 +1,546 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
+import {
+  Heart,
+  Store,
+  Sparkles,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Loader2,
+} from 'lucide-react';
+
+type RoleId = 'momma' | 'vendor' | 'sister';
+
+const ROLES: {
+  id: RoleId;
+  title: string;
+  subtitle: string;
+  description: string;
+  dashboardPath: string;
+  accent: string;
+  badgeBg: string;
+  icon: any;
+  perks: string[];
+}[] = [
+  {
+    id: 'momma',
+    title: 'Momma / Guest',
+    subtitle: 'Celebrations, Events & Lounge',
+    description: 'Access your Celebration Suites, local event tickets, and the Momma Lounge community.',
+    dashboardPath: '/my-account',
+    accent: 'border-spa-purple hover:border-spa-purple',
+    badgeBg: 'bg-spa-purple/10 text-spa-purple',
+    icon: Heart,
+    perks: ['Celebration Suites & downloads', 'Event RSVPs & tickets', 'Momma Lounge community'],
+  },
+  {
+    id: 'vendor',
+    title: 'Vendor Partner',
+    subtitle: 'Directory, Events & Collabs',
+    description: 'Manage your live directory listing, host mama-friendly events, and connect with local vendors.',
+    dashboardPath: '/vendor-dashboard',
+    accent: 'border-spa-pink hover:border-spa-pink',
+    badgeBg: 'bg-spa-pink/15 text-spa-pink',
+    icon: Store,
+    perks: ['Live local directory listing', 'Host events & sell vendor tables', 'Vendor Collab Corner'],
+  },
+  {
+    id: 'sister',
+    title: 'Suite Sister™',
+    subtitle: 'Affiliate Links & Payouts',
+    description: 'Grab your referral links, track 30% suite + 10% vendor commissions, and swap tips with Sisters.',
+    dashboardPath: '/sister-dashboard',
+    accent: 'border-spa-charcoal/30 hover:border-spa-purple',
+    badgeBg: 'bg-spa-lavender text-spa-purple',
+    icon: Sparkles,
+    perks: ['Instant referral links & codes', '30% suite & 10% vendor commissions', 'Suite Sisters Hub'],
+  },
+];
+
+export default function LoginPortal() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const initialRole = (searchParams.get('role') as RoleId | null) || null;
+  const [selectedRole, setSelectedRole] = useState<RoleId | null>(
+    initialRole && ['momma', 'vendor', 'sister'].includes(initialRole) ? initialRole : null
+  );
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [showPassword, setShowPassword] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [activeUser, setActiveUser] = useState<any>(null);
+
+  const [form, setForm] = useState({
+    email: '',
+    password: '',
+    first_name: '',
+    last_name: '',
+    business_name: '',
+    category: 'Spas & Wellness',
+    city: '',
+    state: 'NC',
+    venmo_handle: '',
+  });
+
+  const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'verify'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setActiveUser(data.user || null);
+      setCheckingSession(false);
+    });
+  }, []);
+
+  const roleConfig = ROLES.find((r) => r.id === selectedRole) || null;
+
+  async function ensureRoleRecord(user: any, role: RoleId) {
+    const fullName =
+      [form.first_name.trim(), form.last_name.trim()].filter(Boolean).join(' ') ||
+      user.user_metadata?.first_name ||
+      user.email?.split('@')[0] ||
+      'Member';
+
+    if (role === 'momma') {
+      await supabase.from('momma_profiles').upsert(
+        {
+          user_id: user.id,
+          first_name: form.first_name.trim() || user.user_metadata?.first_name || fullName,
+          last_name: form.last_name.trim() || user.user_metadata?.last_name || '',
+        },
+        { onConflict: 'user_id' }
+      );
+      return;
+    }
+
+    if (role === 'vendor') {
+      const bizName =
+        form.business_name.trim() ||
+        user.user_metadata?.business_name ||
+        `${fullName}'s Business`;
+      const city = form.city.trim();
+      const state = form.state.trim().toUpperCase() || 'NC';
+      const location = [city, state].filter(Boolean).join(', ');
+
+      await supabase.from('vendor_profiles').upsert(
+        {
+          user_id: user.id,
+          business_name: bizName,
+          category: form.category || 'Spas & Wellness',
+          location,
+          tier: 'Starter',
+        },
+        { onConflict: 'user_id' }
+      );
+
+      // Also ensure an active directory row exists in vendors
+      const { data: existingVendor } = await supabase
+        .from('vendors')
+        .select('id')
+        .ilike('email', user.email || '')
+        .maybeSingle();
+
+      if (!existingVendor && user.email) {
+        await supabase.from('vendors').insert({
+          business_name: bizName,
+          owner_name: fullName,
+          email: user.email,
+          category: form.category || 'Spas & Wellness',
+          city: city || 'Local',
+          state,
+          plan: 'Starter',
+          status: 'active',
+        });
+      }
+      return;
+    }
+
+    if (role === 'sister') {
+      const { data: existingAff } = await supabase
+        .from('affiliates')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!existingAff) {
+        const baseCode = fullName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10) || 'sister';
+        const referral_code = `${baseCode}${Math.floor(100 + Math.random() * 900)}`;
+
+        await supabase.from('affiliates').insert({
+          user_id: user.id,
+          full_name: fullName,
+          email: user.email,
+          referral_code,
+          venmo_handle: form.venmo_handle.trim() || null,
+          status: 'active',
+        });
+
+        const origin = window.location.origin;
+        supabase.functions
+          .invoke('send-transactional-email', {
+            body: {
+              type: 'suite_sister_welcome',
+              to: user.email,
+              name: fullName,
+              referralCode: referral_code,
+              suiteLink: `${origin}/suites?ref=${referral_code}`,
+              vendorLink: `${origin}/vendors?ref=${referral_code}`,
+            },
+          })
+          .catch(() => {});
+      }
+    }
+  }
+
+  async function handleSelectRole(role: RoleId) {
+    if (activeUser) {
+      setStatus('loading');
+      await ensureRoleRecord(activeUser, role);
+      const target = ROLES.find((r) => r.id === role)?.dashboardPath || '/my-account';
+      navigate(target);
+      return;
+    }
+    setSelectedRole(role);
+    setErrorMsg('');
+    setStatus('idle');
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!roleConfig) return;
+    setStatus('loading');
+    setErrorMsg('');
+
+    try {
+      if (mode === 'signup') {
+        const { data, error } = await supabase.auth.signUp({
+          email: form.email.trim(),
+          password: form.password,
+          options: {
+            data: {
+              first_name: form.first_name.trim(),
+              last_name: form.last_name.trim(),
+              business_name: form.business_name.trim(),
+              role: roleConfig.id,
+            },
+          },
+        });
+        if (error) throw error;
+
+        if (data.user && data.session) {
+          await ensureRoleRecord(data.user, roleConfig.id);
+          navigate(roleConfig.dashboardPath);
+          return;
+        }
+        setStatus('verify');
+      } else {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: form.email.trim(),
+          password: form.password,
+        });
+        if (error) throw error;
+        if (data.user) {
+          await ensureRoleRecord(data.user, roleConfig.id);
+        }
+        navigate(roleConfig.dashboardPath);
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Unable to sign in. Please check your details.');
+      setStatus('error');
+    }
+  }
+
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-spa-cream pt-24 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-spa-purple border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-spa-cream pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
+        {!roleConfig ? (
+          <>
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <span className="text-xs uppercase tracking-[0.2em] text-spa-purple font-semibold">
+                Welcome to Spa-Pregio™
+              </span>
+              <h1 className="font-serif text-4xl sm:text-5xl text-spa-charcoal mt-3">
+                Choose Your <span className="text-spa-purple italic">Portal</span>
+              </h1>
+              <p className="text-spa-gray mt-3 text-base">
+                {activeUser
+                  ? `Signed in as ${activeUser.email}. Pick which dashboard you want to open:`
+                  : 'Select how you are joining today to sign in or create your free account in seconds.'}
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {ROLES.map((role) => {
+                const Icon = role.icon;
+                return (
+                  <button
+                    key={role.id}
+                    type="button"
+                    onClick={() => handleSelectRole(role.id)}
+                    className={`bg-white rounded-3xl p-7 text-left shadow-elegant border-2 transition-all duration-200 hover:-translate-y-1 flex flex-col ${role.accent}`}
+                  >
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 ${role.badgeBg}`}>
+                      <Icon size={24} />
+                    </div>
+                    <span className="text-xs uppercase tracking-wider text-spa-gray font-semibold">
+                      {role.subtitle}
+                    </span>
+                    <h2 className="font-serif text-2xl text-spa-charcoal mt-1">{role.title}</h2>
+                    <p className="text-sm text-spa-gray mt-2.5 leading-relaxed flex-1">
+                      {role.description}
+                    </p>
+
+                    <ul className="space-y-2 mt-5 pt-5 border-t border-spa-light text-xs text-spa-charcoal/85">
+                      {role.perks.map((perk) => (
+                        <li key={perk} className="flex items-center gap-2">
+                          <Check size={14} className="text-spa-purple flex-shrink-0" />
+                          <span>{perk}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-spa-purple">
+                      {activeUser ? `Open ${role.title} Dashboard` : `Continue as ${role.title}`}
+                      <ArrowRight size={16} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <div className="max-w-md mx-auto">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRole(null);
+                setStatus('idle');
+                setErrorMsg('');
+              }}
+              className="inline-flex items-center gap-1.5 text-sm text-spa-gray hover:text-spa-purple mb-6 transition-colors"
+            >
+              <ArrowLeft size={15} /> Choose a different portal
+            </button>
+
+            <div className="bg-white rounded-3xl shadow-elegant p-8 border border-spa-purple/10">
+              <div className="text-center mb-6">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 ${roleConfig.badgeBg}`}>
+                  <roleConfig.icon size={26} />
+                </div>
+                <span className="text-xs uppercase tracking-widest text-spa-purple font-semibold">
+                  {roleConfig.title}
+                </span>
+                <h1 className="font-serif text-3xl text-spa-charcoal mt-1">
+                  {mode === 'login' ? 'Welcome Back' : 'Create Free Account'}
+                </h1>
+              </div>
+
+              {status === 'verify' ? (
+                <div className="text-center py-6 space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+                    <Check size={24} className="text-green-600" />
+                  </div>
+                  <h3 className="font-serif text-xl text-spa-charcoal">Check Your Email</h3>
+                  <p className="text-sm text-spa-gray">
+                    We sent a confirmation link to <strong>{form.email}</strong>. Click it and you&apos;ll be ready to jump right in.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('login');
+                      setStatus('idle');
+                    }}
+                    className="text-sm text-spa-purple font-medium hover:underline pt-2"
+                  >
+                    Back to Sign In
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex gap-1.5 p-1 bg-spa-lavender rounded-full mb-6">
+                    <button
+                      type="button"
+                      onClick={() => setMode('login')}
+                      className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors ${
+                        mode === 'login' ? 'bg-white text-spa-charcoal shadow-sm' : 'text-spa-gray'
+                      }`}
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMode('signup')}
+                      className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors ${
+                        mode === 'signup' ? 'bg-white text-spa-charcoal shadow-sm' : 'text-spa-gray'
+                      }`}
+                    >
+                      Create Account
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    {mode === 'signup' && (
+                      <>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-spa-charcoal mb-1">First Name *</label>
+                            <input
+                              type="text"
+                              required
+                              value={form.first_name}
+                              onChange={(e) => setForm({ ...form, first_name: e.target.value })}
+                              className="w-full px-3.5 py-2.5 bg-spa-lavender rounded-xl text-sm text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-spa-charcoal mb-1">Last Name</label>
+                            <input
+                              type="text"
+                              value={form.last_name}
+                              onChange={(e) => setForm({ ...form, last_name: e.target.value })}
+                              className="w-full px-3.5 py-2.5 bg-spa-lavender rounded-xl text-sm text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                            />
+                          </div>
+                        </div>
+
+                        {roleConfig.id === 'vendor' && (
+                          <>
+                            <div>
+                              <label className="block text-xs font-medium text-spa-charcoal mb-1">Business Name *</label>
+                              <input
+                                type="text"
+                                required
+                                value={form.business_name}
+                                onChange={(e) => setForm({ ...form, business_name: e.target.value })}
+                                placeholder="e.g., Triad Prenatal Spa"
+                                className="w-full px-3.5 py-2.5 bg-spa-lavender rounded-xl text-sm text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                              />
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              <div className="col-span-2">
+                                <label className="block text-xs font-medium text-spa-charcoal mb-1">City *</label>
+                                <input
+                                  type="text"
+                                  required
+                                  value={form.city}
+                                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                                  placeholder="High Point"
+                                  className="w-full px-3.5 py-2.5 bg-spa-lavender rounded-xl text-sm text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-spa-charcoal mb-1">State *</label>
+                                <input
+                                  type="text"
+                                  required
+                                  maxLength={2}
+                                  value={form.state}
+                                  onChange={(e) => setForm({ ...form, state: e.target.value.toUpperCase() })}
+                                  className="w-full px-3.5 py-2.5 bg-spa-lavender rounded-xl text-sm text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        {roleConfig.id === 'sister' && (
+                          <div>
+                            <label className="block text-xs font-medium text-spa-charcoal mb-1">
+                              Venmo Handle (for payouts — optional now)
+                            </label>
+                            <input
+                              type="text"
+                              value={form.venmo_handle}
+                              onChange={(e) => setForm({ ...form, venmo_handle: e.target.value })}
+                              placeholder="@yourhandle"
+                              className="w-full px-3.5 py-2.5 bg-spa-lavender rounded-xl text-sm text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    <div>
+                      <label className="block text-xs font-medium text-spa-charcoal mb-1">Email *</label>
+                      <input
+                        type="email"
+                        required
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        placeholder="you@example.com"
+                        className="w-full px-3.5 py-2.5 bg-spa-lavender rounded-xl text-sm text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-spa-charcoal mb-1">Password *</label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          required
+                          value={form.password}
+                          onChange={(e) => setForm({ ...form, password: e.target.value })}
+                          placeholder="••••••••"
+                          className="w-full px-3.5 py-2.5 pr-10 bg-spa-lavender rounded-xl text-sm text-spa-charcoal focus:outline-none focus:ring-2 focus:ring-spa-purple/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-spa-gray hover:text-spa-charcoal"
+                        >
+                          {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {status === 'error' && (
+                      <div className="flex items-center gap-2 text-red-600 text-xs bg-red-50 px-3.5 py-2.5 rounded-xl">
+                        <AlertCircle size={15} className="flex-shrink-0" />
+                        <span>{errorMsg}</span>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={status === 'loading'}
+                      className="btn-primary w-full justify-center py-3 disabled:opacity-60"
+                    >
+                      {status === 'loading' ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" /> Please wait...
+                        </>
+                      ) : mode === 'login' ? (
+                        `Sign In to ${roleConfig.title}`
+                      ) : (
+                        `Launch My ${roleConfig.title} Account`
+                      )}
+                    </button>
+
+                    <div className="text-center pt-1">
+                      <Link to="/reset-password" className="text-xs text-spa-gray hover:text-spa-purple">
+                        Forgot your password?
+                      </Link>
+                    </div>
+                  </form>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
