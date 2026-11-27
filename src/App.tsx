@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import './App.css';
 
@@ -26,6 +26,35 @@ import ResetPassword from './pages/ResetPassword';
 import SpoilList from './pages/SpoilList';
 import WhatAboutDad from './pages/WhatAboutDad';
 
+const REF_STORAGE_KEY = 'sp_ref';
+const REF_TS_KEY = 'sp_ref_ts';
+const REF_MAX_AGE_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
+
+function ReferralTracker() {
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const incomingRef = searchParams.get('ref')?.trim();
+    try {
+      if (incomingRef) {
+        localStorage.setItem(REF_STORAGE_KEY, incomingRef);
+        localStorage.setItem(REF_TS_KEY, String(Date.now()));
+        return;
+      }
+
+      const savedTs = Number(localStorage.getItem(REF_TS_KEY) || '0');
+      if (savedTs && Date.now() - savedTs > REF_MAX_AGE_MS) {
+        localStorage.removeItem(REF_STORAGE_KEY);
+        localStorage.removeItem(REF_TS_KEY);
+      }
+    } catch {
+      /* ignore storage errors */
+    }
+  }, [searchParams]);
+
+  return null;
+}
+
 function ScrollToTop() {
   const location = useLocation();
   useEffect(() => {
@@ -37,6 +66,7 @@ function ScrollToTop() {
 function AppLayout() {
   return (
     <>
+      <ReferralTracker />
       <ScrollToTop />
       <Navigation />
       <main>
@@ -48,6 +78,7 @@ function AppLayout() {
           <Route path="/create-event" element={<CreateEvent />} />
           <Route path="/events/:id" element={<EventDetail />} />
           <Route path="/vendors" element={<ForVendors />} />
+          <Route path="/for-vendors" element={<Navigate to="/vendors" replace />} />
           <Route path="/find-vendors" element={<FindVendors />} />
           <Route path="/about" element={<About />} />
           <Route path="/ambassadors" element={<Ambassadors />} />
